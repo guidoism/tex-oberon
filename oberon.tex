@@ -1241,8 +1241,102 @@ system-wide abstract data types like
 {\tt Task\/}, {\tt Frame\/}, {\tt Viewer\/}, {\tt File\/}, {\tt Font\/},
 {\tt Text\/}, {\tt Module\/}, {\tt Reader\/}, {\tt Scanner\/}, {\tt Writer\/} etc..
 
-% \beginsubsubsection 3.3.1. Atomic actions.
-% \beginsubsubsection 3.3.2. Generic text selection.
+\beginsubsubsection 3.3.1. Atomic actions.
+
+The most important generic function of any operating system is
+executing {\it programs\/}. A clarification of the term {\it program\/} as it is used
+in Oberon comprises two views: a {\it static\/} one and a {\it dynamic\/}
+one. Statically, an Oberon program is simply a package of software
+together with an entry point. More formally, an Oberon program is a
+pair {\tt (M*, P)\/}, where {\tt M\/} is an arbitrary module, {\tt P\/} is an exported
+parameterless procedure of {\tt M\/}, and {\tt M*\/} denotes the hierarchy consisting
+of {\tt M\/} itself and of all directly and indirectly imported modules. Note
+that two hierarchies {\tt M*\/} and {\tt N*\/} are not generally disjoint, even if {\tt M\/}
+and {\tt N\/} are different modules. Rather, their intersection is a superset
+of the operating system.
+
+Viewed dynamically, an Oberon program is defined as an atomic action
+(often called {\it command\/}) operating on the global system state, where
+{\it atomic\/} means ``without user interaction''. This definition is just a
+necessary consequence of our model of non-preemptive task scheduling
+with the benefit of a single carrier thread. We can argue like this:
+When a traditional interactive program requires input from the user,
+the current task is normally preempted in favor of another task that
+produces the required input data. Therefore, a traditional interactive
+program can be viewed as a sequence of atomic actions interrupted by
+actions that possibly belong to other programs. Whereas in traditional
+systems these interruptions may occur at any time, in Oberon they can
+occur only after the completion of a task, of a command.
+
+Quintessentially, Oberon programs are represented in the form of
+{\it commands\/} that are in the form of exported parameterless procedures
+that do not interact with the user of the system.
+
+Returning to the calling and execution of programs we now arrive at
+the following refined code version:
+\begintt
+call program (M*, P) = BEGIN
+  load module hierarchy M*; call command P
+END
+\endtt
+
+\noindent The system interface to the command mechanism itself is again provided
+by module {\tt Oberon\/}. Its primary operation can be paraphrased as
+``call a command by its name and pass a list of actual parameters'':
+\begintt
+PROCEDURE Call (name: ARRAY OF CHAR; par: ParList;
+                VAR res: INTEGER);
+\endtt
+
+\noindent {\tt name\/} is the name of the desired command in the form {\tt M.P\/}, {\tt par\/} is the
+list of actual parameters, and {\tt res\/} is a result code. But in fact we
+have separated the setting of parameters from the actual
+call. Parameters are set by calling
+\begintt
+PROCEDURE SetPar (F: Display.Frame; T: Texts.Text;
+                  pos: INTEGER);
+\endtt
+
+\noindent and the actual call is achieved by calling
+\begintt
+PROCEDURE Call (name: ARRAY OF CHAR; VAR res: INTEGER);
+\endtt
+
+\noindent The pair {\tt (T, pos)\/} specifies the starting position of a textual
+parameter list. {\tt F\/} indicates the calling viewer. Notice the occurrence
+of yet another abstract data type of name {\tt Text\/} that is exported by
+module {\tt Texts\/}. We shall devote Chapter 5 to a thorough discussion of
+Oberon's text system. For the moment we can simply look at a text as a
+sequence of characters.
+
+The list of actual parameters is handed over to the called command by
+module {\tt Oberon\/} in the form of an exported global variable {\tt Par\/}:
+\begintt
+Par: RECORD vwr: Viewers.Viewer;
+       frame: Display.Frame;
+       text: Texts.Text;
+       pos: INTEGER
+     END
+\endtt
+In principle, commands operate on the entire system and can access the
+current global state via the system's powerful abstract modular
+interface, of which the list of actual parameters is just one
+component. Another one is the so-called {\it system log\/} which is a
+system-wide protocol reporting on the progress of command execution
+and on exceptional events in chronological order. The log is
+represented as a global variable of type {\tt Text\/}:
+\begintt
+Log: Texts.Text;
+\endtt
+
+
+
+
+
+\beginsubsubsection 3.3.2. Generic text selection.
+
+
+
 % \beginsubsubsection 3.3.3. Generic copy viewer.
 % \beginsubsection 3.4. TOOLBOXES.
 % \beginchapter CHAPTER 4: THE DISPLAY SYSTEM.
