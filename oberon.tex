@@ -1375,7 +1375,32 @@ SelectionMsg = RECORD (ViewerMsg)
 END;
 \endtt
 
-% \beginsubsubsection 3.3.3. Generic copy viewer.
+\beginsubsubsection 3.3.3. Generic copy viewer.
+
+Generic copying is synonymous with reproducing and cloning. It is the
+most elementary generic operation possible. Again, a variant of type
+{\tt ViewerMsg\/} is used for the purpose of transmitting requests of the
+desired type:
+\begintt
+CopyMsg = RECORD (ViewerMsg) vwr: Viewers.Viewer END
+\endtt 
+
+\noindent Receivers of a {\tt copy\/} message typically generate a clone of
+themselves and return it to the sender via field {\tt vwr\/}.
+
+Let us now summarize this Section:. Oberon is an operating system that
+presents itself to its clients in the form of a highly expressive
+abstract modular interface that exports many powerful abstract data
+types like, for example, {\tt Viewer\/} and {\tt Text\/}. A rich arsenal of global
+data types and generic facilities serve the purpose of system
+integration at a high degree. Programs in Oberon are modeled as
+so-called commands, i.e. as exported parameterless procedures that do
+not interact with the user. The collection of commands provided by a
+module appears as its user interface. Parameters are passed to
+commands via a global parameter list, registered by the calling task
+in the central module {\tt Oberon\/}. Commands operate on the global state of
+the system.
+
 % \beginsubsection 3.4. TOOLBOXES.
 % \beginchapter CHAPTER 4: THE DISPLAY SYSTEM.
 % \beginsubsection 4.1. THE SCREEN LAYOUT MODEL.
