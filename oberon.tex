@@ -237,7 +237,7 @@ parts inaccessible through a hiding facility inherent in its
 visibility rules. The latter is of course much more flexible and
 powerful, and the former indeed plays an almost negligible role in our
 system. Hiding is important because it allows maintenance of certain
-properties (called invariants) of an abstraction to be
+properties (called {\it invariants\/}) of an abstraction to be
 guaranteed. Abstraction is indeed the key of any modularization, and
 without modularization every hope of being able to guarantee
 reliability and correctness vanishes. Clearly, the Oberon System was
@@ -264,66 +264,79 @@ faster and cheaper electronic memory components. The high-resolution
 display marked one of the few very significant break-throughs in the
 history of computer development. The typical bandwidth of a modern
 display is in the order of 100 MHz. Primarily the high-resolution
-display made visual output a subject of abstraction and resource
-management. In the Oberon System, the display is partitioned into
-viewers, also called windows, or more precisely, into frames,
+display made visual output a subject of abstraction and {\it resource management\/}.
+In the Oberon System, the display is partitioned into
+{\it viewers\/}, also called {\it windows\/}, or more precisely, into {\it frames\/},
 rectangular areas of the screen(s). A viewer typically consists of two
 frames, a title bar containing a subject name and a menu of commands,
 and a main frame containing some text, graphic, picture, or other
 object. A viewer itself is a frame; frames can be nested, in principle
-to any depth.  14 The System provides routines for generating a frame
-(viewer), for moving and for closing it. It allocates a new viewer at
-a specified place, and upon request delivers hints as to where it
-might best be placed. It keeps track of the set of opened
-viewers. This is what is called viewer management, in contrast to the
-handling of their displayed contents.  But high interactivity requires
-not only a high bandwidth for visual output, it demands also
-flexibility of input. Surely, there is no need for an equally large
-bandwidth, but a keyboard limited by the speed of typing to about 100
-Hz is not good enough. The break-through on this front was achieved by
-the so-called mouse, a pointing device which appeared roughly at the
-same time as the high- resolution display.  This was by no means just
-a lucky coincidence. The mouse comes to fruition only through
-appropriate software and the high-resolution display. It is itself a
-conceptually very simple device delivering signals when moved on the
-table. These signals allow the computer to update the position of a
-mark - the cursor - on the display. Since feedback occurs through the
-human eye, no great precision is required from the mouse. For example,
-when the user wishes to identify a certain object on the screen, such
-as a letter, he moves the mouse as long as required until the mapped
-cursor reaches the object. This stands in marked contrast to a
-digitizer which is supposed to deliver exact coordinates. The Oberon
-System relies very much on the availability of a mouse.  Perhaps the
-cleverest idea was to equip mice with buttons. By being able to signal
-a request with the same hand that determines the cursor position, the
-user obtains the direct impression of issuing position-dependent
-requests. Position-dependence is realized in software by delegating
-interpretation of the signal to a procedure - a so-called handler or
-interpreter -which is local to the viewer in whose area the cursor
-momentarily appears. A surprising flexibility of command activation
-can be achieved in this manner by appropriate software. Various
-techniques have emerged in this connection, e.g. pop-up menus,
-pull-down-menus, etc. which are powerful even under the presence of a
-single button only. For many applications, a mouse with several keys
-is far superior, and the Oberon System basically assumes three buttons
-to be available. The assignment of different functions to the keys may
-of course easily lead to confusion when every application prescribes
-different key assignment. This is, however, easily avoided by the
-adherence to certain "global" conventions. In the Oberon System, the
-left button is primarily used for marking a position (setting a
-caret), the middle button for issuing general commands (see below),
-and the right button for selecting displayed objects.  Recently, it
-has become fashionable to use overlapping windows mirroring documents
-being piled up on one's desk. We have found this metaphor not entirely
-convincing. Partially hidden windows are typically brought to the top
-and made fully visible before any operation is applied to their
-contents. In contrast to the insignificant advantage stands the
-substantial effort necessary to implement this scheme. It is a good
-example of a case where the benefit of a complication is
-incommensurate with its cost. Therefore, we have chosen a solution
-that is much simpler to realize, yet has no genuine disadvantages
-compared to overlapping windows: tiled viewers as shown in Fig. 2.1.
-2.2.2. Commands Position-dependent commands with fixed meaning (fixed
+to any depth.
+
+The System provides routines for generating a frame (viewer), for
+moving and for closing it. It allocates a new viewer at a specified
+place, and upon request delivers hints as to where it might best be
+placed. It keeps track of the set of opened viewers. This is what is
+called {\it viewer management\/}, in contrast to the handling of their
+displayed contents.
+
+But high interactivity requires not only a high bandwidth for visual
+output, it demands also flexibility of input. Surely, there is no need
+for an equally large bandwidth, but a keyboard limited by the speed of
+typing to about 100 Hz is not good enough. The break-through on this
+front was achieved by the so-called {\it mouse\/}, a pointing device which
+appeared roughly at the same time as the high-resolution display.
+
+This was by no means just a lucky coincidence. The mouse comes to
+fruition only through appropriate software and the high-resolution
+display. It is itself a conceptually very simple device delivering
+signals when moved on the table. These signals allow the computer to
+update the position of a mark--- the cursor ---on the display. Since
+feedback occurs through the human eye, no great precision is required
+from the mouse. For example, when the user wishes to identify a
+certain object on the screen, such as a letter, he moves the mouse as
+long as required until the mapped cursor reaches the object. This
+stands in marked contrast to a digitizer which is supposed to deliver
+exact coordinates. The Oberon System relies very much on the
+availability of a mouse.
+
+Perhaps the cleverest idea was to equip mice with buttons. By being
+able to signal a request with the same hand that determines the cursor
+position, the user obtains the direct impression of issuing
+position-dependent requests. Position-dependence is realized in
+software by delegating interpretation of the signal to a procedure---
+a so-called {\it handler\/} or interpreter ---which is local to the viewer in
+whose area the cursor momentarily appears. A surprising flexibility of
+command activation can be achieved in this manner by appropriate
+software. Various techniques have emerged in this connection,
+e.g. pop-up menus, pull-down-menus, etc. which are powerful even under
+the presence of a single button only. For many applications, a mouse
+with several keys is far superior, and the Oberon System basically
+assumes three buttons to be available. The assignment of different
+functions to the keys may of course easily lead to confusion when
+every application prescribes different key assignment. This is,
+however, easily avoided by the adherence to certain ``global''
+conventions. In the Oberon System, the left button is primarily used
+for {\it marking\/} a position (setting a caret), the middle button for
+issuing general {\it commands\/} (see below), and the right button for
+{\it selecting\/} displayed objects.
+
+Recently, it has become fashionable to use overlapping windows
+mirroring documents being piled up on one's desk. We have found this
+metaphor not entirely convincing. Partially hidden windows are
+typically brought to the top and made fully visible before any
+operation is applied to their contents. In contrast to the
+insignificant advantage stands the substantial effort necessary to
+implement this scheme. It is a good example of a case where the
+benefit of a complication is incommensurate with its cost. Therefore,
+we have chosen a solution that is much simpler to realize, yet has no
+genuine disadvantages compared to overlapping windows: tiled viewers
+as shown in Fig. 2.1.
+
+
+\beginsubsubsection 2.2.2. Commands.
+
+Position-dependent commands with fixed meaning (fixed
 for each type of viewer) must be supplemented by general
 commands. Conventionally, such commands are issued through the
 keyboard by typing the program's name that is to be executed into a
@@ -337,8 +350,16 @@ the notion of a unit of action is separated from the notion of unit of
 compilation. The former is a command represented by a (exported)
 procedure, the latter is a module. Hence, a module may, and typically
 does, define several, even many commands. Such a (general) command may
-be invoked at any time by pointing at its name in any 15
+be invoked at any time by pointing at its name in any
 
-text visible in any viewer on the display, and by clicking the middle mouse button. The command name has the form M.P, where P is the procedure's identifier and M that of the module in which P is declared. As a consequence, any command click may cause the loading of one or several modules, if M is not already present in main store. The next invocation of M.P occurs instantaneously, since M is already loaded. A further consequence is that modules are never (automatically) removed, because a next command may well refer to the same module.
+text visible in any viewer on the display, and by clicking the middle
+mouse button. The command name has the form {\tt M.P}, where {\tt P} is the
+procedure's identifier and {\tt M} that of the module in which {\tt P} is
+declared. As a consequence, any command click may cause the loading of
+one or several modules, if {\tt M} is not already present in main store. The
+next invocation of {\tt M.P} occurs instantaneously, since {\tt M} is already
+loaded. A further consequence is that modules are never
+(automatically) removed, because a next command may well refer to the
+same module.
 
 \bye
