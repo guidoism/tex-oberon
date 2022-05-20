@@ -990,7 +990,6 @@ typical Oberon display screen that is divided up into seven viewers
 corresponding to seven simultaneously active interactive tasks.
 
 In order to get firmer ground under our feet, we now present the programmed declaration of type {\tt Viewer\/} in a slightly abstracted form:
-
 \begintt
 Viewer = POINTER TO ViewerDesc;
 
@@ -1005,13 +1004,11 @@ END;
 and height {\tt H\/}. The variable {\tt state\/} informs about the current state of
 visibility (visible, closed, covered), while {\tt handle\/} represents the
 functional interface of viewers. The type of the handler is
-
 \begintt
 Handler = PROCEDURE (V: Viewer; VAR M: ViewerMsg);
 \endtt
 
 where ViewerMsg is some base type of messages whose exact declaration is of minor importance for the moment:
-
 \begintt
 ViewerMsg = RECORD ... (*basic parameter fields*) END;
 \endtt
@@ -1019,10 +1016,20 @@ ViewerMsg = RECORD ... (*basic parameter fields*) END;
 TODO: Figure 3.1 Typical Oberon display configuration with tool track on the right
 
 However, we should point out the use of object-oriented
-terminology. It is justified because handle is a procedure variable (a
-handler) whose identity depends on the specific viewer. A call
+terminology. It is justified because {\tt handle\/} is a procedure variable (a
+{\it handler\/}) whose identity depends on the specific viewer. A call
 {\tt V.handle(V, M)} can therefore be interpreted as the sending of a
 message {\tt M\/} to be handled by the method of the receiving viewer {\tt V\/}.
+
+We recognize an important difference between the standard
+object-oriented model and our handler paradigm. The standard model is
+closed in the sense that only a fixed set of messages is understood by
+a given class of objects. In contrast, the handler paradigm is {\it open\/}
+because it defines just the root ({\tt ViewerMsg\/}) of a potentially
+unlimited tree of extending message types. For example, a concrete
+handler might be able to handle messages of type {\tt MyViewerMsg\/}, where
+
+
 
 % \beginsubsubsection 3.1.2. Background Tasks.
 % \beginsubsection 3.2. THE TASK SCHEDULER.
