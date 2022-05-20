@@ -362,4 +362,73 @@ loaded. A further consequence is that modules are never
 (automatically) removed, because a next command may well refer to the
 same module.
 
+TODO: Fig. 2.1. Oberon display with tiled viewers
+
+Every command has the purpose to alter the state of some
+operands. Typically, they are denoted by text following the command
+identification, and Oberon follows this convention. Strictly speaking,
+commands are denoted as parameterless procedures; but the system
+provides a way for the procedure to identify the text position of its
+origin, and hence to read and interpret the text following the
+command, i.e. the actual parameters. Both reading and interpretation
+must, however, be programmed explicitly.
+
+The parameter text must refer to objects that exist before command
+execution starts and are quite likely the result of a previous command
+interpretation. In most operating systems, these objects are {\it files\/}
+registered in the directory, and they act as interfaces between
+commands. The Oberon System broadens this notion; the links between
+consecutive commands are not restricted to files, but can be any
+global variable, because modules do not disappear from storage after
+command termination, as mentioned above.
+
+This tremendous flexibility seems to open Pandora's box, and indeed it
+does when misused. The reason is that global variables' states may
+completely determine and alter the effect of a command. The variables
+represent {\it hidden states\/}, hidden in the sense that the user is in
+general unaware of them and has no easy way to determine their
+value. The positive aspect of using global variables as interfaces
+between commands is that some of them may well be visible on the
+display. All viewers---and with them also their contents---are
+organized in a data structure that is rooted in a global variable (in
+module {\it Viewers\/}). Parts of this variable therefore constitute {\it visible states\/},
+and it is highly appropriate to refer to them as command
+parameters.
+
+One of the rules of what may be called the Oberon Programming Style is
+therefore to avoid hidden states, and to reduce the introduction of
+global variables. We do not, however, raise this rule to the rank of a
+dogma. There exist genuinely useful exceptions, even if the variables
+have no visible parts.
+
+There remains the question of how to denote visible objects as command
+parameters. An obvious case is the use of the most recent selection as
+parameter. A procedure for locating that selection is provided by
+module Oberon. (It is restricted to text selections). Another
+possibility is the use of the caret position in a text. This is used
+in the case of inserting new text; the pressing of a key on the
+keyboard is also considered to be a command, and it causes the
+character's insertion at the caret position.
+
+A special facility is introduced for designating viewers as operands:
+the star marker. It is placed at the cursor position when the
+keyboard's mark key ({\tt SETUP}) is pressed. The procedure
+{\tt Oberon.MarkedViewer} identifies the viewer in whose area the star
+lies. Commands which take it as their parameter are typically followed
+by an asterisk in the text. Whether the text contained in a text
+viewer, or a graph contained in a graphic viewer, or any other part of
+the marked viewer is taken as the actual parameter depends on how the
+command procedure is programmed.
+
+Finally, a most welcome property of the system should not remain
+unmentioned. It is a direct consequence of the persistent nature of
+global variables and becomes manifest when a command fails. Detected
+failures result in a trap. Such a trap should be regarded as an
+abnormal command termination. In the worst case, global data may be
+left in an inconsistent state, but they are not lost, and a next
+command can be initiated based on their current state. A trap opens a
+small viewer and lists the sequence of invoked procedures with their
+local variables and current values. This information helps a
+programmer to identify the cause of the trap.
+
 \bye
