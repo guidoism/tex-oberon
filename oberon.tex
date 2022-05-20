@@ -1036,7 +1036,18 @@ END;
 
 \noindent is an extended type of {\tt ViewerMsg\/}.
 
+It is worth noting that our open object-oriented model is extremely
+flexible. Notably, extending the set of message types that are handled
+by an object is a mere implementation issue, that is, it has no effect
+at all on the object’s compile-time interface and on the system
+integrity. It is fair to mention though that such a high degree of
+extensibility does not come for free. The price to pay is the
+obligation of explicit message {\it dispatching at runtime\/}. The following
+Chapters will capitalize on this property.
 
+Coming back to the perspective of tasks, we note that each sending of
+a message to a viewer corresponds to an activation or reactivation of
+the interactive task that it represents.
 
 % \beginsubsubsection 3.1.2. Background Tasks.
 % \beginsubsection 3.2. THE TASK SCHEDULER.
