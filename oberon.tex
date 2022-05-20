@@ -703,6 +703,80 @@ TODO: Table here
 
 \beginsubsection 2.4. A TOUR THROUGH THE CHAPTERS.
 
+Implementation of a system proceeds bottom-up. Naturally, because
+modules on higher levels are clients of those on the lower levels and
+cannot function without the availability of their imports. Description
+of a system, on the other hand, is better ordered in the top-down
+direction. This is because a system is designed with its expected
+applications and functions in mind. Decomposition into a hierarchy of
+modules is justified by the use of auxiliary functions and
+abstractions and by postponing their more detailed explanation to a
+later time when their need has been fully motivated. For this reason,
+we will proceed essentially in the top-down direction.
+
+Chapters 3--5 describe the outer core of the system. Chapter 3
+focusses on the dynamic aspects. In particular, this chapter
+introduces the fundamental operational units of {\it task\/} and
+{\it command\/}. Oberon's tasking model distinguishes the categories of
+{\it interactiv taskse\/} and {\it background tasks\/}. Interactive tasks are
+represented on the display screen by rectangular areas, so-called
+{\it viewers\/}. Background tasks need not be connected with any displayed
+object. They are scheduled with low priority when interactions are
+absent. A good example of a background task is the memory garbage
+collector. Both interactive tasks and background tasks are mapped to a
+single process by the task scheduler. Commands in Oberon are explicit,
+atomic units of interactive operations. They are realized in the form
+of exported parameterless procedures and replace the heavier-weight
+notion of program known from more conventional operating systems. This
+chapter continues with a definition of a software toolbox as a
+logically connected collection of commands. It terminates with an
+outline of the system control toolbox.
+
+
+Chapter 4 explains Oberon's display system. It starts with a
+discussion of our choice of a hierarchical tiling strategy for the
+allocation of viewers. A detailed study of the exact role of Oberon
+viewers follows. Type {\tt Viewer\/} is presented as an object class with an
+open message interface providing a conceptual basis for far-reaching
+extensibility. Viewers are then recognized as just a special case of
+so-called {\it frames\/} that may be nested. A category of standard viewers
+containing a menu frame and a frame of contents is investigated. The
+next topic is cursor handling. A cursor in Oberon is a marked
+path. Both viewer manager and cursor handler operate on an abstract
+logical display area rather than on individual physical monitors. This
+allows a unified handling of display requests, independent of number
+and types of monitors assigned. For example, smooth transitions of the
+cursor across screen boundaries are conceptually guaranteed. The
+chapter continues with the presentation of a concise and complete set
+of raster operations that is used to place textual and graphical
+elements in the display area. An overview of the system display
+toolbox concludes the chapter.
+
+Chapter 5 introduces text. Oberon distinguishes itself by treating
+Text as an abstract data type that is integrated in the central
+system. Numerous fundamental consequences are discussed. For example,
+a text can be produced by one command, edited by a user, and then
+consumed by a next command. Commands themselves can be represented
+textually in the form {\tt M.P\/}o, followed by a textual parameter
+list. Consequently, any command can be called directly from within a
+text (so-called {\it tool\/}) simply by pointing at it with the
+mouse. However, the core of this chapter is a presentation of Oberon's
+text system as a case study in program modularization. The concerns of
+managing a text and displaying it are nicely separated. Both the text
+manager and the text display feature an abstract public interface as
+well as an internally hidden data structure. Finally in this chapter,
+Oberon's type-font management and the toolbox for editing are
+discussed.
+
+Chapters 6--9 describe the {\it inner core\/}, still in a top-down
+path. Chapter~6 explains the loader of program modules and motivates
+the introduction of the data type {\tt Module\/}. The chapter includes the
+management of the memory part holding program code and defines the
+format in which compiled modules are stored as object
+files. Furthermore, it discusses the problems of binding separately
+compiled modules together and of referencing objects defined in other
+modules.
+
 
 
 % \beginchapter CHAPTER 3: THE TASKING SYSTEM.
