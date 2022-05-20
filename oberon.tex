@@ -1064,7 +1064,7 @@ PROCEDURE Install (T: Task);
 PROCEDURE Remove (T: Task);
 \endtt
 
-The procedures {\tt Install\/} and {\tt Remove\/} are called explicitly in order to
+\noindent The procedures {\tt Install\/} and {\tt Remove\/} are called explicitly in order to
 transfer the state of the specified task from {\tt offline\/} to {\tt idle\/} and from
 {\tt idle\/} to {\tt offline\/} respectively. Installed tasks take their turns in
 becoming {\tt active\/}, that is, in being executed. The installed handlers
@@ -1116,7 +1116,7 @@ ControlMsg = RECORD (ViewerMsg)
 END;
 \endtt
 
-The field {\tt id\/} specifies the exact request transmitted with this
+\noindent The field {\tt id\/} specifies the exact request transmitted with this
 specific reactivation. In the case of {\tt InputMsg\/} the possible
 requests are consume (the character specified by field {\tt ch\/}) and
 track (mouse, starting from state given by keys and {\tt X\/}, {\tt
@@ -1180,7 +1180,7 @@ REPEAT
 UNTIL FALSE
 \endtt
 
-The system executes a sequence of uninterrupted procedures
+\noindent The system executes a sequence of uninterrupted procedures
 (tasks). Interactive tasks are triggered by input data being present,
 either from the keyboard, the mouse, or other input
 sources. Background tasks are taken up in a round-robin
@@ -1192,9 +1192,35 @@ continuation in the case of a failing task or, in other words, in the
 case of a {\it trap\/} are in order here. On the (abstract) level of tasks, we
 can identify three sequential actions of recovery taken after a
 program failure:
+\begintt
+recovery after program failure =
+BEGIN save current system state;
+  call installed trap handler;
+  roll back to start of task scheduler
+END
+\endtt
+
+\noindent Essentially, the system state is determined by the values of all
+global and local variables at a given time. The trap handler typically
+opens an extra viewer displaying the cause of the trap and the saved
+system state. Notice in the program fragment above that background
+tasks are removed from the ring after failing. This is an effective
+precaution against cascades of repeated failures. Obviously, no such
+precaution is necessary in the case of interactive tasks because their
+reactivation is under control of the user of the system.
+
+Summarizing the essence of the tasking system: Oberon is a
+multitasking system based on a two-category model. Interactive tasks
+are interfacing with the display system and are scheduled with high
+priority upon user interactions. Background tasks are stand-alone and
+are scheduled with low priority. Task activations are modeled as
+message passing and eventually as calls of procedures assigned to
+variables. They are sequentially ordered and controlled by a single
+thread of control.
+
+\beginsubsection 3.3. THE CONCEPT OF COMMAND.
 
 
-% \beginsubsection 3.3. THE CONCEPT OF COMMAND.
 % \beginsubsubsection 3.3.1. Atomic actions.
 % \beginsubsubsection 3.3.2. Generic text selection.
 % \beginsubsubsection 3.3.3. Generic copy viewer.
