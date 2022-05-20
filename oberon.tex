@@ -1329,9 +1329,27 @@ represented as a global variable of type {\tt Text\/}:
 Log: Texts.Text;
 \endtt
 
+\noindent It should have become clear by now that implementers of commands may
+rely on a rich arsenal of abstract global facilities that reflect the
+current system state and make it accessible. In other words, they may
+rely on a high degree of system integration. Therefore, Oberon
+features an extraordinarily broad spectrum of mutually integrated
+facilities. For example, the system distinguishes itself by a complete
+integration of the abstract data types {\tt Viewer\/} and {\tt Text\/} that we
+encountered above. They will be the subject of Chapters 4 and 5.
 
+Module {\tt Oberon\/} assists the integration of these types with the
+following conceptual features, of which the first two are familiar to
+us already: Standard parameter list for commands, system log, generic
+text selection, and generic copy viewer. At this point we should add a
+word of clarification to our use of the term ``generic''. It is
+synonymous with ``interpretable individually by any viewer (interactive task)''
+and is typically used in connection with messages or orders
+whose receiver's exact identity is unknown.
 
-
+Let us now go into a brief discussion of the generic facilities
+without, however, leaving the level of our current abstraction and
+understanding.
 
 \beginsubsubsection 3.3.2. Generic text selection.
 
