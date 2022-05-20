@@ -1353,7 +1353,27 @@ understanding.
 
 \beginsubsubsection 3.3.2. Generic text selection.
 
+Textual selections are characterized by a text, a stretch of
+characters within that text, and a time stamp. Without further
+qualification ``the text selection'' always means ``the most recent text selection''.
+It can be obtained programmatically by calling procedure GetSelection:
+\begintt
+PROCEDURE GetSelection (VAR text: Texts.Text;
+                        VAR beg, end, time: LONGINT);
+\endtt
 
+\noindent The parameters specify the desired stretch of text starting
+at position beg and ending at end - 1 as well as the associated time
+stamp. The procedure is implemented in form of a broadcast of a so-
+called selection message to all viewers. The declaration of this
+message is
+\begintt
+SelectionMsg = RECORD (ViewerMsg)
+  time: INTEGER;
+  text: Texts.Text;
+  beg, end: INTEGER
+END;
+\endtt
 
 % \beginsubsubsection 3.3.3. Generic copy viewer.
 % \beginsubsection 3.4. TOOLBOXES.
