@@ -197,4 +197,148 @@ time, feedback from experience in its use was incorporated by
 improving existing parts. Since 1989, Oberon has replaced Modula-2 in
 our introductory programming courses.
 
+\beginchapter CHAPTER 2: STRUCTURE OF THE SYSTEM.
+
+\medskip
+
+\beginsubsection 2.1. INTRODUCTION.
+
+In order to warrant the sizeable effort of designing and constructing
+an entire operating system from scratch, a number of basic concepts
+need to be novel. We start this chapter with a discussion of the
+principal concepts underlying the Oberon System and of the dominant
+design decisions. On this basis, a presentation of the system's
+structure follows. It will be restricted to its coarsest level, namely
+the composition and interdependence of the largest building blocks,
+the modules. The chapter ends with an overview of the remainder of the
+book. It should help the reader to understand the role, place, and
+significance of the parts described in the individual chapters.
+
+The fundamental objective of an operating system is to present the
+computer to the user and to the programmer at a certain level of
+abstraction. For example, the store is presented in terms of
+requestable pieces or variables of a specified data type, the disk is
+presented in terms of sequences of characters (or bytes) called files,
+the display is presented as rectangular areas called viewers, the
+keyboard is presented as an input stream of characters, and the mouse
+appears as a pair of coordinates and a set of key states. Every
+abstraction is characterized by certain properties and governed by a
+set of operations. It is the task of the system to implement these
+operations and to manage them, constrained by the available resources
+of the underlying computer. This is commonly called resource
+management.
+
+Every abstraction inherently hides details, namely those from which it
+abstracts. Hiding may occur at different levels. For example, the
+computer may allow certain parts of the store, or certain devices to
+be made inaccessible according to its mode of operation
+(user/supervisor mode), or the programming language may make certain
+parts inaccessible through a hiding facility inherent in its
+visibility rules. The latter is of course much more flexible and
+powerful, and the former indeed plays an almost negligible role in our
+system. Hiding is important because it allows maintenance of certain
+properties (called invariants) of an abstraction to be
+guaranteed. Abstraction is indeed the key of any modularization, and
+without modularization every hope of being able to guarantee
+reliability and correctness vanishes. Clearly, the Oberon System was
+designed with the goal of establishing a modular structure on the
+basis of purpose-oriented abstractions. The availability of an
+appropriate programming language is an indispensable prerequisite, and
+the importance of its choice cannot be over-emphasized.
+
+\beginsubsection 2.2. CONCEPTS.
+
+\beginsubsubsection 2.2.1. Viewers.
+
+Whereas the abstractions of individual variables representing parts of
+the primary store, and of files representing parts of the disk store
+are well established notions and have significance in every computer
+system, abstractions regarding input and output devices became
+important with the advent of high interactivity between user and
+computer. High interactivity requires high bandwidth, and the only
+channel of human users with high bandwidth is the eye. Consequently,
+the computer's visual output unit must be properly matched with the
+human eye. This occurred with the advent of the high-resolution
+display in the mid 1970s, which in turn had become feasible due to
+faster and cheaper electronic memory components. The high-resolution
+display marked one of the few very significant break-throughs in the
+history of computer development. The typical bandwidth of a modern
+display is in the order of 100 MHz. Primarily the high-resolution
+display made visual output a subject of abstraction and resource
+management. In the Oberon System, the display is partitioned into
+viewers, also called windows, or more precisely, into frames,
+rectangular areas of the screen(s). A viewer typically consists of two
+frames, a title bar containing a subject name and a menu of commands,
+and a main frame containing some text, graphic, picture, or other
+object. A viewer itself is a frame; frames can be nested, in principle
+to any depth.  14 The System provides routines for generating a frame
+(viewer), for moving and for closing it. It allocates a new viewer at
+a specified place, and upon request delivers hints as to where it
+might best be placed. It keeps track of the set of opened
+viewers. This is what is called viewer management, in contrast to the
+handling of their displayed contents.  But high interactivity requires
+not only a high bandwidth for visual output, it demands also
+flexibility of input. Surely, there is no need for an equally large
+bandwidth, but a keyboard limited by the speed of typing to about 100
+Hz is not good enough. The break-through on this front was achieved by
+the so-called mouse, a pointing device which appeared roughly at the
+same time as the high- resolution display.  This was by no means just
+a lucky coincidence. The mouse comes to fruition only through
+appropriate software and the high-resolution display. It is itself a
+conceptually very simple device delivering signals when moved on the
+table. These signals allow the computer to update the position of a
+mark - the cursor - on the display. Since feedback occurs through the
+human eye, no great precision is required from the mouse. For example,
+when the user wishes to identify a certain object on the screen, such
+as a letter, he moves the mouse as long as required until the mapped
+cursor reaches the object. This stands in marked contrast to a
+digitizer which is supposed to deliver exact coordinates. The Oberon
+System relies very much on the availability of a mouse.  Perhaps the
+cleverest idea was to equip mice with buttons. By being able to signal
+a request with the same hand that determines the cursor position, the
+user obtains the direct impression of issuing position-dependent
+requests. Position-dependence is realized in software by delegating
+interpretation of the signal to a procedure - a so-called handler or
+interpreter -which is local to the viewer in whose area the cursor
+momentarily appears. A surprising flexibility of command activation
+can be achieved in this manner by appropriate software. Various
+techniques have emerged in this connection, e.g. pop-up menus,
+pull-down-menus, etc. which are powerful even under the presence of a
+single button only. For many applications, a mouse with several keys
+is far superior, and the Oberon System basically assumes three buttons
+to be available. The assignment of different functions to the keys may
+of course easily lead to confusion when every application prescribes
+different key assignment. This is, however, easily avoided by the
+adherence to certain "global" conventions. In the Oberon System, the
+left button is primarily used for marking a position (setting a
+caret), the middle button for issuing general commands (see below),
+and the right button for selecting displayed objects.  Recently, it
+has become fashionable to use overlapping windows mirroring documents
+being piled up on one's desk. We have found this metaphor not entirely
+convincing. Partially hidden windows are typically brought to the top
+and made fully visible before any operation is applied to their
+contents. In contrast to the insignificant advantage stands the
+substantial effort necessary to implement this scheme. It is a good
+example of a case where the benefit of a complication is
+incommensurate with its cost. Therefore, we have chosen a solution
+that is much simpler to realize, yet has no genuine disadvantages
+compared to overlapping windows: tiled viewers as shown in Fig. 2.1.
+2.2.2. Commands Position-dependent commands with fixed meaning (fixed
+for each type of viewer) must be supplemented by general
+commands. Conventionally, such commands are issued through the
+keyboard by typing the program's name that is to be executed into a
+special command text. In this respect, the Oberon System offers a
+novel and much more flexible solution which is presented in the
+following paragraphs.  First of all we remark that a program in the
+common sense of a text compiled as a unit is mostly a far too large
+unit of action to serve as a command. Compare it, for example, with
+the insertion of a piece of text through a mouse command. In Oberon,
+the notion of a unit of action is separated from the notion of unit of
+compilation. The former is a command represented by a (exported)
+procedure, the latter is a module. Hence, a module may, and typically
+does, define several, even many commands. Such a (general) command may
+be invoked at any time by pointing at its name in any 15
+
+text visible in any viewer on the display, and by clicking the middle mouse button. The command name has the form M.P, where P is the procedure's identifier and M that of the module in which P is declared. As a consequence, any command click may cause the loading of one or several modules, if M is not already present in main store. The next invocation of M.P occurs instantaneously, since M is already loaded. A further consequence is that modules are never (automatically) removed, because a next command may well refer to the same module.
+
 \bye
