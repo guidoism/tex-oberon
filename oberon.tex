@@ -1049,8 +1049,90 @@ Coming back to the perspective of tasks, we note that each sending of
 a message to a viewer corresponds to an activation or reactivation of
 the interactive task that it represents.
 
-% \beginsubsubsection 3.1.2. Background Tasks.
-% \beginsubsection 3.2. THE TASK SCHEDULER.
+\beginsubsubsection 3.1.2. Background Tasks.
+
+Oberon background tasks are not connected a priori with any specific
+aggregate in the system. Seen technically, they are instances of an
+abstract data type consisting of type declarations Task and TaskDesc
+together with intrinsic operations {\tt NewTask\/}, {\tt Install\/} and {\tt Remove\/}:
+\begintt
+Task = POINTER TO TaskDesc;
+TaskDesc = RECORD state: INTEGER; handle: PROCEDURE END;
+
+PROCEDURE NewTask(h: PROCEDURE; period: INTEGER): Task;
+PROCEDURE Install (T: Task);
+PROCEDURE Remove (T: Task);
+\endtt
+
+The procedures {\tt Install\/} and {\tt Remove\/} are called explicitly in order to
+transfer the state of the specified task from {\tt offline\/} to {\tt idle\/} and from
+{\tt idle\/} to {\tt offline\/} respectively. Installed tasks take their turns in
+becoming {\tt active\/}, that is, in being executed. The installed handlers
+are simple, parameterless procedures specifying their own actions and
+conditions for execution, with one exception: Resumption may be
+delayed until a certain period of time has elapsed. This period is
+specified in milliseconds when a task is created.
+
+The following two examples of concrete background tasks may serve a
+better understanding of our explanations. The first one is a
+system-wide garbage collector collecting unused memory. The second
+example is a network monitor accepting incoming data on a local area
+network. In both examples the state of the task is captured entirely
+by global system variables. We shall come back to these topics in
+Chapters 8 and 10 respectively.
+
+We should not end this Section without drawing an important
+conclusion. Transfers of control between tasks are implemented in
+Oberon as ordinary calls and returns of ordinary procedures (procedure
+variables, actually). Preemption is not possible. From that we
+conclude that active periods of tasks are sequentially ordered and can
+be controlled by a single thread of control. This simplification pays
+well: Locks of common resources are completely dispensable and
+deadlocks are not a topic.
+
+\beginsubsection 3.2. THE TASK SCHEDULER.
+
+We start from the general assumption that, at any given time, a number
+of well-determined tasks are ready in the system to be
+serviced. Remember that two categories of tasks exist: Interactive
+tasks and background tasks. They differ substantially in the criteria
+of activation or reactivation and in the priority of
+dispatching. Interactive tasks are (re)activated exclusively upon
+interactions by the user and are dispatched with high priority. In
+contrast, background tasks are polled with low priority.
+
+We already know that interactive tasks are activated by sending messages. The types of messages used for this purpose are {\tt InputMsg\/} and {\tt ControlMsg\/} reporting keyboard events and mouse events respectively. Slightly simplified, they are declared as
+\begintt
+InputMsg = RECORD (ViewerMsg)
+  id: INTEGER;
+  X, Y: INTEGER;
+  keys: SET;
+  ch: CHAR
+END;
+
+ControlMsg = RECORD (ViewerMsg)
+  id: INTEGER;
+  X, Y: INTEGER
+END;
+\endtt
+
+The field {\tt id\/} specifies the exact request transmitted with this
+specific reactivation. In the case of {\tt InputMsg\/} the possible
+requests are consume (the character specified by field {\tt ch\/}) and
+track (mouse, starting from state given by keys and {\tt X\/}, {\tt
+  Y\/}). In case of {\tt ControlMsg\/} the choice is mark (the viewer
+at position {\tt X\/}, {\tt Y\/}) or neutralize. Mark means moving the
+global system pointer (typically represented as a star-shaped mark) to
+the current position of the mouse. Neutralizing a viewer is equivalent
+to removing all marks and graphical attributes from this viewer.
+
+All tasking facilities are collected in one program module, called
+{\tt Oberon\/}. In particular, the module's definition exposes the
+declarations of the abstract data type Task and of the message types
+{\tt InputMsg\/} and {\tt ControlMsg\/}. The module's most important contribution,
+however, is the task scheduler (often referred to as ``Oberon loop'')
+that can be regarded as the system's dynamic center.
+
 % \beginsubsection 3.3. THE CONCEPT OF COMMAND.
 % \beginsubsubsection 3.3.1. Atomic actions.
 % \beginsubsubsection 3.3.2. Generic text selection.
