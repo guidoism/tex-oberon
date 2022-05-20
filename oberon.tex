@@ -626,221 +626,137 @@ multiple copies in different, linked object files is the key to
 storage economy. Prelinked mega-files do not occur in the Oberon
 System, and every module is freely reusable.
 
+\beginsubsection 2.3. THE SYSTEM'S STRUCTURE.
 
-% \beginsubsection 2.3. THE SYSTEM'S STRUCTURE.
-% 
-% TODO
-% 
-% \beginsubsection 2.4. A TOUR THROUGH THE CHAPTERS.
-% 
-% TODO
-% 
+
+The largest identifiable units of the system are its modules. It is
+therefore most appropriate to describe a system's structure in terms
+of its modules. As their interfaces are explicitly declared, it is
+also easy to exhibit their interdependence in the form of a directed
+graph. The edges indicate imports. The module graph of a system
+programmed in Oberon is hierarchical, i.e. has no cycles. The lowest
+members of the hierarchy effectively import hardware only. We refer
+here to modules which contain device drivers. But module Kernel also
+belongs to this class; it ``imports memory'' and includes the disk
+driver. The modules on the top of the hierarchy effectively export to
+the user. As the user has direct access to command procedures, we call
+these top members {\it command modules\/} or tool modules.
+
+The hierarchy of the basic system is shown in a table of direct
+imports and as a graph in Figure 2.2. The picture is simplified by
+omitting direct import edges if an indirect path also leads from the
+source to the destination. For example, {\tt Files\/} imports {\tt Kernel\/}; the
+direct import is not shown, because a path from {\tt Kernel\/} leads to {\tt Files\/}
+via {\tt FileDir\/}.
+
+TODO: Insert Figure 2.2
+
+Module names in the plural form typically indicate the definition of
+an abstract data type in the module. The type is exported together
+with the pertinent operations. Examples are {\tt Files\/}, {\tt
+  Modules\/}, {\tt Fonts\/}, {\tt Texts\/}, {\tt Viewers\/}, {\tt
+  MenuViewers\/}, and {\tt TextFrames\/}. Modules whose names are in
+singular form typically denote a resource that the module manages, be
+it a global variable or a device. The variable or the device is itself
+hidden (not exported) and becomes accessible through the module's
+exported procedures. Examples are all device drivers, {\tt Input\/}
+for keyboard and mouse, {\tt Kernel\/} for memory and disk, and {\tt
+  Display\/}. Exceptions are the command modules whose name is mostly
+chosen according to the activity they primarily represent, like {\tt
+  System\/}, and {\tt Edit\/}.
+
+Module {\tt Oberon\/} is, as already mentioned, the heart of the system
+containing the central loop to which control returns after each
+command interpretation, independent of whether it terminates normally
+or abnormally. {\tt Oberon\/} exports several procedures of auxiliary nature,
+but primarily also the one allowing the invocation of commands ({\tt Call\/})
+and access to the command's parameter text through variable
+{\tt Oberon.Par}. Furthermore, it contains global, exported variables: the
+log text. The log text typically serves to issue prompts and short
+failure reports of commands. The text is displayed in a log viewer
+that is automatically opened when module {\tt System\/} is initialized. Module
+{\tt Oberon\/} furthermore contains the two markers used globally on the
+display, the {\it mouse cursor\/} and the {\it star pointer\/}. It exports procedures
+to draw and to erase them, and allows the installation of different
+patterns for them.
+
+The system shown in Fig. 2.2. basically contains facilities for
+generating and editing texts, and for storing them in the file
+system. All other functions are performed by modules that must be
+added in the usual way by module loading on demand. This includes,
+notably, the compiler, network communication, document editors, and
+all sorts of programs designed by users. The high priority given in
+the system's conception to modularity, to avoiding unnecessary frills,
+and to concentrate on the indispensable in the core, has resulted in a
+system of remarkable compactness. Although this property may be
+regarded as of little importance in this era of falling costs of large
+memories, we consider it to be highly essential. We merely should like
+to draw the reader's attention to the correlation between a systems'
+size and its reliability. Also, we do not consider it as good
+engineering practice to consume a resource lavishly just because it
+happens to be cheap. The following table lists the core's modules and
+the major application modules, and it indicates the size of code (in
+words) and static variables (in bytes) and, the number of source
+program lines.
+
+TODO: Table here
+
+\beginsubsection 2.4. A TOUR THROUGH THE CHAPTERS.
+
+
+
 % \beginchapter CHAPTER 3: THE TASKING SYSTEM.
-% 
-% TODO
-% 
 % \beginsubsection 3.1. THE CONCEPT OF TASK.
-% 
-% TODO
-% 
 % \beginsubsubsection 3.1.1. Interactive tasks.
-% 
-% TODO
-% 
 % \beginsubsubsection 3.1.2. Background Tasks.
-% 
-% TODO
-% 
 % \beginsubsection 3.2. THE TASK SCHEDULER.
-% 
-% TODO
-% 
 % \beginsubsection 3.3. THE CONCEPT OF COMMAND.
-% 
-% TODO
-% 
 % \beginsubsubsection 3.3.1. Atomic actions.
-% 
-% TODO
-% 
 % \beginsubsubsection 3.3.2. Generic text selection.
-% 
-% TODO
-% 
 % \beginsubsubsection 3.3.3. Generic copy viewer.
-% 
-% TODO
-% 
 % \beginsubsection 3.4. TOOLBOXES.
-% 
-% TODO
-% 
 % \beginchapter CHAPTER 4: THE DISPLAY SYSTEM.
-% 
-% TODO
-% 
 % \beginsubsection 4.1. THE SCREEN LAYOUT MODEL.
-% 
-% TODO
-% 
 % \beginsubsection 4.2. VIEWERS AS OBJECTS.
-% 
-% TODO
-% 
 % \beginsubsection 4.3. FRAMES AS BASIC DISPLAY ENTITIES.
-% 
-% TODO
-% 
 % \beginsubsection 4.4. DISPLAY MANAGEMENT.
-% 
-% TODO
-% 
 % \beginsubsubsection 4.4.1. Viewers.
-% 
-% TODO
-% 
 % \beginsubsubsection 4.4.2. Menu Viewers.
-% 
-% TODO
-% 
 % \beginsubsubsection 4.4.3. Cursor Management.
-% 
-% TODO
-% 
 % \beginsubsection 4.5. RASTER OPERATIONS.
-% 
-% TODO
-% 
 % \beginsubsection 4.6. STANDARD DISPLAY CONFIGURATIONS AND TOOLBOX.
-% 
-% TODO
-% 
 % \beginchapter CHAPTER 5: THE TEXT SYSTEM.
-% 
-% TODO
-% 
 % \beginsubsection 5.1. TEXT AS AN ABSTRACT DATA TYPE.
-% 
-% TODO
-% 
 % \beginsubsubsection 5.1.1. Loading and Storing Text.
-% 
-% TODO
-% 
 % \beginsubsubsection 5.1.2. Editing Text.
-% 
-% TODO
-% 
 % \beginsubsubsection 5.1.3. Accessing Text.
-% 
-% TODO
-% 
 % \beginsubsection 5.2. TEXT MANAGEMENT.
-% 
-% TODO
-% 
 % \beginsubsection 5.3. TEXT FRAMES.
-% 
-% TODO
-% 
 % \beginsubsection 5.4. THE FONT MACHINERY.
-% 
-% TODO
-% 
 % \beginsubsection 5.5. THE EDIT TOOLBOX.
-% 
-% TODO
-% 
 % \beginchapter CHAPTER 6: THE MODULE LOADER.
-% 
-% TODO
-% 
 % \beginsubsection 6.1. LINKING AND LOADING.
-% 
-% TODO
-% 
 % \beginsubsection 6.2. MODULE REPRESENTATION.
-% 
-% TODO
-% 
 % \beginsubsection 6.3. THE LINKING LOADER.
-% 
-% TODO
-% 
 % \beginsubsection 6.4. THE TOOLBOX OF THE LOADER.
-% 
-% TODO
-% 
 % \beginsubsection 6.5. THE OBERON OBJECT FILE FORMAT.
-% 
-% TODO
-% 
 % \beginchapter CHAPTER 7: THE FILE SYSTEM.
-% 
-% TODO
-% 
 % \beginsubsection 7.1. FILES.
-% 
-% TODO
-% 
 % \beginsubsection 7.2 IMPLEMENTATION OF FILES ON A RANDOM-ACCESS STORE.
-% 
-% TODO
-% 
 % \beginsubsection 7.3 IMPLEMENTATION OF FILES ON A DISK.
-% 
-% TODO
-% 
 % \beginsubsection 7.4 THE FILE DIRECTORY.
-% 
-% TODO
-% 
 % \beginsubsection 7.5. THE TOOLBOX OF FILE UTILITIES.
-% 
-% TODO
-% 
 % \beginchapter CHAPTER 8: STORAGE LAYOUT AND MANAGEMENT.
-% 
-% TODO
-% 
 % \beginsubsection 8.1. LAYOUT AND RUN-TIME ORGANIZATION.
-% 
-% TODO
-% 
 % \beginsubsection 8.2. MANAGEMENT OF DYNAMIC STORAGE.
-% 
-% TODO
-% 
 % \beginsubsection 8.3. THE KERNEL.
-% 
-% TODO
-% 
 % \beginsubsection 8.4. THE STORAGE MANAGEMENT'S TOOLBOX.
-% 
-% TODO
-% 
 % \beginchapter CHAPTER 9: DEVICE DRIVERS.
-% 
-% TODO
-% 
 % \beginsubsection 9.1. OVERVIEW.
-% 
-% TODO
-% 
 % \beginsubsection 9.2. KEYBOARD AND MOUSE.
-% 
-% TODO
-% 
 % \beginsubsection 9.3. THE SD-CARD (DISK).
-% 
-% TODO
-% 
 % \beginsubsection 9.4. SERIAL ASYNCHRONOUS INTERFACE (RS 232).
-% 
-% TODO
-% 
 % \beginsubsection 9.5. SERIAL COMMUNICATIONS CONTROLLER (SCC).
-% 
-% TODO
+
 
 \bye
