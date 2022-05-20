@@ -999,7 +999,7 @@ ViewerDesc = RECORD X, Y, W, H: INTEGER;
 END;
 \endtt
 
-{\tt X\/}, {\tt Y\/}, {\tt W\/}, {\tt H\/} define the viewer's rectangle on the screen, i.e. location
+\noindent {\tt X\/}, {\tt Y\/}, {\tt W\/}, {\tt H\/} define the viewer's rectangle on the screen, i.e. location
 {\tt X\/}, {\tt Y\/} of the lower left corner relative to the display origin, width {\tt W\/}
 and height {\tt H\/}. The variable {\tt state\/} informs about the current state of
 visibility (visible, closed, covered), while {\tt handle\/} represents the
@@ -1008,7 +1008,7 @@ functional interface of viewers. The type of the handler is
 Handler = PROCEDURE (V: Viewer; VAR M: ViewerMsg);
 \endtt
 
-where ViewerMsg is some base type of messages whose exact declaration is of minor importance for the moment:
+\noindent where ViewerMsg is some base type of messages whose exact declaration is of minor importance for the moment:
 \begintt
 ViewerMsg = RECORD ... (*basic parameter fields*) END;
 \endtt
@@ -1028,6 +1028,13 @@ a given class of objects. In contrast, the handler paradigm is {\it open\/}
 because it defines just the root ({\tt ViewerMsg\/}) of a potentially
 unlimited tree of extending message types. For example, a concrete
 handler might be able to handle messages of type {\tt MyViewerMsg\/}, where
+\begintt
+MyViewerMsg = RECORD (ViewerMsg)
+  mypar: MyParameters
+END;
+\endtt
+
+\noindent is an extended type of {\tt ViewerMsg\/}.
 
 
 
