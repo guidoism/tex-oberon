@@ -1401,7 +1401,32 @@ commands via a global parameter list, registered by the calling task
 in the central module {\tt Oberon\/}. Commands operate on the global state of
 the system.
 
-% \beginsubsection 3.4. TOOLBOXES.
+\beginsubsection 3.4. TOOLBOXES.
+
+Modules typically appear in three different forms. The first is a
+module that encapsulates some data, letting them be accessed only
+through exported procedures and functions. A good example is Module
+{\tt FileDir\/}, encapsulating the file directory and protecting it from
+disruptive access. A second kind is the module representing an
+{\it abstract data type\/}, exporting a type and its associated
+operators. Typical examples are modules {\tt Files\/}, {\tt Modules\/}, {\tt Viewers\/}, and
+{\tt Texts\/}. A third kind is the collection of procedures pertaining to the
+same topic, such as module {\tt RS-232\/} handling communication over a serial
+line.
+
+Oberon adds a fourth form: the {\it toolbox\/}. By definition, this is a pure
+collection of commands in the sense of the previous section. Toolboxes
+distinguish themselves principally from the other forms of modules by
+the fact that they lie on top of the modular hierarchy. Toolbox
+modules are ``imported'' by system users at run-time. In other words,
+their definitions define the user interface. Typical examples are
+modules {\tt System\/} and {\tt Edit\/}. As a rule of thumb there exists a toolbox for
+every topic or application.
+
+As an example of a toolbox definition we quote an annotated version of
+module {\tt System\/}:
+
+
 % \beginchapter CHAPTER 4: THE DISPLAY SYSTEM.
 % \beginsubsection 4.1. THE SCREEN LAYOUT MODEL.
 % \beginsubsection 4.2. VIEWERS AS OBJECTS.
