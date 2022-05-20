@@ -607,10 +607,26 @@ with surprising ease. One of them is described at the end of this
 book. The basic system is nevertheless quite modest in its resource
 requirements (see Table at the end of Section 2.3).
 
-% \beginsubsubsection 2.2.6. Dynamic Loading.
-% 
-% TODO
-% 
+\beginsubsubsection 2.2.6. Dynamic Loading.
+
+Activation of commands residing in modules that are not present in the
+store implies the loading of the modules and, of course, all their
+imports. Invoking the loader is, however, not restricted to command
+activation; it may also occur through programmed procedure calls. This
+facility is indispensable for a successful realization of genuine
+extensibility. Modules must be loadable on demand. For example, a
+document editor loads a graphics package when a graphic element
+appears in the processed document, but not otherwise.
+
+The Oberon System features no separate linker. A module is linked with
+its imports when it is loaded, and never before. As a consequence,
+every module is present only once, in main store (linked) as well as
+on backing store (unlinked, as file). Avoiding the generation of
+multiple copies in different, linked object files is the key to
+storage economy. Prelinked mega-files do not occur in the Oberon
+System, and every module is freely reusable.
+
+
 % \beginsubsection 2.3. THE SYSTEM'S STRUCTURE.
 % 
 % TODO
