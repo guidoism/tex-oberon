@@ -431,4 +431,400 @@ small viewer and lists the sequence of invoked procedures with their
 local variables and current values. This information helps a
 programmer to identify the cause of the trap.
 
+\beginsubsubsection 2.2.3. Tasks.
+
+From the presentations above it follows that the Oberon System is
+distinguished by a highly flexible scheme of command activation. The
+notion of a command extends from the insertion of a single character
+and the setting of a marker to computations that may take hours or
+days. It is moreover distinguished by a highly flexible notion of
+operand selection not restricted to registered, named files. And most
+importantly, by the virtual absence of hidden states. The state of the
+system is practically determined by what is visible to the user.
+
+This makes it unnecessary to remember a long history of previously
+activated commands, started programs, entered modes, etc. Modes are in
+our view the hallmark of user-unfriendly systems. It should at this
+point have become obvious that the system allows a user to pursue
+several different tasks concurrently. They are manifest in the form of
+viewers containing texts, graphics, or other displayable objects. The
+user switches between tasks implicitly when choosing a different
+viewer as operand for the next command. The characteristic of this
+concept is that task switching is under explicit control of the user,
+and the atomic units of action are the commands.
+
+At the same time, we classify Oberon as a single-process (or
+single-thread) system. How is this apparent paradox to be understood?
+Perhaps it is best explained by considering the basic mode of
+operation. Unless engaged in the interpretation of a command, the
+processor is engaged in a loop continuously polling event
+sources. This loop is called the {\it central loop\/}; it is contained in
+module {\tt Oberon} which may be regarded as the system's heart. The two
+fixed event sources are the mouse and the keyboard. If a keyboard
+event is sensed, control is dispatched to the handler installed in the
+so-called {\it focus viewer\/}, designated as the one holding the caret. If a
+mouse event (key) is sensed, control is dispatched to the handler in
+which the cursor currently lies. This is all possible under the
+paradigm of a single, uninterruptible process.
+
+The notion of a single process implies non-interruptability, and
+therefore also that commands cannot interact with the
+user. Interaction is confined to the selection of commands before
+their execution. Hence, there exists no input statement in typical
+Oberon programs. Inputs are given by parameters supplied and
+designated before command invocation.
+
+This scheme at first appears as gravely restrictive. In practice it is
+not, if one considers single-user operation. It is this single user
+who carries out a dialog with the computer. A human might be capable
+of engaging in simultaneous dialogs with several processes only if the
+commands issued are very time-consuming. We suggest that execution of
+time-consuming computations might better be delegated to loosely
+coupled compute-servers in a distributed system.
+
+The primary advantage of a system dealing with a single process is
+that task switches occur at user-defined points only, where no local
+process state has to be preserved until resumption. Furthermore,
+because the switches are user-chosen, the tasks cannot interfere in
+unexpected and uncontrollable ways by accessing common variables. The
+system designer can therefore omit all kinds of protection mechanisms
+that exclude such interference. This is a significant simplification.
+
+The essential difference between Oberon and multiprocess-systems is
+that in the former task switches occur between commands only, whereas
+in the latter a switch may be invoked after any single
+instruction. Evidently, the difference is one of granularity of
+action. Oberon's granularity is coarse, which is entirely acceptable
+for a single-user system.
+
+The system offers the possibility to insert further polling commands
+in the central loop. This is necessary if additional event sources are
+to be introduced. The prominent example is a network, where commands
+may be sent from other workstations. The central loop scans a list of
+so-called {\it task descriptors\/}. Each descriptor refers to a command
+procedure. The two standard events are selected only if their guard
+permits, i.e. if either keyboard input is present, or if a mouse event
+occurs. Inserted tasks must provide their own guard in the beginning
+of the installed procedure.
+
+The example of a network inserting commands, called {\it requests\/}, raises a
+question: what happens if the processor is engaged in the execution of
+another command when the request arrives? Evidently, the request would
+be lost unless measures are taken. The problem is easily remedied by
+buffering the input. This is done in every driver of an input device,
+in the keyboard driver as well as the network driver. The incoming
+signal triggers an interrupt, and the invoked interrupt handler
+accepts the input and buffers it. We emphasize that such interrupt
+handling is confined to drivers, system components at the lowest
+level. An interrupt does not evoke a task selection and a task
+switch. Control simply returns to the point of interruption, and the
+interrupt remains unnoticeable to programs. There exists, as with
+every rule, an exception: an interrupt due to keyboard input of the
+abort character returns control to the central loop.
+
+\beginsubsubsection 2.2.4. Tool Texts as Configurable Menus.
+
+Certainly, the concepts of viewers specifying their own interpretation
+of mouse clicks, of commands invokable from any text on the display,
+of any displayed object being selectable as an interface between
+commands, and of commands being dialog-free, uninterruptible units of
+action, have considerable influence on the style of programming in
+Oberon, and they thoroughly change the style of using the
+computer. The ease and flexibility in the way pieces of text can be
+selected, moved, copied, and designated as command and as command
+parameters, drastically reduces the need for typing. The mouse becomes
+the dominant input device: the keyboard merely serves to input textual
+data. This is accentuated by the use of so-called {\it tool texts\/},
+compositions of frequently used commands, which are typically
+displayed in the narrower system track of viewers. One simply doesn't
+type commands! They are usually visible somewhere already. Typically,
+the user composes a tool text for every project pursued. Tool texts
+can be regarded as individually configurable private menus.
+
+The rarity of issuing commands by typing them has the most agreeable
+benefit that their names can be meaningful words. For example, the
+copy operation is denoted by {\tt Copy} instead of {\tt cp}, rename by {\tt Rename}
+instead of {\tt rn}, the call for a file directory excerpt is named
+{\tt Directory} instead of {\tt ls}. The need for memorizing an infinite list of
+cryptic abbreviations, which is another hallmark of user-unfriendly
+systems, vanishes.
+
+But the influence of the Oberon concept is not restricted to the style
+in which the computer is used. It extends also to the way programs are
+designed to communicate with the environment. The definition of the
+abstract type {\tt Text} in the system's core suggests the replacement
+of files by texts as carrier of input and output data in very many
+cases. The advantage to be gained lies in the text's immediate
+editability. For example, the output of the command {\tt System.Directory}
+produces the desired excerpt of the file directory
+in the form of a (displayed) text. Parts of it or the whole may be
+selected and copied into other texts by regular editing commands
+(mouse clicks). Or, the compiler accepts texts as input. It is
+therefore possible to compile a text, execute the program, and to
+recompile the re-edited text without storing it on disk between
+compilations and tests. The ubiquitous editability of text together
+with the persistence of global data (in particular viewers) allows
+many steps that do not contribute to the progress of the task actually
+pursued to be avoided.
+
+\beginsubsubsection 2.2.5. Extensibility.
+
+An important objective in the design of the Oberon System was
+extensibility. It should be easy to extend the system with new
+facilities by adding modules that make use of the already existing
+resources. Equally important, it should also reduce the system to
+those facilities that are currently and actually used. For example, a
+document editor processing documents free of graphics should not
+require the loading of an extensive graphics editor, a workstation
+operating as a stand-alone system should not require the loading of
+extensive network software, and a system used for clerical purposes
+need include neither compiler nor assembler. Also, a system
+introducing a new kind of display frame should not include procedures
+for managing viewers containing such frames. Instead, it should make
+use of existing viewer management. The staggering consumption of
+memory space by many widely used systems is due to violation of such
+fundamental rules of engineering. The requirement of many megabytes of
+store for an operating system is, albeit commonly tolerated, absurd
+and another hallmark of user-unfriendliness, or perhaps manufacturer
+friendliness. Its reason is none other than inadequate extensibility.
+
+We do not restrict this notion to procedural extensibility, which is
+easy to realize. The important point is that extensions may not only
+add further procedures and functions, but introduce their own data
+types built on the basis of those provided by the system: data
+extensibility. For example, a graphics system should be able to define
+its graphics frames based on frames provided by the basic display
+module and by extending them with attributes appropriate for graphics.
+
+
+This requires an adequate language feature. The language Oberon
+provides precisely this facility in the form of {\it type extensions\/}. The
+language was designed for this reason; Modula-2 would have been the
+choice, had it not been for the lack of a type extension feature. Its
+influence on system structure was profound, and the results have been
+most encouraging. In the meantime, many additions have been created
+with surprising ease. One of them is described at the end of this
+book. The basic system is nevertheless quite modest in its resource
+requirements (see Table at the end of Section 2.3).
+
+% \beginsubsubsection 2.2.6. Dynamic Loading.
+% 
+% TODO
+% 
+% \beginsubsection 2.3. THE SYSTEM'S STRUCTURE.
+% 
+% TODO
+% 
+% \beginsubsection 2.4. A TOUR THROUGH THE CHAPTERS.
+% 
+% TODO
+% 
+% \beginchapter CHAPTER 3: THE TASKING SYSTEM.
+% 
+% TODO
+% 
+% \beginsubsection 3.1. THE CONCEPT OF TASK.
+% 
+% TODO
+% 
+% \beginsubsubsection 3.1.1. Interactive tasks.
+% 
+% TODO
+% 
+% \beginsubsubsection 3.1.2. Background Tasks.
+% 
+% TODO
+% 
+% \beginsubsection 3.2. THE TASK SCHEDULER.
+% 
+% TODO
+% 
+% \beginsubsection 3.3. THE CONCEPT OF COMMAND.
+% 
+% TODO
+% 
+% \beginsubsubsection 3.3.1. Atomic actions.
+% 
+% TODO
+% 
+% \beginsubsubsection 3.3.2. Generic text selection.
+% 
+% TODO
+% 
+% \beginsubsubsection 3.3.3. Generic copy viewer.
+% 
+% TODO
+% 
+% \beginsubsection 3.4. TOOLBOXES.
+% 
+% TODO
+% 
+% \beginchapter CHAPTER 4: THE DISPLAY SYSTEM.
+% 
+% TODO
+% 
+% \beginsubsection 4.1. THE SCREEN LAYOUT MODEL.
+% 
+% TODO
+% 
+% \beginsubsection 4.2. VIEWERS AS OBJECTS.
+% 
+% TODO
+% 
+% \beginsubsection 4.3. FRAMES AS BASIC DISPLAY ENTITIES.
+% 
+% TODO
+% 
+% \beginsubsection 4.4. DISPLAY MANAGEMENT.
+% 
+% TODO
+% 
+% \beginsubsubsection 4.4.1. Viewers.
+% 
+% TODO
+% 
+% \beginsubsubsection 4.4.2. Menu Viewers.
+% 
+% TODO
+% 
+% \beginsubsubsection 4.4.3. Cursor Management.
+% 
+% TODO
+% 
+% \beginsubsection 4.5. RASTER OPERATIONS.
+% 
+% TODO
+% 
+% \beginsubsection 4.6. STANDARD DISPLAY CONFIGURATIONS AND TOOLBOX.
+% 
+% TODO
+% 
+% \beginchapter CHAPTER 5: THE TEXT SYSTEM.
+% 
+% TODO
+% 
+% \beginsubsection 5.1. TEXT AS AN ABSTRACT DATA TYPE.
+% 
+% TODO
+% 
+% \beginsubsubsection 5.1.1. Loading and Storing Text.
+% 
+% TODO
+% 
+% \beginsubsubsection 5.1.2. Editing Text.
+% 
+% TODO
+% 
+% \beginsubsubsection 5.1.3. Accessing Text.
+% 
+% TODO
+% 
+% \beginsubsection 5.2. TEXT MANAGEMENT.
+% 
+% TODO
+% 
+% \beginsubsection 5.3. TEXT FRAMES.
+% 
+% TODO
+% 
+% \beginsubsection 5.4. THE FONT MACHINERY.
+% 
+% TODO
+% 
+% \beginsubsection 5.5. THE EDIT TOOLBOX.
+% 
+% TODO
+% 
+% \beginchapter CHAPTER 6: THE MODULE LOADER.
+% 
+% TODO
+% 
+% \beginsubsection 6.1. LINKING AND LOADING.
+% 
+% TODO
+% 
+% \beginsubsection 6.2. MODULE REPRESENTATION.
+% 
+% TODO
+% 
+% \beginsubsection 6.3. THE LINKING LOADER.
+% 
+% TODO
+% 
+% \beginsubsection 6.4. THE TOOLBOX OF THE LOADER.
+% 
+% TODO
+% 
+% \beginsubsection 6.5. THE OBERON OBJECT FILE FORMAT.
+% 
+% TODO
+% 
+% \beginchapter CHAPTER 7: THE FILE SYSTEM.
+% 
+% TODO
+% 
+% \beginsubsection 7.1. FILES.
+% 
+% TODO
+% 
+% \beginsubsection 7.2 IMPLEMENTATION OF FILES ON A RANDOM-ACCESS STORE.
+% 
+% TODO
+% 
+% \beginsubsection 7.3 IMPLEMENTATION OF FILES ON A DISK.
+% 
+% TODO
+% 
+% \beginsubsection 7.4 THE FILE DIRECTORY.
+% 
+% TODO
+% 
+% \beginsubsection 7.5. THE TOOLBOX OF FILE UTILITIES.
+% 
+% TODO
+% 
+% \beginchapter CHAPTER 8: STORAGE LAYOUT AND MANAGEMENT.
+% 
+% TODO
+% 
+% \beginsubsection 8.1. LAYOUT AND RUN-TIME ORGANIZATION.
+% 
+% TODO
+% 
+% \beginsubsection 8.2. MANAGEMENT OF DYNAMIC STORAGE.
+% 
+% TODO
+% 
+% \beginsubsection 8.3. THE KERNEL.
+% 
+% TODO
+% 
+% \beginsubsection 8.4. THE STORAGE MANAGEMENT'S TOOLBOX.
+% 
+% TODO
+% 
+% \beginchapter CHAPTER 9: DEVICE DRIVERS.
+% 
+% TODO
+% 
+% \beginsubsection 9.1. OVERVIEW.
+% 
+% TODO
+% 
+% \beginsubsection 9.2. KEYBOARD AND MOUSE.
+% 
+% TODO
+% 
+% \beginsubsection 9.3. THE SD-CARD (DISK).
+% 
+% TODO
+% 
+% \beginsubsection 9.4. SERIAL ASYNCHRONOUS INTERFACE (RS 232).
+% 
+% TODO
+% 
+% \beginsubsection 9.5. SERIAL COMMUNICATIONS CONTROLLER (SCC).
+% 
+% TODO
+
 \bye
