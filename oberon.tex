@@ -865,6 +865,83 @@ readership. The second part is, essentially, language-independent, but
 is specifically tailored to the instruction set of the target
 computer. It is called the {\it code generator\/}.
 
+Texts play a predominant role in the Oberon System. Their preparation
+is supported by the system's major tool, the editor. In Chapter 13 we
+describe another editor, one that handles graphic objects. At first,
+only horizontal and vertical lines and short captions are introduced
+as objects. The major difference to texts lies in the fact that their
+coordinates in the drawing plane do not follow from those of their
+predecessor automatically, because they form a set rather than a
+sequence. Each object carries its own, independent coordinates. The
+influence of this seemingly small difference upon an editor are
+far-reaching and permeate the entire design. There exist hardly any
+similarities between a text and a graphics editor. Perhaps one should
+be mentioned: the partitioning into three parts. The bottom module
+defines the respective abstract data structure for texts or graphics,
+together with, of course, the procedures handling the structure, such
+as searches, insertions, and deletions. The middle module in the
+hierarchy defines a respective frame and contains all procedures
+concerned with displaying the respective objects including the frame
+handler defining interpretation of mouse and keyboard events. The top
+modules are the respective tool modules ({\tt Edit\/}, {\tt Draw\/}). The presented
+graphics editor is particularly interesting in so far as it
+constitutes a convincing example of Oberon's extensibility. The
+graphics editor is integrated into the entire system; it embeds its
+graphic frames into menu-viewers and uses the facilities of the text
+system for its caption elements. And lastly, new kinds of elements can
+be incorporated by the mere addition of new modules, i.e. without
+expanding, even without recompiling the existing ones. Two examples
+are shown in Chapter 13 itself: rectangles and circles.
+
+The Draw System has been extensively used for the preparation of
+diagrams of electronic circuits. This application suggests a concept
+that is useful elsewhere too, namely a recursive definition of the
+notion of object. A set of objects may be regarded as an object itself
+and be given a name. Such an object is called a {\it macro\/}. It is a
+challenge to the designer to implement a macro facility such that it
+is also extensible, i.e. in no way refers to the type of its elements,
+not even in its input operations of files on which macros are stored.
+
+Chapter 14 presents two other tools, namely one used for installing an
+Oberon System on a bare machine, and one used to recover from failures
+of the file store. Although rarely employed, the first was
+indispensable for the development of the system. The maintenance or
+recovery tools are invaluable assets when failures occur. And they do!
+Chapter 14 covers material that is rarely presented in the literature.
+
+Chapter 15 is devoted to tools that are not used by the Oberon System
+presented so far, but may be essential in some applications. The first
+is a data link with a protocol based on the RS-232 standard shown in
+Chapter 9. Another is a standard set of basic mathematical
+functions. And the third is a tool for creating new macros for the
+Draw System.
+
+The third part of this book is devoted to a detailed description of
+the hardware. Chapter 16 defines the processor, for which the compiler
+generates code. The target computer is a truly simple and regular
+processor called RISC with only 14 instructions, represented not by a
+commercial processor, but implemented with an FPGA, a Field
+Programmable Gate Array. It allows its structure to be described in
+full detail. It is a straight-forward, von Neumann type device
+consisting of a register bank, an arithmetic-logic unit, including a
+floating-point unit. Typical optimization facilities, like pipelining
+and cache memory, have been omitted for the sake of transparency and
+simplicity. The processor circuit is described in the language
+{\it Verilog\/}.
+
+Chapter 17 describes the environment in which the processor is
+embedded. This environment consists of the interfaces to main memory
+and to all external devices.
+
+1. N. Wirth. The programming language Oberon. Software - Practice and Experience 18, 7, (July 1988) 671-690.
+2. M. Reiser and N. Wirth. Programming in Oberon - Steps beyond Pascal and Modula. Addison- Wesley, 1992. ISBN 0-201-56543-9
+3. N. Wirth and J. Gutknecht. The Oberon System. Software - Practice and Experience, 19, 9 (Sept. 1989), 857-893.
+4. N. Wirth. Ceres-Net: A low-cost computer network. Software - Practice and Experience, 20, 1 (Jan. 1990), 13-24.
+5. M. Reiser. The Oberon System - User Guide and Programmer's Manual. Addison-Wesley, 1991. ISBN 0-201-54422-9
+6. N. Wirth. Compiler Construction. Addison-Wesley, Reading, 1996. ISBN 0-201-40353-6
+
+
+
 % \beginchapter CHAPTER 3: THE TASKING SYSTEM.
 % \beginsubsection 3.1. THE CONCEPT OF TASK.
 % \beginsubsubsection 3.1.1. Interactive tasks.
