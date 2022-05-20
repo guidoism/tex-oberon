@@ -777,7 +777,93 @@ files. Furthermore, it discusses the problems of binding separately
 compiled modules together and of referencing objects defined in other
 modules.
 
+Chapter 7 is devoted to the file system, a part of crucial importance,
+because files are involved in almost every program and
+computation. The chapter consist of two distinct parts, the first
+introducing the type {\tt File\/} and describing the structure of files,
+i.e. their representation on disk storage with its sequential
+characteristics, the second describing the directory of file names and
+its organisation as a B-tree for obtaining fast searches.
 
+The management of memory is the subject of Chapter 8. A single,
+central storage management was one of the key design decisions,
+guaranteeing an efficient and economical use of storage. The chapter
+explains the store's partitioning into specific areas. Its central
+concern, however, is the discussion of dynamic storage management in
+the partition called the {\it heap\/}. The algorithm for allocation
+(corresponding to the intrinsic procedure {\tt NEW\/}) and for retrieval
+(called garbage collection) are explained in detail.
+
+At the lowest level of the module hierarchy we find device
+drivers. They are described in Chapter 9, which contains drivers for
+some widely accepted interface standards. The first is PS-2, a serial
+transmission with synchronous clock. This is used for the keyboard and
+for the Mouse. The second is SPI, a standard for bi-directional,
+serial transmission with synchronous clock. This is used for the
+``disk'', represented by an SDI-card (flash memory), and for the
+network. And the third standard is RS-232 typically used for simple
+and slow data links. It is bidirectional and asynchronous.
+
+The second part of the book, consisting of Chapters 10--15, is
+devoted to what may be called first applications of the basic Oberon
+System. These chapters are therefore independent of each other, making
+reference to Chapters 3--9 only.
+
+Although the Oberon System is well-suited for operating stand-alone
+workstations, a facility for connecting a set of computers should be
+considered as fundamental. Module {\tt Net\/}, which makes transmission of
+files among workstations connected by a bus-like network possible, is
+the subject of Chapter 10. It presents not only the problems of
+network access, of transmission failures and collisions, but also
+those of naming partners. The solutions are implemented in a
+surprisingly compact module which uses a network driver presented in
+Chapter 9.
+
+When a set of workstations is connected in a network, the desire for a
+central server appears. A central facility serving as a file
+distribution service, as a printing station, and as a storage for
+electronic mail is presented in Chapter 11. It emerges by extending
+the {\tt Net\/} module of Chapter 10, and is a convincing application of the
+tasking facilities explained in Section 2.2. In passing we note that
+the server operates on a machine that is not under observation by a
+user. This circumstance requires an increased degree of robustness,
+not only against transmission failures, but also against data that do
+not conform to defined formats.
+
+The presented system of servers demonstrates that Oberon's
+single-thread scheme need not be restricted to single-user
+systems. The fact that every command or request, once accepted, is
+processed until completion, is acceptable if the request does not
+occupy the processor for too long, which is mostly the case in the
+presented server applications. Requests arriving when the processor is
+engaged are queued. Hence, the processor handles requests one at a
+time instead of interleaving them which, in general, results in faster
+overall performance due to the absence of frequent task switching.
+
+Chapter 12 describes the Oberon compiler. It translates source text in
+Oberon into target code, i.e. instruction sequences of some target
+computer. Its principles and techniques are explained in [6]. Both,
+source language and target architecture must be understood before
+studying a compiler. Both source language and the target computer's
+RISC architecture are presented in the Appendix.
+
+Although here the compiler appears as an application module, it
+naturally plays a distinguished role, because the system (and the
+compiler itself) is formulated in the language which the compiler
+translates into code. Together with the text editor it was the
+principal tool in the system's development. The use of
+straight-forward algorithms for parsing and symbol table organization
+led to a reasonably compact piece of software. A main contributor to
+this result is the language's definition: the language is devoid of
+complicated structures and rarely used embellishments.
+
+The compiler and thereby the chapter is partitioned into two main
+parts. The first is language- specific, but does not refer to any
+particular target computer. It consist of the {\it scanner\/} and the
+{\it parser\/}. This part is therefore of most general interest to the
+readership. The second part is, essentially, language-independent, but
+is specifically tailored to the instruction set of the target
+computer. It is called the {\it code generator\/}.
 
 % \beginchapter CHAPTER 3: THE TASKING SYSTEM.
 % \beginsubsection 3.1. THE CONCEPT OF TASK.
