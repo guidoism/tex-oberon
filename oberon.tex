@@ -1133,6 +1133,67 @@ declarations of the abstract data type Task and of the message types
 however, is the task scheduler (often referred to as ``Oberon loop'')
 that can be regarded as the system's dynamic center.
 
+Before studying the scheduler in detail we need some more
+preparation. We start with the institution of the {\it focus viewer\/}. By
+definition, this is a distinguished viewer that by convention consumes
+subsequent keyboard input. Note that we identify the focus viewer with
+the focus task, hereby making use of the one-to-one correspondence
+between viewers and tasks.
+
+Module Oberon provides the following facilities in connection with the
+focus viewer: A global variable {\tt FocusViewer\/}, a procedure {\tt PassFocus\/} for
+transferring the role of focus to a new viewer, and a defocus variant
+of {\tt ControlMsg\/} for notifying the old focus viewer of such a transfer.
+
+The implementation details of the abstract data type {\tt Task\/} are hidden
+from the clients. It is sufficient to know that all task descriptors
+are organized in a ring and that a pointer points to the previously
+activated task. The ring is guaranteed never to be empty because the
+above mentioned garbage collector is installed as a permanent sentinel
+task at system loading time.
+
+The following is a slightly abstracted version of the actual scheduler
+code operating on the task ring. It should be associated with
+procedure {\tt Loop\/} in the module {\tt Oberon\/}.
+\begintt
+get mouse position and state of keys;
+REPEAT
+  IF keyboard input available THEN read character
+    IF character is escape THEN
+      broadcast neutralize message to viewers
+    ELSIF character is mark THEN
+      send mark message to viewer containing mouse
+    ELSE send consume message to focus viewer
+    END;
+    get mouse position and state of keys
+  ELSIF at least one key pressed THEN
+    REPEAT
+      send track message to viewer containing mouse;
+      get mouse position and state of keys
+    UNTIL all keys released
+  ELSE (*no key pressed*)
+    send track message to viewer containing mouse;
+    take next task in ring as current task;
+    call its handler (if specified time period has elapsed)
+    get mouse position and state of keys
+  END
+UNTIL FALSE
+\endtt
+
+The system executes a sequence of uninterrupted procedures
+(tasks). Interactive tasks are triggered by input data being present,
+either from the keyboard, the mouse, or other input
+sources. Background tasks are taken up in a round-robin
+manner. Interactive tasks have priority.
+
+Having consciously excluded exceptional program behavior in our
+explanations so far, some comments about the way of runtime
+continuation in the case of a failing task or, in other words, in the
+case of a {\it trap\/} are in order here. On the (abstract) level of tasks, we
+can identify three sequential actions of recovery taken after a
+program failure:
+
+
 % \beginsubsection 3.3. THE CONCEPT OF COMMAND.
 % \beginsubsubsection 3.3.1. Atomic actions.
 % \beginsubsubsection 3.3.2. Generic text selection.
