@@ -1425,6 +1425,47 @@ every topic or application.
 
 As an example of a toolbox definition we quote an annotated version of
 module {\tt System\/}:
+\begintt
+DEFINITION System;
+
+(*System management, Chapters 3 and 8*)
+  PROCEDURE SetUser; (*identification*)
+  PROCEDURE SetFont; (*for typed text*)
+  PROCEDURE SetColor; (*for typed text and graphics*)
+  PROCEDURE SetOffset; (*for typed text*)
+  PROCEDURE Date; (*set or display time and date*)
+  PROCEDURE Collect; (*garbage*)
+  
+(*Display management, Chapter 4*)
+  PROCEDURE Open; (*viewer*)
+  PROCEDURE Close; (*viewer*)
+  PROCEDURE CloseTrack;
+  PROCEDURE Recall; (*most recently closed viewer*)
+  PROCEDURE Copy; (*viewer*)
+  PROCEDURE Grow; (*viewer*)
+  PROCEDURE Clear; (*clear log*)
+  
+(*Module management, Chapter 6*)
+  PROCEDURE Free; (*specified modules*)
+  PROCEDURE ShowCommands; (*of specified module*)
+  PROCEDURE ShowModules; (*list loaded modules*)
+  
+(*File management, Chapter 7*)
+  PROCEDURE Directory;
+  PROCEDURE CopyFiles;
+  PROCEDURE RenameFiles;
+  PROCEDURE DeleteFiles;)
+  
+(*System inspection, Chapter 8*)
+  PROCEDURE Watch; (*tasks, memory and disk storage*)
+END System;
+\endtt
+
+\noindent An important consequence of our integrated systems approach is the
+possibility of constructing a universal, interactive 
+{\it command interpreter\/} bound to viewers of {\it textual contents\/}. If the text obeys
+the following syntax (specified in Extended Backus-Naur Form EBNF), we
+call it {\it command tool\/}:
 
 
 % \beginchapter CHAPTER 4: THE DISPLAY SYSTEM.
