@@ -1220,6 +1220,26 @@ thread of control.
 
 \beginsubsection 3.3. THE CONCEPT OF COMMAND.
 
+An operating system constitutes a general purpose platform on which
+application software packages can build upon. To software designers
+the platform appears as interface to ``the system'' and (in particular)
+to the underlying hardware. Unfortunately, interfaces defined by
+conventional operating systems often suffer from an all too primitive
+access mechanism that is based solely on the concept of ``software interrupt''
+or ``supervisor call'' and on files taking the role of
+``connecting pipes''. The situation is especially ironic when compared
+with the development of high-level programming languages towards
+extreme abstraction.
+
+We have put greatest emphasis in Oberon on closing the {\it semantic gap\/}
+between application software packages and the system platform. The
+result of our efforts is a highly expressive and consistent
+{\it application programming interface\/} (API) in the form of an explicit
+hierarchy of module definitions. Perhaps the most significant and most
+notable outcome of this approach is a collection of very powerful and
+system-wide abstract data types like
+{\tt Task\/}, {\tt Frame\/}, {\tt Viewer\/}, {\tt File\/}, {\tt Font\/},
+{\tt Text\/}, {\tt Module\/}, {\tt Reader\/}, {\tt Scanner\/}, {\tt Writer\/} etc..
 
 % \beginsubsubsection 3.3.1. Atomic actions.
 % \beginsubsubsection 3.3.2. Generic text selection.
