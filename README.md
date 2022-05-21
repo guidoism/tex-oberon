@@ -2,7 +2,7 @@
 
 Project Oberon is an amazing piece of computer science and amazing
 tool for teaching. The book and the code demonstrate, without any tiny
-amount of doubt, that it is possible to build a few usable computing
+amount of doubt, that it is possible to build a usable computing
 system small enough to fit in the head of a normal programmer. That,
 in my not-so-humble opinion, is a truly great achievement and I am in
 awe of Niklaus Wirth and Jürg Gutknecht for it.
