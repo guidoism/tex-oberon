@@ -8,6 +8,7 @@ in my not-so-humble opinion, is a truly great achievement and I am in
 awe of Niklaus Wirth and Jürg Gutknecht for it.
 
 The last edition -- from 2013 -- could use some tender loving care.
+It should look beautiful.
 
 This project is an attempt to:
 
