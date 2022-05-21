@@ -1700,6 +1700,82 @@ displaying a collection of objects or an excerpt of a document. In
 particular, frames may recursively contain other frames, a capability
 that makes them an extremely powerful tool for any display organizer.
 
+The type {\tt Frame\/} is declared as
+\begintt
+Frame = POINTER TO FrameDesc;
+FrameDesc = RECORD
+  next, dsc: Frame;
+  X, Y, W, H: INTEGER;
+  handle: Handler
+END;
+\endtt
+
+\noindent The components {\tt next\/} and {\tt dsc\/} are connections to further frames. Their
+names suggest a multi-level recursive hierarchical structure: {\tt next\/}
+points to the next frame on the same level, while {\tt dsc\/} points to the
+(first) descendant, i.e. to the next lower level of the hierarchy of
+nested frames. {\tt X\/}, {\tt Y\/}, {\tt W\/}, {\tt H\/}, and the handler handle serve the original
+purpose to that we introduced them. In particular, the handler allows
+frames to react individually on the receipt of messages. Its type is
+\begintt
+Handler = PROCEDURE (F: Frame; VAR M: FrameMsg);
+\endtt
+
+\noindent where FrameMsg represents the root of a potentially unlimited tree hierarchy of possible messages to frames:
+\begintt
+FrameMsg = RECORD END;
+\endtt
+
+\noindent Having now introduced the concept of frames, we can reveal the whole truth about viewers. As a matter of fact, type {\tt Viewer\/} is a derived type, it is a type extension of {\tt Frame\/}:
+\begintt
+Viewer = POINTER TO ViewerDesc;
+ViewerDesc = RECORD (FrameDesc)
+  state: INTEGER
+END;
+\endtt
+
+\noindent These declarations formally express the fact that viewers
+are nothing but a special case (or variant or subclass) of general
+frames, additionally featuring a state of visibility. In particular,
+viewers inherit the hierarchical structure of frames. This is an
+extremely useful property immediately opening an unlimited spectrum of
+possibilities for designers of a specific subclass of viewers to
+organize the representing rectangular area. For example, the area of
+viewers of, say, class {\tt Desktop\/} may take the role of a background being
+covered by an arbitrary collection of possibly mutually overlapping
+frames. In other words, our decision of using a tiling viewer scheme
+{\it globally\/} can easily be overwritten {\it locally\/}.
+
+An even more important example of a predefined structure is provided
+by the abstract class of so-called {\it menu viewers\/} whose shape is
+familiar from most snapshots taken of the standard Oberon display
+screen. A menu viewer consists of a thin rectangular boundary line and
+an interior area being vertically decomposed into a menu region at the
+top and a contents region at the bottom (see Figure 4.4).
+
+TODO: Figure 4.4 The compositional structure of a menu viewer
+
+In terms of data structures, the class of menu viewers is defined as a
+type extension of {\tt Viewer\/} with an additional component {\tt menuH\/}
+specifying the height of the menu frame:
+\begintt
+MenuViewer = POINTER TO MenuViewerDesc;
+MenuViewerDesc = RECORD (ViewerDesc)
+  menuH: INTEGER
+END;
+\endtt
+
+\noindent Each menu viewer {\tt V\/} specifies exactly two
+descendants: The menu frame {\tt V.dsc\/} and the frame of main
+contents or main frame {\tt V.dsc.next\/}. Absolutely nothing is fixed
+about the contents of the two descendant frames. In the standard case,
+however, the menu frame is a text frame, displaying a line of commands
+in inverse video mode. By definition, the nature of the main frame
+specifies the type of the viewer. If it is a text frame as well, then
+we call the viewer a {\it text viewer\/}, if it a graphics frame, we call it a
+{\it graphics viewer\/} etc.
+
+
 % \beginsubsection 4.4. DISPLAY MANAGEMENT.
 % \beginsubsubsection 4.4.1. Viewers.
 % \beginsubsubsection 4.4.2. Menu Viewers.
