@@ -2086,7 +2086,8 @@ DEFINITION MenuViewers;
       dY, Y, H: INTEGER
    END;
    PROCEDURE Handle (V: Display.Frame; VAR M: Display.FrameMsg);
-   PROCEDURE New (Menu, Main: Display.Frame; menuH, X, Y: INTEGER): Viewer;
+   PROCEDURE New (Menu, Main: Display.Frame;
+                  menuH, X, Y: INTEGER): Viewer;
 END MenuViewers.
 \endtt
 
@@ -2109,7 +2110,81 @@ model is therefore instance-centered.
 Conceptually, the creation of an object is an atomic action consisting
 of three basic steps:
 
+allocate memory block; install message handler; initialize state variables
 
+\noindent In the case of a standard menu viewer {\tt V\/} this can be expressed as
+\begintt
+NEW(V);
+V.handle := Handle;
+V.dsc := Menu;
+V.dsc.next := Main;
+V.menuH := menuH
+\endtt
+
+\noindent With that, calling {\tt New\/} is equivalent with
+\begintt
+create V; open V at X, Y
+\endtt
+
+\noindent where opening {\tt V\/} needs assistance by module {\tt Viewers\/}.
+
+The implementation of procedure {\tt Handle\/} embodies the standard strategy of message handling by
+menu viewers. The following code is a coarse-grained view of it.
+\begintt
+Message handler for menu viewers
+
+IF message reports about user interaction THEN
+  IF variant is mouse tracking THEN
+    IF mouse is in menu region THEN
+      IF mouse is in upper menu region and left key is pressed THEN
+        handle changing of viewer
+      ELSE delegate handling to menu-frame
+      END
+    ELSE
+      IF mouse is in main-frame THEN delegate handling to main-frame END
+    END
+  ELSIF variant is keyboard input THEN
+    delegate handling to menu frame;
+    delegate handling to main frame
+  END
+ELSIF message defines generic operation THEN
+  IF message requests copy (clone) THEN
+    send copy message to menu frame to get a copy (clone);
+    send copy message to main frame to get a copy (clone);
+    create menu viewer clone from copies
+  ELSE
+    delegate handling to menu frame; delegate handling to main frame
+  END
+ELSIF message reports about change of contents THEN
+  delegate handling to menu frame;
+  delegate handling to main frame
+ELSIF message requests change of location or size THEN
+  IF operation is restore THEN
+    draw viewer area and border;
+    send modify message to menu frame to make it extend from height 0;
+    send modify message to main frame to make it extend from height 0
+  ELSIF operation is modify THEN
+    IF operation is extend THEN
+      extend viewer area and border;
+      send modify message to menu frame to make it extend;
+      send modify message to main frame to make it extend
+    ELSE (*reduce*)
+      send modify message to main frame to make it reduce;
+      send modify message to menu frame to make it reduce;
+      reduce viewer area and border
+    END
+  ELSIF operation is suspend THEN
+    send modify message to main frame to make it reduce to height 0;
+    send modify message to menu frame to make it reduce to height 0
+  END
+END
+\endtt
+
+\noindent In principle, the handler acts as a {\it message dispatcher\/} that
+either processes a message directly and/or delegates its processing to
+the descendant frames. Note that the handler's main alternative
+statement discriminates precisely among the four basic categories of
+messages.
 
 % \beginsubsubsection 4.4.3. Cursor Management.
 % \beginsubsection 4.5. RASTER OPERATIONS.
