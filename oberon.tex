@@ -2663,9 +2663,89 @@ specification. In Section 5.4 we shall explain the font machinery,
 starting from an abstract level and proceeding down to the level of
 raster data.
 
+\beginsubsection 5.1. TEXT AS AN ABSTRACT DATA TYPE.
 
-% \beginsubsection 5.1. TEXT AS AN ABSTRACT DATA TYPE.
-% \beginsubsubsection 5.1.1. Loading and Storing Text.
+The concept of abstraction is arguably the most important achievement
+of programming language development. It provides a powerful tool to
+create simplified views of complicated things and connections. Two
+prominent examples of program abstractions are definitions
+(interfaces) and abstract data types, embodying simplified views on a
+certain piece of program and on a certain kind of data respectively.
+
+We shall now give a precise definition of the notion of text in Oberon
+by presenting it as an abstract data type. It is important not to
+confuse this type with the far less powerful type String as it is
+often supported by advanced programming languages. In this Section we
+carefully avoid revealing any implementation aspects of the abstract
+type {\tt Text\/}. Our viewpoint is that of an application program operating
+on text abstractly or using it as a medium of communication.
+
+Nevertheless, let us first use a symbolic looking glass to get a
+refined understanding of the concept of character in the context of
+rich texts. We know that each character represents a textual element
+of information. If displayed, it also refers to some specific
+graphical pattern, often called glyph. In Oberon, we do justice to
+both aspects by thinking of the ASCII-code as an index into a font
+that is into a set of glyphs of the same style. Representing
+characters as pairs (font, ref), where font designates a font and ref
+the character's ASCII-code and adding two more attributes color and
+vertical offset, we get to a quadruple representation (font, ref, col,
+voff) of characters. The components font, color, and vertical offset
+together are often referred to as looks. With that, we can now define
+a (rich) text as a sequence of characters with looks. We shall treat
+the topic of fonts and glyphs thoroughly in Section 5.4.
+
+For the moment, however, let us continue our discussion of the
+abstract data type {\tt Text\/}. Formally, we define it as
+\begintt
+Text = POINTER TO TextDesc;
+TextDesc = RECORD
+  len: INTEGER;
+  notify: Notifier
+END;
+\endtt
+
+\noindent There is only one state variable and one method. The variable len
+represents the current length of the described text (i.e. the number
+of characters in the sequence). The procedure variable notify is
+included as a method (occasionally called after-method) to notify
+interested clients of state changes.
+
+By definition, each abstract data type comes with a complete set of
+operations. In the case of {\tt Text\/}, three different groups corresponding
+to three different topics need to be considered, loading (from file),
+storing (to file), editing, and accessing (reading and writing)
+respectively.
+
+\beginsubsubsection 5.1.1. Loading and Storing Text.
+
+Let us start with the file group. We first introduce a pair of
+mutually inverse operations called internalize and externalize. Their
+meaning is ``load from file and build up an internal data structure''
+and ``serialize the internal data structure and store it on file''
+respectively. There are three corresponding procedures:
+\begintt
+PROCEDURE Open (T: Text; name: ARRAY OF CHAR);
+PROCEDURE Load (T: Text; f: Files.File; pos: INTEGER; VAR len: INTEGER);
+PROCEDURE Store (T: Text; f: Files.File; pos: INTEGER; VAR len: INTEGER);
+\endtt
+
+\noindent Logical entities like texts are stored in Oberon on external media in
+the form of sections. A section is addressed by a pair (file, pos)
+consisting of a file descriptor and a starting position. In general,
+the structure of sections obeys the following syntax:
+\begintt
+section = identification type length contents.
+\endtt
+
+\noindent Procedure {\tt Open\/} internalizes a named text file (consisting of a single
+text section), procedure {\tt Load\/} internalizes an arbitrary text section
+starting at (f, pos), and procedure {\tt Store\/} externalizes a text section
+to (f, pos). The parameter {\tt T\/} designates the internalized text. len
+returns the length of the section. Note that in case of Load the
+identification of the section must have been read and consumed before
+the loader is called.
+
 % \beginsubsubsection 5.1.2. Editing Text.
 % \beginsubsubsection 5.1.3. Accessing Text.
 % \beginsubsection 5.2. TEXT MANAGEMENT.
