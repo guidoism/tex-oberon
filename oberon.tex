@@ -2443,7 +2443,127 @@ from bottom to top. Each line takes an integral number of
 bytes. Hence, the number of data bytes is $((w+7) \div 8) \times h$. An
 example is shown in Figure 4.8.
 
-% \beginsubsection 4.6. STANDARD DISPLAY CONFIGURATIONS AND TOOLBOX.
+TODO: Figure 4.8 A pattern and its encoding as an array of bytes (in hex)
+
+Some standard patterns are included in module {\tt Display\/} and exported as
+global variables. Among them are patterns arrow, hook, and star
+intended to represent the cursor, the caret, and the marker. A second
+group of predefined patterns supports drawing graphics.
+
+The parameter col in the pattern-oriented raster operations specifies
+the pattern's foreground color. Colors black (background) and white
+are predefined. Procedure {\tt CopyPattern\/} copies the pattern to location
+x, y in the display area, using the given combination mode. It is
+probably the most frequently used operation of all because it is
+needed to write text. Procedure {\tt ReplPattern\/} replicates the given
+pattern to the given destination block. It starts at bottom left and
+proceeds from left to right and from bottom to top. Procedures {\tt Dot\/} and
+{\tt ReplConst\/} are special cases of {\tt CopyPattern\/} and {\tt ReplPattern\/}
+respectively, taking a fixed implicit pattern consisting of a single
+foreground pixel. {\tt Dot\/} is exactly our previously mentioned ``set pixel''.
+{\tt ReplConst\/} is used to draw horizontal and vertical lines of
+various widths.
+
+The raster operations are a prominent example of the use of Oberon's
+data type {\tt SET\/}. Formally, variables are sets of integers between 0 and
+31. Here, they are taken as sets of bits numbered from 0 to 31. We
+consider the replication of 1's (mode = replace or paint) in the
+rectangle with origin x, y, width w, and height h. Every line consists
+of 1024 pixels, or 32 words. al, ar, a0, a1 are addresses.
+\begintt
+VAR al, ar, a0, a1: INTEGER;
+    left, right, pixl, pixr: SET;
+al := base + y*128;
+ar := ((x+w-1) DIV 32)*4 + al; al := (x DIV 32)*4 + al;
+left := {(x MOD 32) .. 31}; right := {0 .. ((x+w-1) MOD 32)};
+FOR a0 := al TO al + (h-1)*128 BY 128 DO
+  SYSTEM.GET(a0, pixl); SYSTEM.GET(ar, pixr);
+  SYSTEM.PUT(a0, pixl + left);
+  FOR a1 := a0+4 TO ar-4 BY 4 DO SYSTEM.PUT(a1, {0 .. 31}) END;
+  SYSTEM.PUT(ar, pixr + right)
+END
+\endtt
+
+\noindent The definition (and even more so the implementation) of module {\tt Display\/}
+provides support for a restricted class of possible hardware
+configurations only. Any number of display monitors is theoretically
+possible. However, they must be mapped to a regular horizontal array
+of predefined cells in the display area. Each cell is vertically split
+into two congruent regions, where the corresponding monitor is
+supposed to be able to select and display one of the two regions
+alternatively. Finally, it is assumed that all cells hosting
+black-and-white monitors are allocated to the left of all cells
+hosting color monitors. Figure 4.9 gives an impression of such a
+configuration.
+
+TODO: Figure 4.9 General, regular cell structure of display area
+
+Under these restrictions any concrete configuration can be
+parameterized by the variables of the definition above. {\tt Unit\/}, {\tt Width\/},
+and {\tt Height\/} specify the extent of a displayed region, where {\tt Width\/} and
+{\tt Height\/} are width and height in pixel units, and {\tt Unit\/} is the size of a
+pixel in units of 1/36’000 mm. 1/36’000 mm is a common divisor of all
+of the standard metric units used by the typesetting community, like
+mm, inch, Pica point and point size of usual printing devices. {\tt Bottom\/}
+and {\tt UBottom\/} specify the bottom y-coordinate of the primary region and
+the secondary region respectively. Finally, {\tt Left\/} and {\tt ColLeft\/} give the
+left x-coordinate of the area of black-and-white monitors and of color
+monitors respectively.
+
+\beginsubsection 4.6. STANDARD DISPLAY CONFIGURATIONS AND TOOLBOX.
+
+Let us now take up again our earlier topic of configuring the display
+area. We have seen that no specific layout of the display area is
+distinguished by the general viewer management itself. However, some
+support of the familiar standard Oberon display look is provided by
+module {\tt Oberon\/}.
+
+In the terminology of this module, a standard configuration consists
+of one or several horizontally adjacent displays, where a display is a
+pair consisting of two tracks of equal height, a user track on the
+left and a system track on the right. Note that even though no
+reference to any physical monitor is made, a display is typically
+associated with a monitor in reality.
+
+This is the relevant excerpt of the definition:
+\begintt
+DEFINITION Oberon;
+  PROCEDURE OpenDisplay (UW, SW, H: INTEGER);
+  PROCEDURE OpenTrack (X, W: INTEGER);
+  PROCEDURE DisplayWidth (X: INTEGER): INTEGER;
+  PROCEDURE DisplayHeight (X: INTEGER): INTEGER;
+  PROCEDURE UserTrack (X: INTEGER): INTEGER;
+  PROCEDURE SystemTrack (X: INTEGER): INTEGER;
+  PROCEDURE AllocateUserViewer (DX: INTEGER; VAR X, Y: INTEGER);
+  PROCEDURE AllocateSystemViewer (DX: INTEGER; VAR X, Y: INTEGER);
+END Oberon.
+\endtt
+
+\noindent Procedure {\tt OpenDisplay\/} initializes and opens a new display of the
+dimensions {\tt H\/} (height), {\tt UW\/} (width of user track), and {\tt SW\/} (width of
+system track). Procedure {\tt OpenTrack\/} overlays the sequence of existing
+tracks spanned by the segment $[X, X + W)$ by a new track. Both
+procedure {\tt OpenDisplay\/} and {\tt OpenTrack\/} take from the client the burden
+of creating a filler viewer.
+
+The next group of procedures {\tt DisplayWidth\/}, {\tt DisplayHeight\/},
+{\tt UserTrack\/} and {\tt SystemTrack\/} return
+width or height of the respective structural entity located at
+position X in the display area.
+
+Procedures {\tt AllocateUserViewer\/} and {\tt AllocateSystemViewer\/} make proposals
+for the allocation of a new viewer in the desired track of the display
+located at {\tt DX\/}. In first priority, the location is determined by the
+system pointer that can be set manually. If the pointer is not set, a
+location is calculated on the basis of some heuristics whose
+strategies rely on different splitting fractions that are applied in
+the user track and in the system track respectively, with the aim of
+generating aesthetically satisfactory layouts.
+
+In addition to the programming interface provided by module {\tt Oberon\/} for
+the case of standard display layouts, the display management section
+in the System toolbox provides a user interface:
+
 % \beginchapter CHAPTER 5: THE TEXT SYSTEM.
 % \beginsubsection 5.1. TEXT AS AN ABSTRACT DATA TYPE.
 % \beginsubsubsection 5.1.1. Loading and Storing Text.
