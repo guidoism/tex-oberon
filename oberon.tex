@@ -2746,8 +2746,81 @@ returns the length of the section. Note that in case of Load the
 identification of the section must have been read and consumed before
 the loader is called.
 
-% \beginsubsubsection 5.1.2. Editing Text.
-% \beginsubsubsection 5.1.3. Accessing Text.
+\beginsubsubsection 5.1.2. Editing Text.
+
+Our next group of operations supports text editing. It comprises four procedures:
+\begintt
+PROCEDURE Delete (T: Text; beg, end: INTEGER);
+PROCEDURE Insert (T: Text; pos: INTEGER; B: Buffer);
+PROCEDURE Append (T: Text; B: Buffer);
+PROCEDURE ChangeLooks (T: Text; beg, end: INTEGER; sel: SET; fnt: Fonts.Font; col, voff: INTEGER);
+\endtt
+
+\noindent Again, we should first explain the types of parameters. Procedures
+{\tt Delete\/} and {\tt ChangeLooks\/} each take a stretch of text as an argument
+which, by definition, is an interval [beg, end) within the given
+text. In the parameter lists of {\tt Insert\/} and {\tt Append\/} we recognize a new
+data type {\tt Buffer\/}.
+
+Buffers are a facility to hold anonymous sequences of characters. Type
+{\tt Buffer\/} presents itself again as an abstract data type:
+\begintt  
+Buffer = POINTER TO BufDesc;
+BufDesc = RECORD
+  len: INTEGER
+END;
+\endtt
+
+\noindent {\tt len\/} specifies the current length of the buffered sequence. The
+following procedures represent the intrinsic operations on buffers:
+\begintt
+PROCEDURE OpenBuf (B: Buffer);
+PROCEDURE Copy (SB, DB: Buffer);
+PROCEDURE Save (T: Text; beg, end: INTEGER; B: Buffer);
+\endtt
+
+\noindent Their function is in turn opening a given buffer {\tt B\/}, copying a buffer
+{\tt SB\/} to {\tt DB\/}, saving a stretch [beg, end) of text in a given buffer, and
+recalling the most recently deleted stretch of text and putting it
+into buffer {\tt B\/}.
+
+{\tt Buffer\/} is used as an auxiliary data type in editing
+procedures. Procedure {\tt Delete\/} deletes the given stretch [beg, end)
+within text {\tt T\/}, Insert inserts the buffer's contents at position pos
+within text {\tt T\/}, and {\tt Append(T, B)\/} is a shorthand form for {\tt Insert(T, T.len, B)\/}. Note that, as a side-effect of {\tt Insert\/} and {\tt Append\/}, the
+buffer involved is emptied. Finally, procedure {\tt ChangeLooks\/} allows to
+change selected looks within the given stretch [beg, end) of text
+{\tt T\/}. {\tt sel\/} is a mask selecting a subset of the set of looks {\tt { font,
+color, vertical offset }\/}.
+
+It is time now to come back to the notifier concept. Recapitulate that
+notify is an ``after-method''. It must be installed by the client when
+opening the text and is called at the end of every editing
+operation. Its signature is
+\begintt
+Notifier = PROCEDURE (T: Text; op, beg, end: INTEGER);
+\endtt
+
+\noindent The parameters {\tt op\/}, {\tt beg\/}, and {\tt end\/} report about the operation ({\tt op\/}) that
+calls the notifier and on the affected stretch [beg, end) of the
+text. There are three different possible variants of {\tt op\/}
+corresponding to the three different editing operations: op =
+delete, insert, replace correspond to procedures {\tt Delete\/}, {\tt Insert\/} (and
+{\tt Append\/}), and {\tt ChangeLooks\/} respectively.
+
+By far the most important application of the notifier is updating the
+display, i.e. adjusting all affected views of the text that are
+currently displayed to the new state of the text (the model). We shall
+come back to this important matter when discussing text frames in
+Section 5.3.
+
+In concluding this Section it is worth noting that the groups of
+operations just discussed have been designed to be equally useful for
+interactive text editors as for programmed text
+generators/manipulators.
+
+\beginsubsubsection 5.1.3. Accessing Text.
+
 % \beginsubsection 5.2. TEXT MANAGEMENT.
 % \beginsubsection 5.3. TEXT FRAMES.
 % \beginsubsection 5.4. THE FONT MACHINERY.
