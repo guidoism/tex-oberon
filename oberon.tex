@@ -2821,6 +2821,82 @@ generators/manipulators.
 
 \beginsubsubsection 5.1.3. Accessing Text.
 
+Let us now turn to the third and last group of operations on texts:
+Accessing that is reading and writing. According to the principle of
+separation of concerns, one of our guiding principles, the access
+mechanism operates on extra aggregates called readers and writers
+rather than on texts themselves.
+
+Readers are used to read texts sequentially. Their type is declared as
+\begintt
+Reader = RECORD
+  eot: BOOLEAN; (*end of text*)
+  fnt: Fonts.Font;
+  col, voff: INTEGER
+END;
+\endtt
+
+\noindent A reader must first be opened at the desired position in the text
+before it can then be moved forward incrementally by reading
+character-by-character. Its state variables indicate end-of-text and
+expose the looks of the character last read.
+
+The corresponding operators are
+\begintt
+PROCEDURE OpenReader (VAR R: Reader; T: Text; pos: INTEGER);
+PROCEDURE Read (VAR R: Reader; VAR ch: CHAR);
+\endtt
+
+\noindent Procedure {\tt OpenReader\/} sets up a reader {\tt R\/} at position {\tt pos\/} in text
+{\tt T\/}. Procedure {\tt Read\/} returns the character at the current position of {\tt R\/}
+and makes {\tt R\/} move to the next position.
+
+\noindent The current position of reader {\tt R\/} is returned by a call to the function {\tt Pos\/}:
+\begintt
+PROCEDURE Pos (VAR R: Reader): INTEGER;
+\endtt
+
+\noindent In Chapter 3 we learned that commands plus parameter lists are often
+embedded in ordinary texts. When interpreting such commands, the
+underlying text appears as a sequence of tokens like name, number,
+special symbol etc. much rather than as a sequence of
+characters. Therefore, we have adopted the well-known concepts of
+syntax and scanning from the discipline of compiler construction,
+including functional support. The Oberon scanner recognizes tokens of
+some universal classes. They are name, string, integer, real,
+longreal, and special character.
+
+The exact syntax of universal Oberon tokens is:
+\begintt
+token = name | string | integer | real | spexchar.
+name = ident { "." ident }.
+ident = letter { letter | digit }.
+string = """ { char } """.
+integer = ["+"|"-"] number.
+real = ["+"|"-"] number "." number ["E" ["+"|"-"] number].
+number = digit { digit }.
+spexchar = any character except letters, digits, space, tab, and carriage-return.
+\endtt
+
+\noindent Type {\tt Scanner\/} is defined correspondingly as
+\begintt
+Scanner = RECORD (Reader)
+  nextCh: CHAR;
+  line: INTEGER;
+  class: INTEGER;
+  i: INTEGER;
+  x: REAL;
+  c: CHAR;
+  len: INTEGER;
+  s: ARRAY 32 OF CHAR
+END;
+\endtt
+
+\noindent This type is actually a variant record type with class as
+discriminating tag. Depending on its class the value of the current
+token is stored in one of the fields {\tt i\/}{\tt , x\/}{\tt , c\/}{\tt , or\/}{\tt  s\/}. {\tt len\/} gives the length of {\tt s\/},
+
+
 % \beginsubsection 5.2. TEXT MANAGEMENT.
 % \beginsubsection 5.3. TEXT FRAMES.
 % \beginsubsection 5.4. THE FONT MACHINERY.
