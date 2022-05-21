@@ -1499,11 +1499,51 @@ standard system tool and a customized private tool respectively.
 
 In concluding this Chapter, let us exemplify the concepts of command
 and tool by the system control section of the {\tt System\/}
-toolbox. Consisting of the commands {\tt SetUser\/}, {\tt Date\/}, {\tt SetFont\/},
+toolbox. Consisting of the commands {\tt SetUser\/}, {\tt Date\/},
+{\tt SetFont\/}, {\tt SetColor\/}, and {\tt Collect\/} it is used to control
+system-wide facilities. In detail, their function is installing the
+user's identification, displaying or setting the system date and time,
+presetting the system type-font for typed text, setting the system
+color, and activating the garbage collector.
 
+In summary, a toolbox is a special form of an {\tt Oberon\/} module. It is
+defined as a collection of commands. Appearing at the top of the
+modular hierarchy the toolboxes in their entirety fix the system’s
+user interface. Command tools are sequences of textually represented
+command calls. They are editable and customizable. In a typical Oberon
+screen layout the tools are displayed in viewers within the system
+track.
 
-% \beginchapter CHAPTER 4: THE DISPLAY SYSTEM.
-% \beginsubsection 4.1. THE SCREEN LAYOUT MODEL.
+\beginchapter CHAPTER 4: THE DISPLAY SYSTEM.
+
+The display screen is the most important part of the interface
+presented by a personal workstation to its users. At first sight, it
+simply represents a rectangular output area. However, in combination
+with the mouse, it quickly develops into a sophisticated interactive
+input/output platform of almost unlimited flexibility. It is mainly
+its Janus-faced characteristic that makes the display screen stand out
+from ordinary external devices to be managed by the operating
+system. In the current chapter we shall give more detailed insight
+into the reasons for the central position the display system takes
+within the operating system, and for its determining influence on the
+entire system architecture. In particular, we shall show that the
+display system is a natural basis or anchor for functional
+extensibility.
+
+\beginsubsection 4.1. THE SCREEN LAYOUT MODEL.
+
+In the early seventies, Xerox PARC in California launched the
+Smalltalk-project with the goal of conceiving and developing new and
+more natural ways to communicate with personal computers
+[Goldberg]. Perhaps the most conspicuous among several significant
+achievements of this endeavor is the idea of applying the desktop
+metaphor to the display screen. This metaphor comprises a desktop and
+a collection of possibly mutually overlapping pages of paper that are
+laid out on the desktop. By projecting such a configuration onto the
+surface of a screen we get the familiar picture of Figure 4.1 showing
+a collection of partially or totally visible rectangular areas on a
+background, so-called {\it windows\/} or {\it viewers\/}.
+
 % \beginsubsection 4.2. VIEWERS AS OBJECTS.
 % \beginsubsection 4.3. FRAMES AS BASIC DISPLAY ENTITIES.
 % \beginsubsection 4.4. DISPLAY MANAGEMENT.
