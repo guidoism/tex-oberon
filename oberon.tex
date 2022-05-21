@@ -2894,8 +2894,78 @@ END;
 
 \noindent This type is actually a variant record type with class as
 discriminating tag. Depending on its class the value of the current
-token is stored in one of the fields {\tt i\/}{\tt , x\/}{\tt , c\/}{\tt , or\/}{\tt  s\/}. {\tt len\/} gives the length of {\tt s\/},
+token is stored in one of the fields {\tt i\/}{\tt , x\/}{\tt , c\/}{\tt , or\/}{\tt  s\/}. {\tt len\/} gives the length of {\tt s\/}, {\tt nextCh\/} typically exposes the character terminating the current token, and line counts the number of lines scanned.
 
+The operations on scanners are
+\begintt
+PROCEDURE OpenScanner (VAR S: Scanner; T: Text; pos: INTEGER);
+PROCEDURE Scan (VAR S: Scanner);
+\endtt
+
+\noindent They correspond exactly to their counterparts {\tt OpenReader\/} and {\tt Read\/} respectively.
+
+Writers are dual to readers. They serve the purpose of creating and
+extending texts. However, again, they do not operate on texts
+directly. Rather, they act as self-contained aggregates, continuously
+consuming and buffering textual data.
+
+The formal declaration of type {\tt Writer\/} resembles that of type {\tt Reader\/}:
+\begintt
+Writer = RECORD buf:
+  Buffer;
+  fnt: Fonts.Font;
+  col, voff: INTEGER
+END;
+\endtt
+
+\noindent {\tt buf\/} is an internal buffer containing the consumed data. {\tt fnt\/}, {\tt col\/}, and {\tt voff\/} specify the current looks for the next character consumed by this writer.
+
+The following procedures constitute the {\tt Writer\/} API:
+\begintt
+PROCEDURE OpenWriter (VAR W: Writer);
+PROCEDURE SetFont (VAR W: Writer; fnt: Fonts.Font);
+PROCEDURE SetColor (VAR W: Writer; col: INTEGER);
+PROCEDURE SetOffset (VAR W: Writer; voff: INTEGER);
+\endtt
+
+\noindent Procedure {\tt OpenWriter\/} opens a new writer with an empty buffer. Procedures {\tt SetFont\/}, {\tt SetColor\/}, and {\tt SetOffset\/} set the respective current look. For example,
+{\tt SetFont(W, fnt)\/} is equivalent with {\tt W.fnt := fnt\/}.
+These procedures are included because {\tt fnt\/}, {\tt col\/}, and {\tt voff\/} are read-only for clients.
+
+The question may arise how data is produced and transferred to
+writers. The answer is a set of writer procedures, each of them
+handling an individual data type:
+\begintt
+PROCEDURE Write (VAR W: Writer; ch: CHAR);
+PROCEDURE WriteLn (VAR W: Writer);
+PROCEDURE WriteString (VAR W: Writer; s: ARRAY OF CHAR);
+PROCEDURE WriteInt (VAR W: Writer; x, n: INTEGER);
+PROCEDURE WriteHex (VAR W: Writer; x: INTEGER);
+PROCEDURE WriteReal (VAR W: Writer; x: REAL; n: INTEGER);
+PROCEDURE WriteRealFix (VAR W: Writer; x: REAL; n, k: INTEGER);
+PROCEDURE WriteClock(VAR W: Writer; d: INTEGER);
+\endtt
+
+\noindent The following is schematic fragment of a client program that creates textual output:
+\begintt
+open writer; set desired font;
+REPEAT
+  process;
+  write result to writer;
+  append writer buffer to output text
+UNTIL ended
+\endtt
+
+\noindent Of course, writers can be reused. For example, a single global writer
+is typically shared by all of the procedures within a module. In this
+case, the writer needs to be opened just once at module loading time.
+
+Typically, however, accessing aggregates are of a transient nature and
+are bound to a certain activity, which manifests itself in their
+allocation on the stack without any possibility of referencing them
+from the outside of the activity, in contrast to the underlying texts
+that are allocated on the system heap and have a much longer life
+time.
 
 % \beginsubsection 5.2. TEXT MANAGEMENT.
 % \beginsubsection 5.3. TEXT FRAMES.
