@@ -2186,7 +2186,165 @@ the descendant frames. Note that the handler's main alternative
 statement discriminates precisely among the four basic categories of
 messages.
 
-% \beginsubsubsection 4.4.3. Cursor Management.
+From the above outlined algorithm handling {\it copy messages\/}, that
+is, requests for generating a {\it copy\/} or {\it clone\/} of a menu
+viewer, we can derive a general recursive scheme for the creation of a
+clone of an arbitrary frame:
+
+send {\it copy\/} message to each element in the list of descendants;
+
+generate copy of the original frame descriptor;
+
+attach copies of descendants to the copy of descriptor
+
+\noindent The essential point here is the use of new {\it outgoing\/} messages in order
+to process a given {\it incoming\/} message. We can regard message processing
+as a transformation that maps incoming messages into a set of outgoing
+messages, with possible side-effects. The simplest case of such a
+transformation is known as {\it delegation\/}. In this case, the input message
+is simply passed on to the descendant(s).
+
+As a fine point we clarify that the above algorithm is designed to
+create a {\it deep\/} copy of a composite object (a menu viewer in our
+case). If a {\it shallow\/} copy would be desired, the descendants would not
+have to be copied, and the original descendants instead of their
+copies would be attached to the copy of the composite object.
+
+Another example of message handling is provided by mouse
+tracking. Assume that a {\it mouse message\/} is received by a menu viewer
+while the mouse is located in the upper part of its menu frame and the
+left mouse key is kept down. This means ``change viewer's height by
+moving its top line vertically''. No message to express the required
+transformation of the sub-frames yet exists. Consequently, module
+{\tt MenuViewers\/} takes advantage of our open (extensible) message model and
+simply introduces an appropriate message type called {\tt ModifyMsg\/}:
+\begintt
+ModifyMsg = RECORD (Display.FrameMsg)
+  id: INTEGER;
+  dY, Y, H: INTEGER
+END;
+\endtt
+
+\noindent The field {\tt id\/} specifies one of two variants: {\tt extend\/} or {\tt reduce\/}. The
+first variant of the message requests the receiving frame to move by
+the vertical translation vector {\tt dY\/} and then to extend to height {\tt H\/} at
+bottom. The second variant requests the frame to reduce to height {\tt H\/} at
+bottom and then to move by {\tt dY\/}. In both cases {\tt Y\/} indicates the
+Y-coordinate of the new lower-left corner. Figure 4.7 summarizes this
+graphically.
+
+Messages arriving from the viewer manager and requesting the receiving
+viewer to extend or reduce at its bottom are also mapped into messages
+of type {\tt ModifyMsg\/}. Of course, no translation is needed in these cases,
+and {\tt dY\/} is 0.
+
+The attentive reader might perhaps have asked why the standard handler
+is exported by module {\tt MenuViewers\/} at all. The thought behind is
+reusability of code. For example, a message handler for a subclass of
+menu viewers could be implemented effectively by reusing menu viewer's
+standard handler. After having handled all new or differing cases
+first it would simply (super-)call the standard handler subsequently.
+
+TODO: Figure 4.7 The modify frame operation
+
+\beginsubsubsection 4.4.3. Cursor Management.
+
+Traditionally, a cursor indicates and visualizes on the screen the
+current location of the {\it caret\/} in a text or, more generally, the
+current {\it focus\/} of attention. A small arrow or similar graphic symbol is
+typically used for this purpose. In Oberon, we have slightly
+generalized and abstracted this concept. A cursor is a path in the
+logical display area whose current position can be made visible by a
+{\it marker\/}.
+
+The viewer manager and the cursor handler are two concurrent users of
+the same display area. Actually, we should imagine two parallel
+planes, one displaying viewers and the other displaying cursors. If
+there is just one physical plane we take care of painting markers
+non-destructively, for example in inverse-video mode. Then, no
+precondition must be established before drawing a marker. However, in
+the case of a viewer task painting destructively in its viewer's area,
+the area must be locked first after turning invisible all markers in
+the area.
+
+The technical support of cursor management is again contained in
+module {\tt Oberon\/}. The corresponding application programming interface is
+\begintt
+DEFINITION Oberon;
+  TYPE Marker = RECORD
+      Fade, Draw: PROCEDURE (x, y: INTEGER)
+    END;
+    Cursor = RECORD
+      marker: Marker;
+      on: BOOLEAN;
+      X, Y: INTEGER
+    END;
+  VAR Arrow, Star: Marker;
+      Mouse, Pointer: Cursor;
+  PROCEDURE OpenCursor (VAR c: Cursor);
+  PROCEDURE FadeCursor (VAR c: Cursor);
+  PROCEDURE DrawCursor (VAR c: Cursor; VAR m: Marker; X, Y: INTEGER);
+  PROCEDURE MarkedViewer (): Viewers.Viewer;
+  PROCEDURE RemoveMarks (X, Y, W, H: INTEGER);
+  ...
+END Oberon.
+\endtt
+
+\noindent The state of a cursor is given by its mode of visibility (on), its
+position (X, Y) in the display area, and the current marker. {\tt Marker\/} is
+an abstract data type with an interface consisting of two operations
+{\tt Fade\/} and {\tt Draw\/}. The main benefit we can draw from this abstraction is
+once more conceptual independence of the underlying hardware. For
+example, {\tt Fade\/} and {\tt Draw\/} can adapt to a given monitor hardware with
+built-in cursor support or, in case of absence of such support, can
+simply be implemented as identical procedures (an involution) drawing
+the marker pattern in inverse video mode.
+
+The functional interface to cursors consists of three operations:
+{\tt OpenCursor\/} to open a new cursor, {\tt FadeCursor\/} to switch off the marker
+of an open cursor, and {\tt DrawCursor\/} to extend the path of a cursor to a
+new position and mark it with the given marker. We emphasize that the
+marker representing a given cursor can change its shape dynamically on
+the fly.
+
+Two cursors, {\tt Mouse\/} and {\tt Pointer\/} are predefined. They represent the
+mouse and an interactively controlled global system pointer
+respectively. Typically (but not necessarily) these cursors are
+visualized by the built-in markers {\tt Arrow\/} (a small arrow pointing to
+north-west) and {\tt Star\/} (a star symbol) respectively. The pointer can be
+used to mark any displayed object. It serves primarily as an implicit
+parameter of commands.
+
+Two assisting service procedures {\tt MarkedViewer\/} and {\tt RemoveMarks\/} are
+added in connection with the predefined cursors. {\tt MarkedViewer\/} returns
+the viewer that is currently marked by the pointer. Its resulting
+value is equivalent to {\tt Viewers.This(Pointer.X, Pointer.Y)\/}. {\tt RemoveMarks\/}
+turns invisible the predefined cursors within a given rectangle in the
+display area. This procedure is used to lock the rectangle for its
+caller.
+
+Summary of the essential points and characteristics of Oberon's concept of cursor handling:
+
+1.) By virtue of the use of abstract markers and of the logical display area, any potential hardware dependence is encapsulated in system modules and is therefore hidden from the application programmer. Cursors are moving uniformly within the whole display area, even across screen boundaries.
+
+2.) Cursor handling is decentralized by delegating it to the individual handlers that are installed in viewers. Typically, a handler reacts on the receipt of a mouse tracking message by drawing the mouse cursor at the indicated new position. The benefit of such individualized handling is flexibility. For example, a smart local handler might choose the shape of the visualizing marker depending on the exact location, or it might force the cursor onto a grid point.
+
+3.) Even though cursor handling is decentralized, there is some intrinsic support for cursor drawing built into the declaration of type {\tt Cursor\/}. Cursors are objects of full value and, as such, can ``memorize'' their current state. Consequently, the interface operations {\tt FadeCursor\/} and {\tt DrawCursor\/} need to refer to the desired future state only.
+
+4.) Looking at the viewer manager as one user of the display area, the cursor handler is a second (and logically concurrent) user of the same resource. If there is just one physical plane implementing the display area, any region must be locked by a current user before destructive painting. Therefore, markers are usually painted non-destructively in inverse-video mode.
+
+Let us now recapitulate the entire Section. The central resource
+managed by the display subsystem is the logical display area whose
+purpose is abstraction from the underlying display monitor
+hardware. The display area is primarily used by the viewer manager for
+the accommodation of tracks and viewers, which are merely the first
+two levels of a potentially unlimited nested hierarchy of display
+frames. For example, standard menu viewers contain two subordinate
+frames: A menu frame and a main frame of contents. Viewers are treated
+as black boxes by the viewer manager and are addressed via
+messages. Viewers and, more generally frames, are used as elements of
+message-based interfaces connecting the display subsystem
+
 % \beginsubsection 4.5. RASTER OPERATIONS.
 % \beginsubsection 4.6. STANDARD DISPLAY CONFIGURATIONS AND TOOLBOX.
 % \beginchapter CHAPTER 5: THE TEXT SYSTEM.
