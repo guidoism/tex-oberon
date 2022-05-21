@@ -1978,7 +1978,102 @@ a nice example of a nested hierarchy of frames with the additional
 property that the first two levels correspond to the first two levels
 in the type hierarchy defined by {\tt Track\/}, {\tt Viewer\/}, and {\tt Frame\/}.
 
-% \beginsubsubsection 4.4.2. Menu Viewers.
+
+In an object-oriented environment objects are autonomous entities in
+principle. However, they may be bound to some higher instance (other
+than the system) temporarily. For example, we can look at the objects
+belonging to a module's private data structure as bound to this
+module. Deciding if an object is currently bound is then a fundamental
+problem. In the case of viewers, this information is contained in an
+extra instance variable called {\tt state\/}.
+
+As a system invariant, we have for every viewer {\tt V\/}
+
+{\tt V\/} is bound to module {\tt Viewers\/} \Leftrightarrow {\tt V.state} \neq 0
+
+If we call visible any displayed viewer and suspended any viewer that
+is covered by an overlaying track we can refine this invariant to
+
+({\tt V\/} is visible \Leftrightarrow ${\tt V.state\/} > 0$) and ( {\tt V\/} is suspended \Leftrightarrow ${\tt V.state\/} < 0$)
+
+TODO: Clean this math shit up
+
+In addition, more detailed information about the kind of viewer {\tt V\/} is given by the magnitude
+TODO: absolute value ${\tt V.state\/}$ :
+
+TODO: table
+V.state kind of viewer
+0 closed
+1 filler
+-1 productive
+
+The magnitude $ \vert V.state \vert $ is kept invariant by module {\tt Viewers\/}. It could
+be used, for example, to distinguish different levels of importance or
+preference with the aim of supporting a smarter algorithm for
+heuristic allocation of new viewers. The variable state is treated as
+read-only by every module other than {\tt Viewers\/}.
+
+We are now sufficiently prepared to understand how the exported
+procedures of module {\tt Viewers\/} work behind the scenes. All of them
+operate on the internal dynamic data structure just explained. Some
+use the structure as a reference only or operate on individual
+elements (procedures {\tt This\/}, {\tt Next\/}, {\tt Locate\/}, {\tt Change\/}), others add new
+elements to the structure (procedures {\tt InitTrack\/}, {\tt OpenTrack\/}, {\tt Open\/}), and
+even others remove elements (procedures {\tt CloseTrack\/}, {\tt Close\/}). Most
+procedures have side-effects on the size or state of existing
+elements.
+
+Let us now change perspective and look at module {\tt Viewers\/} as a general
+low-level manager of viewers whose exact contents are unknown to it
+(and whose controlling software might have been developed years
+later). In short, let us look at module {\tt Viewers\/} as a manager of black
+boxes. Such an abstraction immediately makes it impossible for the
+implementation to call fixed procedures for, say, changing a viewer's
+size or state. The facility needed is a message-oriented interface.
+\begintt
+TYPE ViewerMsg = RECORD (Display.FrameMsg)
+  id: INTEGER;
+  X, Y, W, H: INTEGER;
+  state: INTEGER
+END;
+\endtt
+
+\noindent There exist three variants of {\tt Viewer\/} messages, discriminated by the
+field {\tt id\/}: Restore contents, modify height (extend or reduce at
+bottom), and suspend (close temporarily or permanently). The
+additional components of the message inform about the desired new
+location, size, and state.
+
+The following table lists senders, messages, and recipients of viewer messages.
+
+TODO: table
+Originator
+OpenTrack CloseTrack Open Change Close
+Message
+Suspend temporarily Suspend permanently Modify or suspend Modify
+Suspend permanently
+Recipients
+Viewers covered by opening track Viewers in closing track
+Upper neighbor of opening viewer Upper neighbor of changing viewer Closing viewer
+
+\beginsubsubsection 4.4.2. Menu Viewers.
+
+So far, we have treated viewers abstractly as black boxes. Our next
+step is now to focus on a special class of viewers called {\it menu viewers\/}. Remembering the definition given earlier we know that a menu
+viewer is characterized by a structure consisting of two vertically
+tiled ``descendant'' frames, a {\it menu frame\/} at the top and a {\it frame of contents\/} at the bottom. Because the nature and contents of these
+frames are typically unknown by their ``ancestor'' (or ``parent'') viewer,
+a collection of abstract messages is again a postulating form of
+interface. As net effect, the handling of menu viewers boils down to a
+combination of preprocessing, transforming and forwarding messages to
+the descendant frames. In short, the display space in Oberon is
+hierarchically organized and message passing within the display space
+obeys the pattern of strict {\it parental control\/}.
+
+Again, we start our more detailed discussion with a module interface definition:
+
+
+
 % \beginsubsubsection 4.4.3. Cursor Management.
 % \beginsubsection 4.5. RASTER OPERATIONS.
 % \beginsubsection 4.6. STANDARD DISPLAY CONFIGURATIONS AND TOOLBOX.
