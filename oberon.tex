@@ -2071,6 +2071,43 @@ hierarchically organized and message passing within the display space
 obeys the pattern of strict {\it parental control\/}.
 
 Again, we start our more detailed discussion with a module interface definition:
+\begintt
+DEFINITION MenuViewers;
+  IMPORT Viewers, Display;
+  CONST extend = 0; reduce = 1; move = 2; (*message ids*)
+
+  TYPE
+    Viewer = POINTER TO ViewerDesc;
+    ViewerDesc = RECORD (Viewers.ViewerDesc)
+      menuH: INTEGER
+    END;
+    ModifyMsg = RECORD (Display.FrameMsg)
+      id: INTEGER;
+      dY, Y, H: INTEGER
+   END;
+   PROCEDURE Handle (V: Display.Frame; VAR M: Display.FrameMsg);
+   PROCEDURE New (Menu, Main: Display.Frame; menuH, X, Y: INTEGER): Viewer;
+END MenuViewers.
+\endtt
+
+The interface represented by this definition is conspicuously
+narrow. There are just two procedures: A generator procedure {\tt New\/} and a
+standard message handler {\tt Handle\/}. The generator returns a newly created
+menu viewer displaying the two (arbitrary) frames passed as
+parameters. The message handler implements the entire ``behavior'' of an
+object and in particular the above mentioned message dispatching
+functionality.
+
+Message handlers in Oberon are implemented in the form of procedure
+variables that obviously must be initialized properly at object
+creation time. In other words, some concrete behavior must explicitly
+be bound to each object, where different instances of the same object
+type could potentially have a different behavior and/or the same
+instance could change its behavior during its lifetime. Our object
+model is therefore instance-centered.
+
+Conceptually, the creation of an object is an atomic action consisting
+of three basic steps:
 
 
 
