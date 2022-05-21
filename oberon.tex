@@ -1883,6 +1883,40 @@ parameter. The filler viewer essentially serves as background filling
 up the track at its top end. It reduces to height 0 if the track is
 covered completely by productive viewers.
 
+Configuring the display area is part of system initialization after
+startup. It amounts to executing a sequence of steps of the form
+\begintt
+NEW(Filler); Filler.handle := HandleFiller; InitTrack(W, H, Filler)
+\endtt
+
+\noindent where {\tt HandleFiller\/} is supposed to handle messages
+that require modifications of size and cursor drawing.
+
+The global variable {\tt curW\/} indicates the width of the already configured
+part of the display area. Note that configuring starts with {\tt x = 0\/} and
+is non-reversible in the sense that the grid defined by the
+initialized tracks cannot be refined later. However, remember that it
+can be coarsened at any time by overlaying a contiguous sequence of
+existing tracks by a single new track.
+
+Procedure {\tt OpenTrack\/} serves exactly this purpose. The track (or
+sequence of tracks) to be overlaid in the display-area must be spanned
+by the segment {\tt [X, X + W)\/}. Procedure {\tt CloseTrack\/} is inverse to
+{\tt OpenTrack\/}. It is called to close the (topmost) track located at {\tt X\/} in
+the display area, and to restore the previously covered track (or
+sequence of tracks).
+
+The next three procedures are used to organize viewers within
+individual tracks. Procedure {\tt Open\/} allocates a given viewer at a given
+position. More precisely, {\tt Open\/} locates the viewer containing the point
+{\tt (X, Y)\/}, splits it horizontally at height {\tt Y\/}, and opens the viewer {\tt V\/} in
+the lower part of the area. In the special case of {\tt Y\/} coinciding with
+the upper boundary line of the located viewer this is closed
+automatically. Procedure {\tt Change\/} allows to change the height of a given
+viewer {\tt V\/} by moving its upper boundary line to a new location {\tt Y\/} (within
+the limits of its neighbors). Procedure {\tt Close\/} removes the given viewer
+{\tt V\/} from the display area. Figure 4.5 makes these operations clear.
+
 % \beginsubsubsection 4.4.2. Menu Viewers.
 % \beginsubsubsection 4.4.3. Cursor Management.
 % \beginsubsection 4.5. RASTER OPERATIONS.
