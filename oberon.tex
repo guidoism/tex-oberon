@@ -1535,7 +1535,7 @@ extensibility.
 In the early seventies, Xerox PARC in California launched the
 Smalltalk-project with the goal of conceiving and developing new and
 more natural ways to communicate with personal computers
-[Goldberg]. Perhaps the most conspicuous among several significant
+\footnote1{[Goldberg] A. Goldberg, Smalltalk-80: The Interactive Programming Environment, Addison-Wesley 1984.}. Perhaps the most conspicuous among several significant
 achievements of this endeavor is the idea of applying the desktop
 metaphor to the display screen. This metaphor comprises a desktop and
 a collection of possibly mutually overlapping pages of paper that are
@@ -1565,10 +1565,12 @@ newly opened viewers.
 
 Experience has shown that partial overlapping is desirable and
 beneficial in rare cases only, and so the additional complexity of its
-management [Binding, Wille] is hard to justify. Therefore, alternate
+management \footnote1{C. Binding, User Interface Components based on a Multiple Window Package, University of Washington, Seattle, Technical Report 85-08-07.}
+\footnote2{M. Wille, Overview: Entwurf und Realisierung eines Fenstersystems für Arbeitsplatzrechner, Diss. ETH Nr. 8771, 1988.}
+is hard to justify. Therefore, alternate
 strategies to structure a display screen have been looked for. An
-interesting class of established solutions can be titled as {\it
-  tiling\/}. There are several variants of tiling [Cohen]. Perhaps the
+interesting class of established solutions can be titled as {\it tiling\/}.
+There are several variants of tiling \footnote3{[Cohen] E.S. Cohen, E.T. Smith, L.A. Iverson, Constraint-Based Tiled Windows, IEEE, 1985}. Perhaps the
 most obvious one (because the most unconstrained one) is based on
 iterated horizontal or vertical splitting of existing
 viewers. Starting with the full screen and successively opening
@@ -1591,7 +1593,8 @@ and D by making them extend to their left. Clearly, no such
 complicated situations can occur in the case of hierarchic tiling.
 
 Hierarchic tiling is also used in Xerox PARC's Cedar system
-[Teitelman]. However, the Oberon variant differs from the Cedar
+\footnote4{[Teitelman] W. Teitelman, "A tour through Cedar", IEEE Software, 1, (2), 44-73 (1984).
+}. However, the Oberon variant differs from the Cedar
 variant in some respects. Firstly, Oberon supports quick temporary
 context switching by overlaying one track or any contiguous sequence
 of tracks with new layers. In Figure 4.3 a snapshot of a standard
@@ -2431,7 +2434,7 @@ assumed tacitly that the numbers of colors per pixel in the source
 block and in the destination area are identical. It is perhaps
 informative to know that {\tt CopyBlock\/} is essentially equivalent with the
 famous {\tt BitBlt\/} (bit block transfer) in the SmallTalk project
-[Goldberg]. In Oberon, {\tt CopyBlock\/} is used primarily for scrolling
+\footnote1{[Goldberg] A. Goldberg, Smalltalk-80: The Interactive Programming Environment, Addison-Wesley 1984.}. In Oberon, {\tt CopyBlock\/} is used primarily for scrolling
 contents within a viewer.
 
 The remaining raster operations use a constant pattern. Patterns are
@@ -2584,11 +2587,7 @@ and {\tt Grow\/} are typically included in the title bar of a menu
 viewer. Their detailed implementations follow subsequently.
 
 TODO: References
-[Binding] C. Binding, User Interface Components based on a Multiple Window Package, University of Washington, Seattle, Technical Report 85-08-07.
-[Cohen] E.S. Cohen, E.T. Smith, L.A. Iverson, Constraint-Based Tiled Windows, IEEE, 1985
-[Wille] M. Wille, Overview: Entwurf und Realisierung eines Fenstersystems für Arbeitsplatzrechner, Diss. ETH Nr. 8771, 1988.
-[Goldberg] A. Goldberg, Smalltalk-80: The Interactive Programming Environment, Addison-Wesley 1984.
-[Teitelman] W. Teitelman, "A tour through Cedar", IEEE Software, 1, (2), 44-73 (1984).
+
 
 \beginchapter CHAPTER 5: THE TEXT SYSTEM.
 
