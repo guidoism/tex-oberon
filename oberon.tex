@@ -2343,7 +2343,11 @@ frames. For example, standard menu viewers contain two subordinate
 frames: A menu frame and a main frame of contents. Viewers are treated
 as black boxes by the viewer manager and are addressed via
 messages. Viewers and, more generally frames, are used as elements of
-message-based interfaces connecting the display subsystem
+message-based interfaces connecting the display subsystem with other
+subsystems like the task scheduler and the various document
+managers. Finally, the display area is also the living room of
+cursors. In Oberon, a cursor is a marked path. Two standard cursors
+Mouse and Pointer are predefined.
 
 % \beginsubsection 4.5. RASTER OPERATIONS.
 % \beginsubsection 4.6. STANDARD DISPLAY CONFIGURATIONS AND TOOLBOX.
