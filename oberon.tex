@@ -2967,6 +2967,18 @@ from the outside of the activity, in contrast to the underlying texts
 that are allocated on the system heap and have a much longer life
 time.
 
+Let us summarize: Text in Oberon is a powerful abstract data type with
+intrinsic operations from three areas: Loading/storing, editing, and
+accessing (reading/writing). The latter two areas on their part
+introduce further abstract types called {\tt Buffer\/}, {\tt Reader\/}, {\tt Scanner\/}, and
+{\tt Writer\/}. In combination they guarantee a clean separation of very
+different concerns. The benefits of such a rigorous decoupling are
+numerous. For example, it makes it possible to freely choose (and
+vary) the granularity at which a text and its views are
+updated. Finally, an after-method is used to allow context-dependent
+post-processing of editing operations. It is used primarily for
+preserving consistency between text models and their views.
+
 % \beginsubsection 5.2. TEXT MANAGEMENT.
 % \beginsubsection 5.3. TEXT FRAMES.
 % \beginsubsection 5.4. THE FONT MACHINERY.
