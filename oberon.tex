@@ -1917,6 +1917,67 @@ viewer {\tt V\/} by moving its upper boundary line to a new location {\tt Y\/} (
 the limits of its neighbors). Procedure {\tt Close\/} removes the given viewer
 {\tt V\/} from the display area. Figure 4.5 makes these operations clear.
 
+TODO: Figure 4.5 Basic operations on viewers
+
+The last group of procedures provides miscellaneous
+services. Procedure {\tt This\/} identifies the viewer displayed at {\tt (X, Y)\/}.
+Procedure {\tt Next\/} returns the next upper neighbor of a given
+displayed viewer {\tt V\/}. Procedure {\tt Recall\/} allows recalling and restoring
+the most recently closed viewer. {\tt Locate\/} is a procedure that assists
+heuristic allocation of new viewers. For any given track and desired
+minimum height, procedure {\tt Locate\/} offers a choice of some distinguished
+viewers in the track: the filler viewer, the viewer at the bottom, an
+alternative choice, and the viewer of maximum height. Finally,
+procedure {\tt Broadcast\/} broadcasts a message to the display area, that is,
+sends the given message to all viewers that are currently displayed.
+
+It is now a good time to throw a glance behind the scenes. Let us
+start with revealing module {\tt Viewer\/}’s internal data structure. Remember
+that according to the principle of information hiding an internal data
+structure is fully private to the containing module and accessible
+through the module’s procedural interface only. Figure 4.6 shows a
+data structure view of the display snapshot taken in Figure 4.4. Note
+that the overlaid tracks and viewers are still part of the internal
+data structure.
+
+In the data structure we recognize an anchor that represents the
+display area and points to a list of tracks, each of them in turn
+pointing to a list of viewers, each of them in turn pointing to a list
+of arbitrary sub-frames. Both the list of tracks and the list of
+viewers are closed to a ring, where the filler track (filling up the
+display area) and the filler viewers (filling up the tracks) act as
+anchors. Additionally, each track points to a (possibly empty) list of
+tracks lying underneath. These frames are invisible on the display,
+and shaded in Figure 4.6.
+
+TODO: Figure 4.6 A snapshot of the internal data structure corresponding to Figure 4.3
+
+Technically, the track descriptor type {\tt TrackDesc\/} is a private
+extension of the viewer descriptor type {\tt ViewerDesc\/}. Repeating the
+declarations of viewer descriptors and frame descriptors, we get to
+this hierarchy of types:
+\begintt
+TrackDesc = RECORD (ViewerDesc)
+  under: Display.Frame
+END;
+
+ViewerDesc = RECORD (FrameDesc)
+  state: INTEGER
+END;
+
+FrameDesc = RECORD
+  next, dsc: Frame;
+  X, Y, W, H: INTEGER;
+  handle: Handler
+END;
+\endtt
+
+\noindent It is noteworthy that the data structure of the viewer
+manager is heterogeneous with {\tt Frame\/} as base type. It provides
+a nice example of a nested hierarchy of frames with the additional
+property that the first two levels correspond to the first two levels
+in the type hierarchy defined by {\tt Track\/}, {\tt Viewer\/}, and {\tt Frame\/}.
+
 % \beginsubsubsection 4.4.2. Menu Viewers.
 % \beginsubsubsection 4.4.3. Cursor Management.
 % \beginsubsection 4.5. RASTER OPERATIONS.
