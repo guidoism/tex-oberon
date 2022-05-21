@@ -1544,8 +1544,162 @@ surface of a screen we get the familiar picture of Figure 4.1 showing
 a collection of partially or totally visible rectangular areas on a
 background, so-called {\it windows\/} or {\it viewers\/}.
 
-% \beginsubsection 4.2. VIEWERS AS OBJECTS.
-% \beginsubsection 4.3. FRAMES AS BASIC DISPLAY ENTITIES.
+TODO: Figure 4.1 Desktop showing partially overlapping viewers
+
+The desktop metaphor is used by many modern operating systems and user
+interface shells both as a natural model for the system to separate
+displayed data belonging to different tasks, and as a powerful tool
+for users to organize the display screen interactively, according to
+individual taste and preference. However, there are inherent drawbacks
+in the metaphor. They are primarily connected with
+overlapping. Firstly, any efficient management of overlapping viewers
+must rely on a subordinate management of (arbitrary) sub-rectangles
+and on sophisticated clipping operations. This is so because partially
+overlapped viewers must be partially restored under control of the
+viewer manager. For example, in Figure 4.1, rectangles a, b, and c in
+viewer B ought to be restored individually after closing of viewer
+A. Secondly, there is a significant danger of covering viewers
+completely and losing them forever. And thirdly, no canonical
+heuristic algorithms exist for automatic allocation of screen space to
+newly opened viewers.
+
+Experience has shown that partial overlapping is desirable and
+beneficial in rare cases only, and so the additional complexity of its
+management [Binding, Wille] is hard to justify. Therefore, alternate
+strategies to structure a display screen have been looked for. An
+interesting class of established solutions can be titled as {\it
+  tiling\/}. There are several variants of tiling [Cohen]. Perhaps the
+most obvious one (because the most unconstrained one) is based on
+iterated horizontal or vertical splitting of existing
+viewers. Starting with the full screen and successively opening
+viewers A, B, C, D, E, and F we get to a configuration as in Figure
+4.2.
+
+TODO: Figure 4.2 Viewer configuration resulting from unconstrained tiling
+
+A second variant is hierarchic tiling. Again, the hierarchy starts
+with a full screen that is now decomposed into a number of vertical
+tracks, each of which is further decomposed into a number of
+horizontal viewers. We decided in favor of this kind of tiling in
+Oberon, mainly because the algorithm of reusing the area of a closed
+viewer is simpler and more uniform. For example, assume that in Figure
+4.2 viewer F has been closed. Then, it is straightforward to reverse
+the previous opening operation by extending viewer E at its bottom
+end. However, if the closed viewer is B, no such simple procedure
+exists. For example, the freed area can be shared between viewers C
+and D by making them extend to their left. Clearly, no such
+complicated situations can occur in the case of hierarchic tiling.
+
+Hierarchic tiling is also used in Xerox PARC's Cedar system
+[Teitelman]. However, the Oberon variant differs from the Cedar
+variant in some respects. Firstly, Oberon supports quick temporary
+context switching by overlaying one track or any contiguous sequence
+of tracks with new layers. In Figure 4.3 a snapshot of a standard
+Oberon display screen is graphically represented. It suggests two
+original tracks and two levels of overlay, where the top layer is
+screen-filling. Secondly, unlike Cedar display screens, Oberon
+displays do not provide reserved areas for system-wide facilities,
+Standard Cedar screens feature a command row at the top and an icon
+row at the bottom. And thirdly, Oberon is based on a different
+heuristic strategy for the automatic placement of new viewers. As a
+Cedar default invariant, the area of every track is divided up evenly
+among the viewers in this track. When a new viewer is to be placed,
+the existing viewers in the track are requested to reduce their size
+and move up appropriately. The newly opened viewer is then allocated
+in the freed spot at the bottom. In contrast, Oberon normally splits
+the largest existing viewer in a given track into two halves of equal
+size. As an advantage of this latter allocation strategy we note that
+existing contents are kept stable.
+
+TODO: Figure 4.3 Overlay of tracks and sequences of tracks
+
+\beginsubsection 4.2. VIEWERS AS OBJECTS.
+
+Although everybody seems to agree on the meaning of the term viewer,
+no two different system designers actually do. The original role of a
+viewer as merely a separate display area has meanwhile become heavily
+overloaded with additional functionality. Depending on the underlying
+system are viewers' individual views on a certain configuration of
+objects, carriers of tasks, processes, applications, etc. Therefore,
+we first need to define our own precise understanding of the concept
+of viewer.
+
+The best guide to this aim is the abstract data type {\tt Viewer\/} that we
+introduced in Chapter 3. We recapitulate: Type {\tt Viewer\/} serves as a
+template describing viewers abstractly as ``black boxes'' in terms of a
+state of visibility, a rectangle on the display screen, and a message
+handler. The exact functional interface provided by a given variant of
+viewer is determined by the set of messages accepted. This set is
+structured as a customized hierarchy of type extensions.
+
+We can now obtain a more concrete specification of the role of viewer
+by identifying some basic categories of universal messages that are
+expected to be accepted by all variants of viewer. For example, we
+know that messages reporting about user interactions as well as
+messages defining a generic operation are universal. These two
+categories of universal messages document the roles of viewers as
+interactive tasks and as parts of an integrated system respectively.
+
+In total, there are four such categories. They are here listed
+together with the corresponding topics and message dispatchers:
+
+TODO: Table
+Dispatcher
+Task scheduler Command interpreter Viewer manager Document manager
+Topic
+dispatching of task processing of command organizing display area operating on document
+Message
+reports user interaction defines generic operation change of location or size change of contents or format
+
+These topics essentially define the role of Oberon viewers. In short,
+we may look at an Oberon viewer as a non-overlapped rectangular box on
+the screen both acting as an integrated display area for some objects
+of a document and representing an interactive task in the form of a
+sensitive editing area.
+
+Shifting emphasis a little and regarding the various message
+dispatchers as subsystems, we recognize immediately the role of
+viewers as integrators of the different subsystems via message-based
+interfaces. In this light type Viewer appears as a common
+object-oriented basis of Oberon's subsystems.
+
+The topics listed above constitute some kind of backbone of the
+contents of the Chapters 3, 4 and 5. Task scheduling and command
+interpreting are already familiar to us from Sections 3.2 and
+3.3. Viewer management and text management will be the topics of
+Sections 4.4 and 5.2 respectively. Thereby, the built-in type Text
+will serve as a prime example of a document type.
+
+The activities that a viewer performs are basically controlled by
+events or, more precisely, by messages representing {\it event notices\/}. We
+shall explain this in detail in Sections 4.4 and 5.3 in the cases of
+an abstract class of standard viewers and a class of viewers
+displaying standard text respectively.
+
+Here is a preliminary overview of some archetypal kinds of message:
+
+TODO: List bullets
+• After each key stroke a keyboard message containing the typed character is sent to the current focus viewer and after each mouse click a mouse message reporting the new state of the mouse is sent to the viewer containing the current mouse position.
+
+• A message often represents some generic operation that is expected to be interpreted individually by its recipients. Obvious examples in our context are ``return current textual selection'', ``copy-over stretch of text'', and ``produce a copy (clone)''. Notice that generic operations are the key to extensibility.
+
+• In a tiling viewer environment, every opening of a new viewer and every change of size or location of an existing viewer has an obvious effect on adjacent viewers. The viewer manager therefore issues a message for every affected viewer requesting it to adjust its size appropriately.
+
+• Whenever the contents or the format of a document has changed, a message notifying all visible viewers of the change is broadcast. Notice that broadcasting messages by a model (document) to the entirety of its potential views (viewers) is an interesting implementation of the famous MVC (model-view-controller) pattern that dispenses models from ``knowing'' (registering) their views.
+
+\beginsubsection 4.3. FRAMES AS BASIC DISPLAY ENTITIES.
+
+When we introduced viewers in Chapter 3 and in the previous section,
+we simplified with the aim of abstraction. We know already that
+viewers appear as elements of second order in the tiling
+hierarchy. Having treated them as black boxes so far we have not
+revealed anything about the continuation of the hierarchy. As a matter
+of fact, viewers are neither elementary display entities nor
+atoms. They are just a special case of so-called {\it display frames\/}. Display frames or frames in short are arbitrary rectangles
+displaying a collection of objects or an excerpt of a document. In
+particular, frames may recursively contain other frames, a capability
+that makes them an extremely powerful tool for any display organizer.
+
 % \beginsubsection 4.4. DISPLAY MANAGEMENT.
 % \beginsubsubsection 4.4.1. Viewers.
 % \beginsubsubsection 4.4.2. Menu Viewers.
