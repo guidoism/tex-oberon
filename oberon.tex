@@ -2562,7 +2562,34 @@ generating aesthetically satisfactory layouts.
 
 In addition to the programming interface provided by module {\tt Oberon\/} for
 the case of standard display layouts, the display management section
-in the System toolbox provides a user interface:
+in the {\tt System\/} toolbox provides a user interface:
+\begintt
+DEFINITION System; (*Display management*)
+  PROCEDURE Open; (*viewer*)
+  PROCEDURE Close; (*viewer*)
+  PROCEDURE CloseTrack;
+  PROCEDURE Recall; (*most recently closed viewer*)
+  PROCEDURE Copy; (*viewer*)
+  PROCEDURE Grow; (*viewer*)
+  PROCEDURE Clear; (*clear system log*)
+END System.
+\endtt
+
+\noindent In turn, these commands are called to open a text viewer in
+the system track, close a viewer, close a track, recall (and reopen)
+the most recently closed viewer, copy a viewer, and grow a viewer. The
+commands {\tt Close\/}, {\tt CloseTrack\/}, {\tt Recall\/}, {\tt Copy\/},
+and {\tt Grow\/} are generic. {\tt Close\/}, {\tt Copy\/},
+and {\tt Grow\/} are typically included in the title bar of a menu
+viewer. Their detailed implementations follow subsequently.
+
+TODO: References
+[Binding] C. Binding, User Interface Components based on a Multiple Window Package, University of Washington, Seattle, Technical Report 85-08-07.
+[Cohen] E.S. Cohen, E.T. Smith, L.A. Iverson, Constraint-Based Tiled Windows, IEEE, 1985
+[Wille] M. Wille, Overview: Entwurf und Realisierung eines Fenstersystems für Arbeitsplatzrechner, Diss. ETH Nr. 8771, 1988.
+[Goldberg] A. Goldberg, Smalltalk-80: The Interactive Programming Environment, Addison-Wesley 1984.
+[Teitelman] W. Teitelman, "A tour through Cedar", IEEE Software, 1, (2), 44-73 (1984).
+
 
 % \beginchapter CHAPTER 5: THE TEXT SYSTEM.
 % \beginsubsection 5.1. TEXT AS AN ABSTRACT DATA TYPE.
