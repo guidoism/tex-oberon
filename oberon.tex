@@ -1775,9 +1775,114 @@ specifies the type of the viewer. If it is a text frame as well, then
 we call the viewer a {\it text viewer\/}, if it a graphics frame, we call it a
 {\it graphics viewer\/} etc.
 
+\beginsubsection 4.4. DISPLAY MANAGEMENT.
 
-% \beginsubsection 4.4. DISPLAY MANAGEMENT.
-% \beginsubsubsection 4.4.1. Viewers.
+Oberon's display system comprises two main topics: Viewer management
+and cursor handling. Let us first turn to the much more involved topic
+of viewer management and postpone cursor handling to the end of this
+Section. Before we can actually begin our explanations we need to
+introduce the concept of the {\it logical display area\/}. It is modeled as a
+two-dimensional Cartesian plane housing the totality of objects to be
+displayed. The essential point of this abstraction is a rigorous
+decoupling of any aspects of physical display devices. As a matter of
+fact, any concrete assignment of display monitors to certain finite
+regions of the display area is a pure matter of configuring the
+system.
+
+Being a subsystem of a system with a well-defined modular structure
+the display system appears in the form of a small hierarchy of
+modules. Its core is a linearly ordered set consisting of three
+modules: {\tt Display\/}, {\tt Viewers\/}, and {\tt MenuViewers\/}, the latter building upon
+the formers. Conceptually, each module contributes an associated class
+of display-oriented objects and a collection of related service
+routines.
+
+The following is an overview of the subsystem viewer
+management. Modules on upper lines import modules on lower lines and
+types on upper lines extend types on lower lines.
+
+TODO: table
+Module
+MenuViewer Viewers Display
+Type
+Viewer Viewer Frame
+Service
+Message handling for menu viewers Tiling viewer management Block-oriented raster operations
+
+Inspecting the column titled Type we recognize precisely our familiar
+types {\tt Frame\/}, {\tt Viewer\/}, and {\tt MenuViewer\/} respectively, where the latter is
+an abbreviation of {\tt MenuViewers.Viewer\/}.
+
+In addition to the core modules of the display system a section in
+module {\tt Oberon\/} provides a specialized application programming interface
+(API) that simplifies the use of the viewer management package by
+applications in the case of standard Oberon display configurations. We
+shall come back to this topic in Section 4.6.
+
+For the moment let us concentrate on the core of the viewer management
+and in particular on the modules {\tt Viewers\/} and {\tt MenuViewers\/}, saving the
+discussion of the module {\tt Display\/} for the next section. Typically, we
+start the presentation of a module by listing and commenting its
+definition, and we refer to subsequent listings for its
+implementation.
+
+\beginsubsubsection 4.4.1. Viewers.
+
+
+Focusing first on module {\tt Viewers\/} we can roughly define the domain of
+its responsibility as ``initializing and maintaining the global layout
+of the display area''. From the previous discussion we are well
+acquainted already with the structure of the global display space as
+well as with its building blocks: The display area is hierarchically
+tiled with display frames, where the first two levels in the frame
+hierarchy correspond to {\it tracks\/} and {\it viewers\/} respectively.
+
+This is the formal definition:
+\begintt
+DEFINITION Viewers;
+  IMPORT Display;
+  CONST restore = 0; modify = 1; suspend = 2; (*message ids*)
+  TYPE Viewer = POINTER TO ViewerDesc;
+       ViewerDesc = RECORD (Display.FrameDesc)
+         state: INTEGER
+       END;
+       ViewerMsg = RECORD (Display.FrameMsg)
+         id: INTEGER;
+         X, Y, W, H: INTEGER;
+         state: INTEGER
+       END;
+
+  VAR curW: INTEGER;
+       
+  (*track handling*)
+  PROCEDURE InitTrack (W, H: INTEGER; Filler: Viewer);
+  PROCEDURE OpenTrack (X, W: INTEGER; Filler: Viewer);
+  PROCEDURE CloseTrack (X: INTEGER);
+
+  (*viewer handling*)
+  PROCEDURE Open (V: Viewer; X, Y: INTEGER);
+  PROCEDURE Change (V: Viewer; Y: INTEGER);
+  PROCEDURE Close (V: Viewer);
+
+  (*miscellaneous*)
+  PROCEDURE This (X, Y: INTEGER): Viewer;
+  PROCEDURE Next (V: Viewer): Viewer;
+  PROCEDURE Recall (VAR V: Viewer);
+  PROCEDURE Locate (X, H: INTEGER; VAR fil, bot, alt, max: Viewer);
+  PROCEDURE Broadcast (VAR M: Display.FrameMsg);
+END Viewers.
+\endtt
+
+\noindent Some comments: A first group of procedures consisting of {\tt
+InitTrack\/}, {\tt OpenTrack\/}, and {\tt CloseTrack\/} supports the
+track structure of the display area. {\tt InitTrack\/} creates a new track of
+width {\tt W\/} and height {\tt H\/} by partitioning off a vertical strip of width {\tt W\/}
+from the display area. In addition, {\tt InitTrack\/} initializes the newly
+created track with a filler viewer that is supplied as a
+parameter. The filler viewer essentially serves as background filling
+up the track at its top end. It reduces to height 0 if the track is
+covered completely by productive viewers.
+
 % \beginsubsubsection 4.4.2. Menu Viewers.
 % \beginsubsubsection 4.4.3. Cursor Management.
 % \beginsubsection 4.5. RASTER OPERATIONS.
