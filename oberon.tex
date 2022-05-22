@@ -1,5 +1,10 @@
 \input taocpmac
 
+\def\code#1{{\tt #1\/}}
+\def\emph#1{{\it #1\/}}
+
+% TODO: Change raw tags to use semantic \code and \emph macros
+
 \beginchapter CHAPTER 1: HISTORY AND MOTIVATION.
 
 {\quoteformat{The most important thing in the programming language is the name. A language will not succeed without a good name. I have recently invented a very good name and now I am looking for a suitable language.}
@@ -3151,6 +3156,22 @@ END;
   prev, next: Piece
 END;
 \endtt
+
+\noindent As depicted in Figure 5.1, the piece list is implemented as a doubly
+linked list with a sentinel piece closing it to a ring. The field
+trailer in type \code{TextDesc} points to the sentinel piece. Fields \code{org} and
+\code{pce} implement a translation cache consisting of merely one entry \code{(org, pce)}.
+It links a position \code{org} with a piece \code{pce}. The fields \code{header} and \code{last} in type \code{Buffer} refer to the implementation of buffers as piece
+lists. They point to the first and last piece descriptors
+respectively. Finally, the fields \code{ref}, \code{org}, and \code{off} in type \code{Reader}
+memorize the current piece, its origin, and the current offset within
+this piece.
+
+The fields \code{f}, \code{off}, and \code{len} in type \code{Piece} specify the underlying file, starting position in the file, and length of the piece. \code{fnt}, \code{col}, and \code{voff} are its looks. Finally \code{prev} and \code{next} are pointers to the previous piece and to the next piece in the list respectively.
+
+\code{FindPiece} and \code{SplitPiece} are auxiliary procedures that are used by almost all piece-oriented operations.
+
+
 
 % \beginsubsection 5.3. TEXT FRAMES.
 % \beginsubsection 5.4. THE FONT MACHINERY.
