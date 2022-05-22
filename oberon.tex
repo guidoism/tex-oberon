@@ -3310,6 +3310,29 @@ involves recognizing $m$ and $d$, and computing $x = m \times 10^d$.
 This is done using procedure \code{Ten(d)} computing $10^d$ by
 repeated multiplication maintaining the invariant
 $t \times p^n = 10^{n_0}$, where $n_0$ is the initial value of $n$.
+\begintt
+PROCEDURE Ten(n: INTEGER): REAL;
+  VAR t, p: REAL;
+BEGIN
+  t := 1.0;
+  p := 10.0;
+  WHILE n > 0 DO
+    IF ODD(n) THEN t := p * t END ;
+    p := p*p;
+    n := n DIV 2
+  END ;
+  RETURN t
+END Ten;
+\endtt
+
+\noindent Writing a real number in decimal form is more complicated. It involves the computation of $m$ and $d$ from $x = n \times 2^e$ so that $x = m \times 10^d$ with $1.0 \le m < 10.0$. First, $e$ is obtained with the standard function \code{UNPK(x, e)}, then $d$ is computed (from the relationship
+$10^k = 2^{k*log(10)}$) as $d = e \div log_2(10)$.
+In order to avoid a real division for obtaining $d$,
+we use the approximation $1.0 \div log_2(10) $~\equiv~\code{77 DIV 256},
+and then compute
+\code{x := x / Ten(e)} or \code{x := x * Ten(-e)}.
+Further details are to be taken from the listings of \code{WriteReal} and \code{WriteRealFix}.
+
 
 % \beginsubsection 5.3. TEXT FRAMES.
 % \beginsubsection 5.4. THE FONT MACHINERY.
