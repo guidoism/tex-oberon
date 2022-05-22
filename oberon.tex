@@ -3059,6 +3059,46 @@ TODO: Figure 5.1 Piece chain representing a text
 Figure 5.1 shows a typical piece list representing (the current state
 of) a text. Investigating the effects of the basic editing operations
 delete and insert on the piece list, we end up with these algorithms:
+\begintt
+delete stretch [beg, end) of text = BEGIN
+  split pieces at beg and at end;
+  remove piece descriptors from beg to end from the chain
+END
+  
+insert stretch of text at pos = BEGIN
+  split piece at pos;
+  insert piece descriptors representing the stretch at pos
+END
+\endtt
+
+\noindent Of course, splitting is superfluous if the desired splitting point
+happens to coincide with the beginning of a piece. Figures 5.3 and 5.4
+show the resulting piece list after a delete and an insert-operation
+respectively.
+
+TODO: Figure 5.2 Piece chain after delete operation
+TODO: Figure 5.3 Piece chain after insert operation
+
+Checking our wish list of above we immediately recognize the
+requirements 1.), 2.), and 3.) as met. Requirement 4.) is also met
+under the assumption of an efficient mechanism for direct positioning
+in files. Requirement 6.) can be checked off because the piece list
+initially consists of a single piece spanning the entire text
+file. Finally, requirement 7.) is met simply because the operations do
+not affect file representations at all.
+
+In Oberon we adapted the piece list technique to texts with looks
+(``rich texts''). Formally, we first define a run as a stretch of text
+whose characters show identical looks. Now, we require the piece list
+to subordinate itself to the run structure. This obviously means that
+every piece needs to be contained within a single run. Figure 5.4
+visualizes such a compliant piece list representing a text with
+varying looks. There are only two new aspects compared to the original
+version of the piece list discussed above: An additional operation to
+change looks and the initial state of the piece chain.
+
+
+
 
 % \beginsubsection 5.3. TEXT FRAMES.
 % \beginsubsection 5.4. THE FONT MACHINERY.
