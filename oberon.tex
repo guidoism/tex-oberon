@@ -3333,6 +3333,12 @@ and then compute
 \code{x := x / Ten(e)} or \code{x := x * Ten(-e)}.
 Further details are to be taken from the listings of \code{WriteReal} and \code{WriteRealFix}.
 
+In spite of its apparent simplicity the piece list technique interoperates with other system components in quite a subtle way. For example, after a while of editing, there are typically numerous cross references between the documents involved. In other words, pieces of one document may point to foreign files that is to files that were originally associated with other documents. As a consequence, the file system must either employ some smart garbage collection algorithm or not recycle file pages at all, even if a new version of a file of the same name has been created in the meantime.
+
+A problem of another kind, again affecting the file system, arises if, say, a single text line is composed of several small pieces. Then, reading this line sequentially may necessitate several jumps to different positions in different files at a high pace. Depending on the quality of the file buffering mechanism, this may lead to significantly hesitant mouse tracking.
+
+And finally, typed characters that are supposed to be inserted into a text need to be stored on the so-called \emph{keyboard file}. For this (continuously growing) file, several readers and one writer must be allowed to coexist concurrently.
+
 
 % \beginsubsection 5.3. TEXT FRAMES.
 % \beginsubsection 5.4. THE FONT MACHINERY.
