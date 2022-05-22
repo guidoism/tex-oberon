@@ -3225,9 +3225,91 @@ END SplitPiece;
 
 4) insert new piece in backward chain
 
-\noindent Procedure Insert handles text insertion. It operates on a buffer that
-contains the stretch of text to be inserted:
+\noindent Procedure Insert handles text insertion. It operates on a buffer that contains the stretch of text to be inserted:
 
+Procedure \code{Insert} handles text insertion. It operates on a buffer that contains the stretch of text to be inserted:
+\begintt
+PROCEDURE Insert (T: Text; pos: INTEGER; B: Buffer);
+  VAR pl, pr, p, qb, qe: Piece;
+  org, end: INTEGER;
+BEGIN
+  FindPiece(T, pos, org, p);
+  SplitPiece(p, pos - org, pr);
+  IF T.org >= org THEN
+    T.org := org - p.prev.len;
+    T.pce := p.prev
+  END;
+  pl := pr.prev;
+  qb := B.header.next;
+  IF (qb # NIL) & (qb.f = pl.f) & (qb.off = pl.off + pl.len)
+      & (qb.fnt = pl.fnt) & (qb.col = pl.col) & (qb.voff = pl.voff) THEN
+    pl.len := pl.len + qb.len; qb := qb.next
+  END;
+  IF qb # NIL THEN
+    qe := B.last;
+    qb.prev := pl; pl.next := qb; qe.next := pr; pr.prev := qe
+  END;
+  T.len := T.len + B.len; end := pos + B.len;
+  B.last := B.header; B.last.next := NIL; B.len := 0;
+  T.notify(T, insert, pos, end)
+END Insert;
+\endtt
+
+TODO: explaination numbers in the code
+
+Explanations:
+
+1) split piece to isolate point of insertion
+
+2) adjust cache if necessary
+
+3) merge pieces if possible
+
+4) insert buffer
+
+5) update text length
+
+6) empty buffer
+
+7) notify
+
+\noindent Procedure \code{Read} implements sequential reading of characters in texts. It operates on a text reader:
+\begintt
+PROCEDURE Read (VAR R: Reader; VAR ch: CHAR);
+BEGIN
+  Files.Read(R.rider, ch);
+  R.fnt := R.ref.fnt;
+  R.col := R.ref.col;
+  R.voff := R.ref.voff;
+  INC(R.off);
+  IF R.off = R.ref.len THEN
+    IF R.ref.f = WFile THEN R.eot := TRUE END;
+    R.org := R.org + R.off; R.off := 0;
+    R.ref := R.ref.next; R.org := R.org + R.off; R.off := 0;
+    Files.Set(R.rider, R.ref.f, R.ref.off)
+  END
+END Read;
+\endtt
+
+TODO: add line number thingies
+Explanations:
+
+1) read character from file and update looks in reader
+2) if piece boundary reached
+3) check if sentinel piece reached
+4) move reader to next piece
+5) position file rider
+
+Procedure \code{Read} is typically used as a primitive by text
+scanners and in particular by the built-in scanner \code{Scan} for the
+recognition of universal tokens, as they were defined in the previous
+section. Scanning is a rather complex operation that, for example,
+includes the conversion of a sequence of digits into an internal
+floating-point representation and vice-versa. Scanning a real number
+involves recognizing $m$ and $d$, and computing $x = m \times 10^d$.
+This is done using procedure \code{Ten(d)} computing $10^d$ by
+repeated multiplication maintaining the invariant
+$t \times p^n = 10^{n_0}$, where $n_0$ is the initial value of $n$.
 
 % \beginsubsection 5.3. TEXT FRAMES.
 % \beginsubsection 5.4. THE FONT MACHINERY.
