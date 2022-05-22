@@ -2979,7 +2979,81 @@ updated. Finally, an after-method is used to allow context-dependent
 post-processing of editing operations. It is used primarily for
 preserving consistency between text models and their views.
 
-% \beginsubsection 5.2. TEXT MANAGEMENT.
+\beginsubsection 5.2. TEXT MANAGEMENT.
+
+The art and challenge of modularization lie in finding an effective
+decomposition of a topic into modules with relatively thin interfaces
+or, in other words, into modules with a great potential for
+information hiding. Text systems provide a welcome opportunity of an
+exercise. A closer analysis immediately leads to the following
+separate concerns corresponding to the components {\tt Model\/}, {\tt View\/} and
+{\tt Controller\/} of the MVC scheme: Text management, text rendering, and
+text editing. If we combine {\tt View\/} and {\tt Controller\/} and add an auxiliary
+font handling module {\tt Fonts\/}, we arrive at the following three-module
+import hierarchy:
+
+TODO: table
+Module
+TextFrames Texts
+Fonts
+Object type
+Frame Text Font
+Service
+Text rendering and editing Text management
+Font management
+
+Note that, in contrast to the display-subsystem, the associated object
+types are not connected hierarchically here.
+
+Separate Sections 5.3 and 5.4 will be devoted to modules {\tt TextFrames\/}
+and {\tt Fonts\/} respectively. In the current Section
+we focus on module {\tt Texts\/}. Regarding it as a model of the
+abstract data type Text presented in the previous Section, its
+definition is congruent with the specification of the abstract data
+type itself, and we need not repeat it here.
+
+The main topics of this Section are internal representation and file
+representation of texts. We first emphasize that the internal
+representation of a text is a completely private matter of module
+{\tt Texts\/} that is encapsulated and hidden from clients. In particular, the
+representation could be changed at any time without invalidating any
+single client. In principle, the same is true for the file
+representation. However, stability is of paramount importance here
+because files serve the additional purposes of backing up text on
+external media and of porting text to other environments.
+
+Our choice of an internal representation of text was determined by a catalogue of requirements and desired properties. The wish list looks like this:
+
+1.) lean data structure
+
+2.) closed under editing operations 3.) efficient editing operations
+
+4.) efficient sequential reading
+
+5.) efficient direct positioning
+
+6.) super efficient internalizing
+
+7.) preserving file representations
+
+\noindent With the exception of 5.), we found these requirements met
+perfectly by an adequately generalized variant of the piece list
+technique that was originally used for Xerox PARC's Bravo text editor
+and also for ETH's former document editors Dyna and Lara
+[Gutknecht]. The original piece list is able to describe a vanilla
+text without looks. It is based on two principles:
+
+
+1.) A text is regarded as a sequence of pieces, where a piece is a
+section of a text file consisting of a sequence of contiguous
+characters.
+
+2.) Every piece is represented by a descriptor {\tt (f, pos, len)\/}, where
+the components designate a file, a starting position, and a length
+respectively. The whole text is represented as a list of piece
+descriptors (in short: piece list). The editing operations operate on
+the piece list rather than on the pieces themselves.
+
 % \beginsubsection 5.3. TEXT FRAMES.
 % \beginsubsection 5.4. THE FONT MACHINERY.
 % \beginsubsection 5.5. THE EDIT TOOLBOX.
