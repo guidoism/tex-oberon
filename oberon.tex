@@ -3114,6 +3114,43 @@ We conclude that the new aspects do not invalidate the positive rating given abo
 Eventually, we decided in favor of a simpler solution that we can easily justify by pointing out that the typical editing scenario is zooming into a local region of text, i.e. positioning at an arbitrary location once and subsequently positioning at locations in its immediate neighborhood many times. Therefore, an appropriate solution is caching the most recently calculated values (pos, piece) of the translation map. Of course, this does not solve the problem of cache misses. Notice, however, that this problem is acute only in the case of extremely long piece lists that do not occur in ordinary texts and editing sessions.
 
 We shall now illustrate the piece technique in detail at the example of two important but basic operations: Insert and read. Let us start with an overview of the data types involved. Apart from some auxiliary private variables marked with an arrow, the types {\tt Text\/}, {\tt Buffer\/}, and {\tt Reader\/} are already familiar to us from the previous Section. Type {\tt Piece\/} is completely private and hidden from the clients.
+\begintt
+Text = POINTER TO TextDesc;
+
+Notifier = PROCEDURE (T: Text; op, beg, end: INTEGER);
+
+TextDesc = RECORD
+  len: INTEGER;
+  notify: Notifier;
+  → trailer: Piece;
+  → org: INTEGER;
+  → pce: Piece
+END;
+
+Buffer = POINTER TO BufDesc;
+BufDesc = RECORD
+  len: INTEGER;
+  → header, last: Piece
+END;
+
+Reader = RECORD
+  eot: BOOLEAN;
+  fnt: Fonts.Font;
+  col, voff: INTEGER;
+  → ref: Piece;
+  → org, off: INTEGER;
+  rider: Files.Rider
+END;
+
+→ Piece = POINTER TO PieceDesc;
+→ PieceDesc = RECORD
+  f: Files.File;
+  off, len: INTEGER;
+  fnt: Fonts.Font;
+  col, voff: INTEGER;
+  prev, next: Piece
+END;
+\endtt
 
 % \beginsubsection 5.3. TEXT FRAMES.
 % \beginsubsection 5.4. THE FONT MACHINERY.
