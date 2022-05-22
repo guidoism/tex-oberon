@@ -3195,8 +3195,38 @@ END FindPiece;
 2) search to the left (prev)
 
 3) update cache if more than 50 pieces traversed
+\begintt
+1: PROCEDURE SplitPiece (p: Piece; off: INTEGER; VAR pr: Piece);
+VAR q: Piece;
+BEGIN
+2: IF off > 0 THEN
+     NEW(q);
+     q.fnt := p.fnt;
+     q.col := p.col;
+     q.voff := p.voff;
+     q.len := p.len - off;
+     q.f := p.f;
+     q.off := p.off + off;
+     p.len := off;
+  3: q.next := p.next; p.next := q;
+  4: q.prev := p; q.next.prev := q;
+     pr := q
+   ELSE pr := p
+   END
+END SplitPiece;
+\endtt
+\noindent Explanations:
 
+1) return right part piece pr after split
 
+2) generate new piece only if remaining length > 0
+
+3) insert new piece in forward chain
+
+4) insert new piece in backward chain
+
+\noindent Procedure Insert handles text insertion. It operates on a buffer that
+contains the stretch of text to be inserted:
 
 
 % \beginsubsection 5.3. TEXT FRAMES.
