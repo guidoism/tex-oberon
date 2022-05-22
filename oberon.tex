@@ -3096,8 +3096,14 @@ visualizes such a compliant piece list representing a text with
 varying looks. There are only two new aspects compared to the original
 version of the piece list discussed above: An additional operation to
 change looks and the initial state of the piece chain.
+\begintt
+change looks in a stretch [beg, end) of text = BEGIN
+  split pieces at beg and at end;
+  change looks in piece descriptors from beg to end in the chain
+END
+\endtt
 
-
+\noindent This shows that requirements 2.) and 3.) in the wish list are still satisfied.
 
 
 % \beginsubsection 5.3. TEXT FRAMES.
