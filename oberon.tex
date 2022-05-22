@@ -3105,6 +3105,15 @@ END
 
 \noindent This shows that requirements 2.) and 3.) in the wish list are still satisfied.
 
+TODO: Figure 5.4 Generalized piece chain representing a text with looks
+
+Initially, the pieces are identical with runs, and the number of elements in the piece list is equal to the number of runs. Because this number is typically small in comparison with the total number of characters in a text requirement 6.) is still met.
+
+We conclude that the new aspects do not invalidate the positive rating given above to the piece technique with regard to requirements 1.), 2.), 3.), 4.), 6.), and 7.) in our wish list. However, the requirement of efficient direct positioning remains. The problem is the necessity to scan through the piece list sequentially in order to locate the piece that contains the desired position. We investigated different solutions of this efficiency problem. They are based on different data structures connecting the piece descriptors, among them a piece tree and a variant of the piece list featuring an additional long-distance link like in a skip-list.
+
+Eventually, we decided in favor of a simpler solution that we can easily justify by pointing out that the typical editing scenario is zooming into a local region of text, i.e. positioning at an arbitrary location once and subsequently positioning at locations in its immediate neighborhood many times. Therefore, an appropriate solution is caching the most recently calculated values (pos, piece) of the translation map. Of course, this does not solve the problem of cache misses. Notice, however, that this problem is acute only in the case of extremely long piece lists that do not occur in ordinary texts and editing sessions.
+
+We shall now illustrate the piece technique in detail at the example of two important but basic operations: Insert and read. Let us start with an overview of the data types involved. Apart from some auxiliary private variables marked with an arrow, the types {\tt Text\/}, {\tt Buffer\/}, and {\tt Reader\/} are already familiar to us from the previous Section. Type {\tt Piece\/} is completely private and hidden from the clients.
 
 % \beginsubsection 5.3. TEXT FRAMES.
 % \beginsubsection 5.4. THE FONT MACHINERY.
