@@ -3170,6 +3170,32 @@ this piece.
 The fields \code{f}, \code{off}, and \code{len} in type \code{Piece} specify the underlying file, starting position in the file, and length of the piece. \code{fnt}, \code{col}, and \code{voff} are its looks. Finally \code{prev} and \code{next} are pointers to the previous piece and to the next piece in the list respectively.
 
 \code{FindPiece} and \code{SplitPiece} are auxiliary procedures that are used by almost all piece-oriented operations.
+\begintt
+PROCEDURE FindPiece (T: Text; pos: INTEGER;
+                     VAR org: INTEGER; VAR p: Piece);
+  VAR p: Piece;
+      porg: INTEGER;
+BEGIN
+  p := T.pce;
+  porg := T.org;
+1:IF pos >= porg THEN
+    WHILE pos >= porg + p.len DO INC(porg, p.len); p := p.next END
+2:ELSE p := p.prev; DEC(porg, p.len);
+    WHILE p < porg DO p := p.prev; DEC(porg, p.len) END
+  END;
+3:T.pce := p; R.org := porg; (*update cache*)
+  pce := p; org := porg
+END FindPiece;
+\endtt
+
+\noindent Explanations (referring to the line numbers in the above code excerpt)
+
+1) search to the right (next)
+
+2) search to the left (prev)
+
+3) update cache if more than 50 pieces traversed
+
 
 
 
