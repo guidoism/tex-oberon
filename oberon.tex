@@ -4030,8 +4030,26 @@ contents = nofRuns { beg end } { dx x y w h } { rasterByte }.
 
 In summary, fonts in Oberon are indexed libraries of objects. The objects are descriptions of character images in two levels of abstraction: As metric data of black boxes and as binary patterns (glyphs). Type \code{Font} is an abstract data type with intrinsic operations to internalize and to get character object data. Internalized fonts are cached in a private list.
 
-% \beginsubsection 5.5. THE EDIT TOOLBOX.
-% \beginchapter CHAPTER 6: THE MODULE LOADER.
+\beginsubsection 5.5. THE EDIT TOOLBOX.
+
+We have seen that every text frame integrates an interactive text editor that we can regard as an interpreter of a set of built-in commands (intrinsic commands). Of course, we would like to be able to extend this set by custom editing commands (extrinsic commands). Adding additional editing commands was indeed a worthwhile stress test for the underlying texts API. Module \code{Edit} is the result of this effort. It is a toolbox of consisting of some standard extrinsic editing commands.
+\begintt
+DEFINITION Edit;
+PROCEDURE Open; (*text viewer*) PROCEDURE Show; (*text*) PROCEDURE Locate; (*position*) PROCEDURE Search; (*pattern*) PROCEDURE Store; (*text*)
+PROCEDURE Recall; (*deleted text*) PROCEDURE CopyFont; PROCEDURE ChangeFont; PROCEDURE ChangeColor; PROCEDURE ChangeOffset;
+END Edit.
+\endtt
+
+\noindent The first group of commands in \code{Edit} is used to display, locate, and store texts or parts of texts. In turn they open a text file and display it, open a program text and show the declaration of a given object, locate a given position in a displayed text (main application: locating an error found by the compiler), search a pattern, and store the current state of a displayed text. Commands in the next group are related with editing. They allow restoring of the previously deleted part of text, copying a font attribute to the current text selection, and change attributes of the current text selection. Note that the commands \code{CopyFont}, \code{ChangeFont}, \code{ChangeColor}, and \code{ChangeOffset} are extrinsic variations of the intrinsic copy-look operation. The implementations of the toolbox commands are given in the Appendix.
+
+References
+
+[Gutknecht] J. Gutknecht, "Concept of the Text Editor Lara", Communications of the ACM, Sept. 1985, Vol.28, No. 9.
+[Teitelman] W. Teitelman, "A tour through Cedar", IEEE Software, 1, (2), 44-73 (1984).
+
+\beginchapter CHAPTER 6: THE MODULE LOADER.
+
+
 % \beginsubsection 6.1. LINKING AND LOADING.
 % \beginsubsection 6.2. MODULE REPRESENTATION.
 % \beginsubsection 6.3. THE LINKING LOADER.
