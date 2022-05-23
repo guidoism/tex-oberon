@@ -3733,17 +3733,64 @@ END TrackCaret;
 
 \code{TrackCaret} makes use of two auxiliary procedures \code{FlipCaret} and \code{LocateChar}. \code{FlipCaret} is used to turn off or on the pattern of the caret. \code{LocateChar} is an important operation that is used to locate the character at a given Cartesian position $(x, y)$ within the frame.
 
+\begintt
+PROCEDURE FlipCaret (F: Frame);
+BEGIN
+1:IF F.carloc.x < F.W THEN
+2:  IF (F.carloc.y >= 10) & (F.carloc.x + 12 < F.W) THEN
+3:    Display.CopyPattern(Display.white, Display.hook,
+        F.X + F.carloc.x, F.Y + F.carloc.y - 8, Display.invert)
+    END
+  END
+END FlipCaret;
+\endtt
 
+Explanations:
 
+1) - 2) if there is room for drawing the caret
 
+3) copy standard hook-shaped pattern to caret location in inverse video mode
 
+\begintt
+PROCEDURE LocateChar (F: Frame; x, y: INTEGER; VAR loc: Location);
+VAR R: Texts.Reader;
+    patadr, pos, lim: INTEGER;
+    ox, dx, u, v, w, h: INTEGER;
+BEGIN
+1:LocateLine(F, y, loc);
+2:lim := loc.org + loc.lin.len - 1;
+3:pos := loc.org; ox := F.left; dx := eolW;
+4:Texts.OpenReader(R, F.text, loc.org);
+5:WHILE pos # lim DO
+6:  Texts.Read(R, nextCh);
+7:  Fonts.GetPat(R.fnt.raster, nextCh, dx, u, v, w, h, patadr);
+    IF ox + dx <= x THEN
+      INC(pos); ox := ox + dx;
+      IF pos = lim THEN dx := eolW END
+      ELSE lim := pos
+    END
+  END ;
+8:loc.pos := pos; loc.dx := dx; loc.x := ox
+END LocateChar;
+\endtt
 
+Explanations:
 
+1) locate text line corresponding to at y
 
+2) set limit to the last actual character on this line
 
+3) start locating loop with first character on this line
 
+4) setup reader and read first character of this line
 
+5) - 7) scan through characters of this line until limit or x is reached
 
+6) get character width dx of current character 8) return location found
+
+Note that the need to read characters from the text (again) in \code{LocateChar} has its roots in the so-called \emph{proportional} fonts in which our rich texts are represented. We found that keeping character widths is an unnecessary optimization thanks to the buffering capabilities of the underlying file system. In the case of fixed-pitch fonts a simple division by the character width would be sufficient, of course.
+
+Finally, procedure \code{LocateLine} uses the line list to locate the desired text line without reading text at all.
 
 % \beginsubsection 5.4. THE FONT MACHINERY.
 % \beginsubsection 5.5. THE EDIT TOOLBOX.
