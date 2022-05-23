@@ -4180,10 +4180,64 @@ ptrrefs = {word} 0.
 
 \beginchapter CHAPTER 7: THE FILE SYSTEM.
 
+\beginsubsection 7.1. FILES.
 
+It is essential that a computer system has a facility for storing data over longer periods of time and for retrieving the stored data. Such a facility is called a \emph{file system}. Evidently, a file system cannot accommodate all possible data types and structures that will be programmed in the future. Hence, it is necessary to provide a simple, yet flexible enough base structure that allows any data structure to be mapped onto this base structure (and vice-versa) in a reasonably straight-forward and efficient way. This base structure, called \emph{file}, is a sequence of bytes. As a consequence, any given structure to be transformed into a file must be sequentialized. The notion of sequence is indeed fundamental, and it requires no further explanation and theory. We recall that texts are sequences of characters, and that characters are typically represented as bytes.
 
+The sequence is also the natural abstraction of all physically moving storage media. Among them are magnetic tapes and disks. Magnetic media have the welcome property of non-volatility and are therefore the primary choices for storing data over longer periods of time, especially over periods where the equipment is switched off. Sequential access is also necessary for media that allow access only by large blocks, such as flash-RAMs and SD-cards.
 
-% \beginsubsection 7.1. FILES.
+A further advantage of the sequence is that its transmission between media is simple too. The reason is that its structural information is inherent and need not be encoded and transmitted in addition to the actual data. This implicitness of structural information is particularly convenient in the case of moving storage media, because they impose strict timing constraints on transmission of consecutive elements. Therefore, the process which generates (or consumes) the data must be effectively decoupled from the transmission process that observes the timing constraints. In the case of sequences, this decoupling is simple to achieve by dividing a sequence into subsequences which are buffered. A sequence is output to the storage medium by alternately generating data (and filling the buffer holding the current subsequence) and transmitting data (fetching elements from the buffer and transmitting them). The size of the subsequences (and the buffer) depends on the storage medium under consideration: there must be no timing constraints between accesses to consecutive subsequences.
+
+The file is not a static data structure like the array or the record, because the length may increase dynamically, i.e. during program execution. On the other hand, the sequence is less flexible than general dynamic structures, because it cannot change its form, but only its length, since elements can only be appended but not inserted. It might therefore be called a semi-dynamic structure.
+
+The discipline of purely sequential access to a file is enforced by restricting access to calls of specific procedures, typically read and write procedures for scanning and generating a file. In the jargon of data processing, a file must be opened before reading or writing is possible. The opening implies the initialization of a reading and writing mechanism, and in particular the fixing of its initial position. Hence each (opened) file not only has a value and a length, but also a position attributed to it. If reading must occur from several positions (still sequentially) alternately, the file is ``multiply opened''; it implies that the same file is represented by several variables, each denoting a different position.
+
+This widespread view of files is conceptually unappealing, and the Oberon file system therefore departs from it by introducing the notion of a rider. A file simply has a value, the sequence of bytes, and a length, the number of bytes in the sequence. Reading and writing occurs through a rider, which denotes a position. ``Multiple opening'' is achieved by simply using several riders riding on the same file. Thereby the two concepts of data structure (\emph{file}) and access mechanism (\emph{rider}) are clearly distinct and properly disentangled.
+
+Given a file \code{f}, a rider \code{r} is placed on a file by the call
+\code{Files.Set (r, f, pos)}, where \code{pos} indicates the position from which reading or writing is to start. Calls of \code{Files.Read (r, x)} and \code{Files.Write (r, x)} implicitly increment the position beyond the element read or written, and the file is implicitly denoted via the explicit parameter \code{r}, which denotes a rider. The rider has two (visible) attributes, namely \code{r.eof} and \code{r.res}. The former is set to \code{FALSE} by \code{Files.Set}, and to \code{TRUE} when a read operation could not be performed, because the end of the file had been reached. \code{r.res} serves as a result variable in procedures \code{ReadBytes} and \code{WriteBytes} allowing one to check for correct termination.
+
+A file system must not only provide the concept of a sequence with its accessing mechanism, but also a registry. This implies that files be identified, that they can be given a name by which they are registered and retrieved. The registry or collection of registered names is called the file system's directory. Here we wish to emphasize that the concepts of files as data structure with associated access facilities on the one hand, and the concept of file naming and directory management on the other hand must also be considered separately and as independent notions. In fact, in the Oberon system their implementation underscores this separation by the existence of two modules: \code{Files} and \code{FileDir}. The following procedures are available. They are summarized by the interface specification (definition) of module \code{Files}.
+\begintt
+DEFINITION Files;
+  TYPE File = POINTER TO FileDesc;
+     FileDesc = RECORD END ;
+     Rider = RECORD eof: BOOLEAN; res: INTEGER END ;
+
+  PROCEDURE Old(name: ARRAY OF CHAR): File;
+  PROCEDURE New(name: ARRAY OF CHAR): File;
+  PROCEDURE Register(f: File);
+  PROCEDURE Close(f: File);
+  PROCEDURE Purge(f: File);
+  PROCEDURE Length(f: File): INTEGER;
+  PROCEDURE Date(f: File): INTEGER);
+  PROCEDURE Set(VAR r: Rider; f: File; pos: INTEGER);
+  PROCEDURE ReadByte(VAR r: Rider; VAR x: BYTE);
+  PROCEDURE ReadBytes(VAR r: Rider; VAR x: ARRAY OF BYTE; n: INTEGER);
+  PROCEDURE Read(VAR r: Rider; VAR ch: CHAR);
+  PROCEDURE ReadInt(VAR r: Rider; VAR n: INTEGER);
+  PROCEDURE ReadSet(VAR r: Rider; VAR s: SET);
+  PROCEDURE ReadReal(VAR r: Rider; VAR x: REAL);
+  PROCEDURE ReadString(VAR r: Rider; VAR s: ARRAY OF CHAR);
+  PROCEDURE ReadNum(VAR r: Rider; VAR n: INTEGER);
+  PROCEDURE WriteByte(VAR r: Rider; x: BYTE);
+  PROCEDURE WriteBytes(VAR r: Rider; x: ARRAY OF BYTE; n: INTEGER);
+  PROCEDURE WriteInt(VAR r: Rider; n: INTEGER);
+  PROCEDURE WriteSet(VAR r: Rider; s: SET);
+  PROCEDURE WriteReal(VAR r: Rider; x: REAL);
+  PROCEDURE WriteString(VAR r: Rider; x: ARRAY OF CHAR);
+  PROCEDURE WriteNum(VAR r: Rider; n: INTEGER);
+  PROCEDURE Pos(VAR r: Rider): INTEGER;
+  PROCEDURE Base(VAR r: Rider): File;
+  PROCEDURE Rename(old, new: ARRAY OF CHAR; VAR res: INTEGER);
+  PROCEDURE Delete(name: ARRAY OF CHAR; VAR res: INTEGER);
+END Files.
+\endtt
+
+\noindent \code{New(name)} yields a new (empty) file without registering it in the directory. \code{Old(name)} retrieves the file with the specified name, or yields \code{NIL}, if it is not found in the directory. \code{Register(f)} inserts the name of \code{f} (specified in the call of \code{New}) in the directory. An already existing entry with this name is replaced. \code{Close(f)} must be called after writing is completed and the file is not to be registered. \code{Close} actually stands for ``close buffers'', and is implied in the procedure \code{Register}. Procedure \code{Purge}\code{ will} be explained at the end of section 7.2.
+
+The sequential scan of a file \code{f} (reading characters) is programmed as shown in the following template:
+
 % \beginsubsection 7.2 IMPLEMENTATION OF FILES ON A RANDOM-ACCESS STORE.
 % \beginsubsection 7.3 IMPLEMENTATION OF FILES ON A DISK.
 % \beginsubsection 7.4 THE FILE DIRECTORY.
