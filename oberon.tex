@@ -4063,10 +4063,97 @@ Similarly, the object file must contain a table of imported modules, containing 
 
 Certain linkage information must not only be provided in each object file, but also be present along with each loaded module's program code, because a module to be loaded must be linkable with modules loaded at any earlier time without reading their object files again.
 
+\beginsubsection 6.2. MODULE REPRESENTATION.
 
-% \beginsubsection 6.2. MODULE REPRESENTATION.
-% \beginsubsection 6.3. THE LINKING LOADER.
-% \beginsubsection 6.4. THE TOOLBOX OF THE LOADER.
+The primary requirement is that a system must be represented in a form that allows to add new modules quickly. What is a sensible representation for this purpose? The simplest solution that comes to mind is a list of module blocks containing sections for the global data, for the program code, and perhaps meta data for the linking process. The list is rooted in a variable global to the loader module, here called \code{Modules}.
+
+TODO: Fig. 6.1. System of 4 modules
+
+The first part, containing the link to the next module, is called the module descriptor. On the Oberon System, it contains further links to the various sections of a module. The type \code{Module} is defined as follows:
+\begintt
+TYPE Module = POINTER TO ModDesc;
+ModuleName = ARRAY 32 OF CHAR;
+ModDesc = RECORD
+  name: ModuleName;
+  next: Module;
+  key, num, size, refcnt: INTEGER;
+  data, code, imp, cmd, ent, ptr: INTEGER (*addresses*)
+END ;
+\endtt
+
+\noindent \code{key} is the module's key used for version consistency checking. The key changes if, and only if, the module's interface and thereby its symbol file changes. \code{num} is the module's number, which is the index of the module's entry in a global module table, referenced by the processor's \code{MT} register. The invariant relationship is
+\begintt
+ModTable[mod.mno] = mod.data
+\endtt
+
+\noindent for all \code{mod} in the module list. \code{size} is the entire module block's size excluding the descriptor, and \code{refcnt} is the number of other modules importing this module. This number is used to check whether a module can be released by procedure \code{Modules.Free}.
+
+TODO: Figure 6.2. Module block headed by descriptor
+
+The section with meta data follows the data and code areas and consists of several parts. \emph{Imports} is an array of the modules imported by this module, each entry being the address of the respective module descriptor. \emph{Commands} is a sequence of procedure identifiers followed by their offset in the code section. This section is used when activating a command. \emph{Entries} is an array of offsets of all exported entities (including commands). This section is used by the loader itself for linking. \emph{Pointer refs} is an array of offsets of global pointer variables in the data section. These are used by the garbage collector as the roots of graphs of heap objects in use.
+
+\beginsubsection 6.3. THE LINKING LOADER.
+
+The purpose of the loader is to read object files, and to transform the file representation of modules into their internal image.
+
+The loader is represented by procedure \code{Load} in module \code{Modules}. It accepts a name and returns a pointer to the specified module's descriptor. It first scans the list searching for the named module. Only if it is not present, the module is loaded and added to the list. Duplications therefore cannot occur.
+\begintt
+mod := root;
+WHILE (mod # NIL) & (name # mod.name) DO mod := mod.next END ;
+IF mod = NIL THEN (*load*) F := ThisFile(name); Files.Set(R, F, 0); ...
+\endtt
+
+\noindent First, the header of the respective object file is read. It specifies the required size of the block which is allocated in the module area at the position indicated by the global variable \code{AllocPtr}. Then the list of imports of the module being imported is read, and these module are imported. Evidently procedure \code{Load} is used recursively. Because cyclic imports are excluded, recursion always terminates.
+\begintt
+Files.ReadString(R, impname); (*imports*)
+WHILE (impname[0] # 0X) & (res = 0) DO
+  Files.ReadInt(R, impkey);
+  Load(impname, impmod); import[nofimps] := impmod; importing := name1;
+  IF res = 0 THEN
+    IF impmod.key = impkey THEN INC(impmod.refcnt); INC(nofimps)
+    ELSE error(3, name); imported := impname
+    END
+  END ;
+  Files.ReadString(R, impname)
+END
+\endtt
+
+\noindent 
+The loading process stops, if a key mismatch is detected (\code{err} = 3). After successful loading of all imports, the loading of the actual module proceeds by allocating a descriptor and then reading the remaining sections of the file. The data is allocated (and cleared) and the code section is read in a straight-forward way without alteration.
+
+At the very end of the file three integers called \code{fixorgP}, \code{fixorgD}, and \code{fixorgT} are read. They are the anchors of linked lists in the program code of instructions that need fixups. These fixups are performed only after the entire file had been read. Traversing the P-list, the pairs mno-pno are replaced by computed offsets in \code{BL} instructions (procedure calls). Traversing the D-list, addresses of \code{LDR} instructions and instruction pairs are fixed up, and traversing the T-list, addresses of type descriptors are computed and inserted. This low-level piece of code is shown below for call instructions (\code{BL}). Those for the D-List and the T-list are analogous.
+\begintt
+adr := mod.code + fixorgP*4;
+WHILE adr # mod.code DO
+  SYSTEM.GET(adr, inst);
+  mno := inst DIV 100000H MOD 10H; (*decompose*)
+  pno := inst DIV 1000H MOD 100H;
+  disp := inst MOD 1000H;
+  SYSTEM.GET(mod.imp + (mno-1)*4, impmod);
+  SYSTEM.GET(impmod.ent + pno*4, dest); dest := dest + impmod.code;
+  offset := (dest - adr - 4) DIV 4;
+  SYSTEM.PUT(adr, (offset MOD 1000000H) + 0F7000000H); (*compose*)
+  adr := adr - disp*4
+END ;
+\endtt
+
+\noindent After the module has been loaded successfully, its initialisation body is executed.
+
+Apart from \code{Load}, module \code{Modules} also contains the procedures
+\begintt
+PROCEDURE ThisCommand (mod: Module; name: ARRAY OF CHAR): Command;
+PROCEDURE Free (name: ARRAY OF CHAR);
+\endtt
+
+\noindent The former yields the procedure named \code{name} from module \code{mod}. It is used in \code{TextFrames.Call} for activating command procedures. The latter unloads the named module, i.e. removes it from the list of loaded modules.
+
+The frequent use of the low-level procedures \code{SYSTEM.GET} and \code{SYSTEM.PUT} is easily justified in base modules such as the loader or device drivers. After all, here data are transferred into untyped main storage.
+
+\beginsubsection 6.4. THE TOOLBOX OF THE LOADER.
+
+
+
+
 % \beginsubsection 6.5. THE OBERON OBJECT FILE FORMAT.
 % \beginchapter CHAPTER 7: THE FILE SYSTEM.
 % \beginsubsection 7.1. FILES.
