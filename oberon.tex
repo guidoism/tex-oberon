@@ -242,7 +242,7 @@ parts inaccessible through a hiding facility inherent in its
 visibility rules. The latter is of course much more flexible and
 powerful, and the former indeed plays an almost negligible role in our
 system. Hiding is important because it allows maintenance of certain
-properties (called {\it invariants\/}) of an abstraction to be
+properties (called \emph{invariants}) of an abstraction to be
 guaranteed. Abstraction is indeed the key of any modularization, and
 without modularization every hope of being able to guarantee
 reliability and correctness vanishes. Clearly, the Oberon System was
@@ -269,9 +269,9 @@ faster and cheaper electronic memory components. The high-resolution
 display marked one of the few very significant break-throughs in the
 history of computer development. The typical bandwidth of a modern
 display is in the order of 100 MHz. Primarily the high-resolution
-display made visual output a subject of abstraction and {\it resource management\/}.
+display made visual output a subject of abstraction and \emph{resource management}.
 In the Oberon System, the display is partitioned into
-{\it viewers\/}, also called {\it windows\/}, or more precisely, into {\it frames\/},
+\emph{viewers}, also called \emph{windows}, or more precisely, into \emph{frames},
 rectangular areas of the screen(s). A viewer typically consists of two
 frames, a title bar containing a subject name and a menu of commands,
 and a main frame containing some text, graphic, picture, or other
@@ -282,14 +282,14 @@ The System provides routines for generating a frame (viewer), for
 moving and for closing it. It allocates a new viewer at a specified
 place, and upon request delivers hints as to where it might best be
 placed. It keeps track of the set of opened viewers. This is what is
-called {\it viewer management\/}, in contrast to the handling of their
+called \emph{viewer management}, in contrast to the handling of their
 displayed contents.
 
 But high interactivity requires not only a high bandwidth for visual
 output, it demands also flexibility of input. Surely, there is no need
 for an equally large bandwidth, but a keyboard limited by the speed of
 typing to about 100 Hz is not good enough. The break-through on this
-front was achieved by the so-called {\it mouse\/}, a pointing device which
+front was achieved by the so-called \emph{mouse}, a pointing device which
 appeared roughly at the same time as the high-resolution display.
 
 This was by no means just a lucky coincidence. The mouse comes to
@@ -310,7 +310,7 @@ able to signal a request with the same hand that determines the cursor
 position, the user obtains the direct impression of issuing
 position-dependent requests. Position-dependence is realized in
 software by delegating interpretation of the signal to a procedure---
-a so-called {\it handler\/} or interpreter ---which is local to the viewer in
+a so-called \emph{handler} or interpreter ---which is local to the viewer in
 whose area the cursor momentarily appears. A surprising flexibility of
 command activation can be achieved in this manner by appropriate
 software. Various techniques have emerged in this connection,
@@ -322,9 +322,9 @@ functions to the keys may of course easily lead to confusion when
 every application prescribes different key assignment. This is,
 however, easily avoided by the adherence to certain ``global''
 conventions. In the Oberon System, the left button is primarily used
-for {\it marking\/} a position (setting a caret), the middle button for
-issuing general {\it commands\/} (see below), and the right button for
-{\it selecting\/} displayed objects.
+for \emph{marking} a position (setting a caret), the middle button for
+issuing general \emph{commands} (see below), and the right button for
+\emph{selecting} displayed objects.
 
 Recently, it has become fashionable to use overlapping windows
 mirroring documents being piled up on one's desk. We have found this
@@ -380,7 +380,7 @@ must, however, be programmed explicitly.
 
 The parameter text must refer to objects that exist before command
 execution starts and are quite likely the result of a previous command
-interpretation. In most operating systems, these objects are {\it files\/}
+interpretation. In most operating systems, these objects are \emph{files}
 registered in the directory, and they act as interfaces between
 commands. The Oberon System broadens this notion; the links between
 consecutive commands are not restricted to files, but can be any
@@ -390,13 +390,13 @@ command termination, as mentioned above.
 This tremendous flexibility seems to open Pandora's box, and indeed it
 does when misused. The reason is that global variables' states may
 completely determine and alter the effect of a command. The variables
-represent {\it hidden states\/}, hidden in the sense that the user is in
+represent \emph{hidden states}, hidden in the sense that the user is in
 general unaware of them and has no easy way to determine their
 value. The positive aspect of using global variables as interfaces
 between commands is that some of them may well be visible on the
 display. All viewers---and with them also their contents---are
 organized in a data structure that is rooted in a global variable (in
-module {\it Viewers\/}). Parts of this variable therefore constitute {\it visible states\/},
+module \emph{Viewers}). Parts of this variable therefore constitute \emph{visible states},
 and it is highly appropriate to refer to them as command
 parameters.
 
@@ -463,11 +463,11 @@ single-thread) system. How is this apparent paradox to be understood?
 Perhaps it is best explained by considering the basic mode of
 operation. Unless engaged in the interpretation of a command, the
 processor is engaged in a loop continuously polling event
-sources. This loop is called the {\it central loop\/}; it is contained in
+sources. This loop is called the \emph{central loop}; it is contained in
 module {\tt Oberon} which may be regarded as the system's heart. The two
 fixed event sources are the mouse and the keyboard. If a keyboard
 event is sensed, control is dispatched to the handler installed in the
-so-called {\it focus viewer\/}, designated as the one holding the caret. If a
+so-called \emph{focus viewer}, designated as the one holding the caret. If a
 mouse event (key) is sensed, control is dispatched to the handler in
 which the cursor currently lies. This is all possible under the
 paradigm of a single, uninterruptible process.
@@ -506,13 +506,13 @@ The system offers the possibility to insert further polling commands
 in the central loop. This is necessary if additional event sources are
 to be introduced. The prominent example is a network, where commands
 may be sent from other workstations. The central loop scans a list of
-so-called {\it task descriptors\/}. Each descriptor refers to a command
+so-called \emph{task descriptors}. Each descriptor refers to a command
 procedure. The two standard events are selected only if their guard
 permits, i.e. if either keyboard input is present, or if a mouse event
 occurs. Inserted tasks must provide their own guard in the beginning
 of the installed procedure.
 
-The example of a network inserting commands, called {\it requests\/}, raises a
+The example of a network inserting commands, called \emph{requests}, raises a
 question: what happens if the processor is engaged in the execution of
 another command when the request arrives? Evidently, the request would
 be lost unless measures are taken. The problem is easily remedied by
@@ -539,7 +539,7 @@ computer. The ease and flexibility in the way pieces of text can be
 selected, moved, copied, and designated as command and as command
 parameters, drastically reduces the need for typing. The mouse becomes
 the dominant input device: the keyboard merely serves to input textual
-data. This is accentuated by the use of so-called {\it tool texts\/},
+data. This is accentuated by the use of so-called \emph{tool texts},
 compositions of frequently used commands, which are typically
 displayed in the narrower system track of viewers. One simply doesn't
 type commands! They are usually visible somewhere already. Typically,
@@ -603,7 +603,7 @@ module and by extending them with attributes appropriate for graphics.
 
 
 This requires an adequate language feature. The language Oberon
-provides precisely this facility in the form of {\it type extensions\/}. The
+provides precisely this facility in the form of \emph{type extensions}. The
 language was designed for this reason; Modula-2 would have been the
 choice, had it not been for the lack of a type extension feature. Its
 influence on system structure was profound, and the results have been
@@ -645,7 +645,7 @@ here to modules which contain device drivers. But module Kernel also
 belongs to this class; it ``imports memory'' and includes the disk
 driver. The modules on the top of the hierarchy effectively export to
 the user. As the user has direct access to command procedures, we call
-these top members {\it command modules\/} or tool modules.
+these top members \emph{command modules} or tool modules.
 
 The hierarchy of the basic system is shown in a table of direct
 imports and as a graph in Figure 2.2. The picture is simplified by
@@ -681,7 +681,7 @@ log text. The log text typically serves to issue prompts and short
 failure reports of commands. The text is displayed in a log viewer
 that is automatically opened when module {\tt System\/} is initialized. Module
 {\tt Oberon\/} furthermore contains the two markers used globally on the
-display, the {\it mouse cursor\/} and the {\it star pointer\/}. It exports procedures
+display, the \emph{mouse cursor} and the \emph{star pointer}. It exports procedures
 to draw and to erase them, and allows the installation of different
 patterns for them.
 
@@ -721,11 +721,11 @@ we will proceed essentially in the top-down direction.
 
 Chapters 3--5 describe the outer core of the system. Chapter 3
 focusses on the dynamic aspects. In particular, this chapter
-introduces the fundamental operational units of {\it task\/} and
-{\it command\/}. Oberon's tasking model distinguishes the categories of
-{\it interactiv taskse\/} and {\it background tasks\/}. Interactive tasks are
+introduces the fundamental operational units of \emph{task} and
+\emph{command}. Oberon's tasking model distinguishes the categories of
+\emph{interactiv taskse} and \emph{background tasks}. Interactive tasks are
 represented on the display screen by rectangular areas, so-called
-{\it viewers\/}. Background tasks need not be connected with any displayed
+\emph{viewers}. Background tasks need not be connected with any displayed
 object. They are scheduled with low priority when interactions are
 absent. A good example of a background task is the memory garbage
 collector. Both interactive tasks and background tasks are mapped to a
@@ -744,7 +744,7 @@ allocation of viewers. A detailed study of the exact role of Oberon
 viewers follows. Type {\tt Viewer\/} is presented as an object class with an
 open message interface providing a conceptual basis for far-reaching
 extensibility. Viewers are then recognized as just a special case of
-so-called {\it frames\/} that may be nested. A category of standard viewers
+so-called \emph{frames} that may be nested. A category of standard viewers
 containing a menu frame and a frame of contents is investigated. The
 next topic is cursor handling. A cursor in Oberon is a marked
 path. Both viewer manager and cursor handler operate on an abstract
@@ -764,7 +764,7 @@ a text can be produced by one command, edited by a user, and then
 consumed by a next command. Commands themselves can be represented
 textually in the form {\tt M.P\/}o, followed by a textual parameter
 list. Consequently, any command can be called directly from within a
-text (so-called {\it tool\/}) simply by pointing at it with the
+text (so-called \emph{tool}) simply by pointing at it with the
 mouse. However, the core of this chapter is a presentation of Oberon's
 text system as a case study in program modularization. The concerns of
 managing a text and displaying it are nicely separated. Both the text
@@ -773,7 +773,7 @@ well as an internally hidden data structure. Finally in this chapter,
 Oberon's type-font management and the toolbox for editing are
 discussed.
 
-Chapters 6--9 describe the {\it inner core\/}, still in a top-down
+Chapters 6--9 describe the \emph{inner core}, still in a top-down
 path. Chapter~6 explains the loader of program modules and motivates
 the introduction of the data type {\tt Module\/}. The chapter includes the
 management of the memory part holding program code and defines the
@@ -795,7 +795,7 @@ central storage management was one of the key design decisions,
 guaranteeing an efficient and economical use of storage. The chapter
 explains the store's partitioning into specific areas. Its central
 concern, however, is the discussion of dynamic storage management in
-the partition called the {\it heap\/}. The algorithm for allocation
+the partition called the \emph{heap}. The algorithm for allocation
 (corresponding to the intrinsic procedure {\tt NEW\/}) and for retrieval
 (called garbage collection) are explained in detail.
 
@@ -864,11 +864,11 @@ complicated structures and rarely used embellishments.
 
 The compiler and thereby the chapter is partitioned into two main
 parts. The first is language- specific, but does not refer to any
-particular target computer. It consist of the {\it scanner\/} and the
-{\it parser\/}. This part is therefore of most general interest to the
+particular target computer. It consist of the \emph{scanner} and the
+\emph{parser}. This part is therefore of most general interest to the
 readership. The second part is, essentially, language-independent, but
 is specifically tailored to the instruction set of the target
-computer. It is called the {\it code generator\/}.
+computer. It is called the \emph{code generator}.
 
 Texts play a predominant role in the Oberon System. Their preparation
 is supported by the system's major tool, the editor. In Chapter 13 we
@@ -902,7 +902,7 @@ The Draw System has been extensively used for the preparation of
 diagrams of electronic circuits. This application suggests a concept
 that is useful elsewhere too, namely a recursive definition of the
 notion of object. A set of objects may be regarded as an object itself
-and be given a name. Such an object is called a {\it macro\/}. It is a
+and be given a name. Such an object is called a \emph{macro}. It is a
 challenge to the designer to implement a macro facility such that it
 is also extensible, i.e. in no way refers to the type of its elements,
 not even in its input operations of files on which macros are stored.
@@ -932,7 +932,7 @@ consisting of a register bank, an arithmetic-logic unit, including a
 floating-point unit. Typical optimization facilities, like pipelining
 and cache memory, have been omitted for the sake of transparency and
 simplicity. The processor circuit is described in the language
-{\it Verilog\/}.
+\emph{Verilog}.
 
 Chapter 17 describes the environment in which the processor is
 embedded. This environment consists of the interfaces to main memory
@@ -967,7 +967,7 @@ workstation that is possibly integrated into a local area network.
 We start the presentation in Section 3.1 with a clarification of the
 technical notion of task. In Section 3.2, we continue with a detailed
 explanation of the scheduling strategy. Then, in Section 3.3, we
-introduce the concept of {\it command\/}. And finally, Section 3.4 provides an
+introduce the concept of \emph{command}. And finally, Section 3.4 provides an
 overview of predefined system-oriented toolboxes, i. e. coherent
 collections of commands devoted to some specific topic. Example topics
 are system control and diagnosis, display management, and file
@@ -975,8 +975,7 @@ management.
 
 \beginsubsection 3.1. THE CONCEPT OF TASK.
 
-In principle, we distinguish two categories of tasks in Oberon: {\it
-  Interactive tasks\/} and {\it background tasks\/}. Loosely speaking,
+In principle, we distinguish two categories of tasks in Oberon: {\\emph{Interactive tasks} and \emph{background tasks}. Loosely speaking,
 interactive tasks are bound to local regions on the display screen and
 to interactions with their contents while, in contrast, background
 tasks are system-wide and not necessarily related to any specific
@@ -984,7 +983,7 @@ displayed entity.
 
 \beginsubsubsection 3.1.1. Interactive tasks.
 
-Every interactive task is represented by a so-called {\it viewer\/}. Viewers
+Every interactive task is represented by a so-called \emph{viewer}. Viewers
 constitute the interface to Oberon's display-system. They embody a
 variety of roles that are collected in an abstract data type
 {\tt Viewer\/}. We shall give a deeper insight into the display system in
@@ -1022,14 +1021,14 @@ TODO: Figure 3.1 Typical Oberon display configuration with tool track on the rig
 
 However, we should point out the use of object-oriented
 terminology. It is justified because {\tt handle\/} is a procedure variable (a
-{\it handler\/}) whose identity depends on the specific viewer. A call
+\emph{handler}) whose identity depends on the specific viewer. A call
 {\tt V.handle(V, M)} can therefore be interpreted as the sending of a
 message {\tt M\/} to be handled by the method of the receiving viewer {\tt V\/}.
 
 We recognize an important difference between the standard
 object-oriented model and our handler paradigm. The standard model is
 closed in the sense that only a fixed set of messages is understood by
-a given class of objects. In contrast, the handler paradigm is {\it open\/}
+a given class of objects. In contrast, the handler paradigm is \emph{open}
 because it defines just the root ({\tt ViewerMsg\/}) of a potentially
 unlimited tree of extending message types. For example, a concrete
 handler might be able to handle messages of type {\tt MyViewerMsg\/}, where
@@ -1047,7 +1046,7 @@ by an object is a mere implementation issue, that is, it has no effect
 at all on the object’s compile-time interface and on the system
 integrity. It is fair to mention though that such a high degree of
 extensibility does not come for free. The price to pay is the
-obligation of explicit message {\it dispatching at runtime\/}. The following
+obligation of explicit message \emph{dispatching at runtime}. The following
 Chapters will capitalize on this property.
 
 Coming back to the perspective of tasks, we note that each sending of
@@ -1139,7 +1138,7 @@ however, is the task scheduler (often referred to as ``Oberon loop'')
 that can be regarded as the system's dynamic center.
 
 Before studying the scheduler in detail we need some more
-preparation. We start with the institution of the {\it focus viewer\/}. By
+preparation. We start with the institution of the \emph{focus viewer}. By
 definition, this is a distinguished viewer that by convention consumes
 subsequent keyboard input. Note that we identify the focus viewer with
 the focus task, hereby making use of the one-to-one correspondence
@@ -1194,7 +1193,7 @@ manner. Interactive tasks have priority.
 Having consciously excluded exceptional program behavior in our
 explanations so far, some comments about the way of runtime
 continuation in the case of a failing task or, in other words, in the
-case of a {\it trap\/} are in order here. On the (abstract) level of tasks, we
+case of a \emph{trap} are in order here. On the (abstract) level of tasks, we
 can identify three sequential actions of recovery taken after a
 program failure:
 \begintt
@@ -1236,10 +1235,10 @@ or ``supervisor call'' and on files taking the role of
 with the development of high-level programming languages towards
 extreme abstraction.
 
-We have put greatest emphasis in Oberon on closing the {\it semantic gap\/}
+We have put greatest emphasis in Oberon on closing the \emph{semantic gap}
 between application software packages and the system platform. The
 result of our efforts is a highly expressive and consistent
-{\it application programming interface\/} (API) in the form of an explicit
+\emph{application programming interface} (API) in the form of an explicit
 hierarchy of module definitions. Perhaps the most significant and most
 notable outcome of this approach is a collection of very powerful and
 system-wide abstract data types like
@@ -1249,8 +1248,8 @@ system-wide abstract data types like
 \beginsubsubsection 3.3.1. Atomic actions.
 
 The most important generic function of any operating system is
-executing {\it programs\/}. A clarification of the term {\it program\/} as it is used
-in Oberon comprises two views: a {\it static\/} one and a {\it dynamic\/}
+executing \emph{programs}. A clarification of the term \emph{program} as it is used
+in Oberon comprises two views: a \emph{static} one and a \emph{dynamic}
 one. Statically, an Oberon program is simply a package of software
 together with an entry point. More formally, an Oberon program is a
 pair {\tt (M*, P)\/}, where {\tt M\/} is an arbitrary module, {\tt P\/} is an exported
@@ -1261,8 +1260,8 @@ and {\tt N\/} are different modules. Rather, their intersection is a superset
 of the operating system.
 
 Viewed dynamically, an Oberon program is defined as an atomic action
-(often called {\it command\/}) operating on the global system state, where
-{\it atomic\/} means ``without user interaction''. This definition is just a
+(often called \emph{command}) operating on the global system state, where
+\emph{atomic} means ``without user interaction''. This definition is just a
 necessary consequence of our model of non-preemptive task scheduling
 with the benefit of a single carrier thread. We can argue like this:
 When a traditional interactive program requires input from the user,
@@ -1274,7 +1273,7 @@ systems these interruptions may occur at any time, in Oberon they can
 occur only after the completion of a task, of a command.
 
 Quintessentially, Oberon programs are represented in the form of
-{\it commands\/} that are in the form of exported parameterless procedures
+\emph{commands} that are in the form of exported parameterless procedures
 that do not interact with the user of the system.
 
 Returning to the calling and execution of programs we now arrive at
@@ -1326,7 +1325,7 @@ Par: RECORD vwr: Viewers.Viewer;
 In principle, commands operate on the entire system and can access the
 current global state via the system's powerful abstract modular
 interface, of which the list of actual parameters is just one
-component. Another one is the so-called {\it system log\/} which is a
+component. Another one is the so-called \emph{system log} which is a
 system-wide protocol reporting on the progress of command execution
 and on exceptional events in chronological order. The log is
 represented as a global variable of type {\tt Text\/}:
@@ -1413,13 +1412,13 @@ module that encapsulates some data, letting them be accessed only
 through exported procedures and functions. A good example is Module
 {\tt FileDir\/}, encapsulating the file directory and protecting it from
 disruptive access. A second kind is the module representing an
-{\it abstract data type\/}, exporting a type and its associated
+\emph{abstract data type}, exporting a type and its associated
 operators. Typical examples are modules {\tt Files\/}, {\tt Modules\/}, {\tt Viewers\/}, and
 {\tt Texts\/}. A third kind is the collection of procedures pertaining to the
 same topic, such as module {\tt RS-232\/} handling communication over a serial
 line.
 
-Oberon adds a fourth form: the {\it toolbox\/}. By definition, this is a pure
+Oberon adds a fourth form: the \emph{toolbox}. By definition, this is a pure
 collection of commands in the sense of the previous section. Toolboxes
 distinguish themselves principally from the other forms of modules by
 the fact that they lie on top of the modular hierarchy. Toolbox
@@ -1468,9 +1467,9 @@ END System;
 
 \noindent An important consequence of our integrated systems approach is the
 possibility of constructing a universal, interactive 
-{\it command interpreter\/} bound to viewers of {\it textual contents\/}. If the text obeys
+\emph{command interpreter} bound to viewers of \emph{textual contents}. If the text obeys
 the following syntax (specified in Extended Backus-Naur Form EBNF), we
-call it {\it command tool\/}:
+call it \emph{command tool}:
 \begintt
 CommandTool = { [Comment] CommandName [ParameterList] }.
 \endtt
@@ -1547,7 +1546,7 @@ a collection of possibly mutually overlapping pages of paper that are
 laid out on the desktop. By projecting such a configuration onto the
 surface of a screen we get the familiar picture of Figure 4.1 showing
 a collection of partially or totally visible rectangular areas on a
-background, so-called {\it windows\/} or {\it viewers\/}.
+background, so-called \emph{windows} or \emph{viewers}.
 
 TODO: Figure 4.1 Desktop showing partially overlapping viewers
 
@@ -1574,7 +1573,7 @@ management \footnote1{C. Binding, User Interface Components based on a Multiple 
 \footnote2{M. Wille, Overview: Entwurf und Realisierung eines Fenstersystems für Arbeitsplatzrechner, Diss. ETH Nr. 8771, 1988.}
 is hard to justify. Therefore, alternate
 strategies to structure a display screen have been looked for. An
-interesting class of established solutions can be titled as {\it tiling\/}.
+interesting class of established solutions can be titled as \emph{tiling}.
 There are several variants of tiling \footnote3{[Cohen] E.S. Cohen, E.T. Smith, L.A. Iverson, Constraint-Based Tiled Windows, IEEE, 1985}. Perhaps the
 most obvious one (because the most unconstrained one) is based on
 iterated horizontal or vertical splitting of existing
@@ -1679,7 +1678,7 @@ Sections 4.4 and 5.2 respectively. Thereby, the built-in type Text
 will serve as a prime example of a document type.
 
 The activities that a viewer performs are basically controlled by
-events or, more precisely, by messages representing {\it event notices\/}. We
+events or, more precisely, by messages representing \emph{event notices}. We
 shall explain this in detail in Sections 4.4 and 5.3 in the cases of
 an abstract class of standard viewers and a class of viewers
 displaying standard text respectively.
@@ -1703,7 +1702,7 @@ viewers appear as elements of second order in the tiling
 hierarchy. Having treated them as black boxes so far we have not
 revealed anything about the continuation of the hierarchy. As a matter
 of fact, viewers are neither elementary display entities nor
-atoms. They are just a special case of so-called {\it display frames\/}. Display frames or frames in short are arbitrary rectangles
+atoms. They are just a special case of so-called \emph{display frames}. Display frames or frames in short are arbitrary rectangles
 displaying a collection of objects or an excerpt of a document. In
 particular, frames may recursively contain other frames, a capability
 that makes them an extremely powerful tool for any display organizer.
@@ -1752,10 +1751,10 @@ organize the representing rectangular area. For example, the area of
 viewers of, say, class {\tt Desktop\/} may take the role of a background being
 covered by an arbitrary collection of possibly mutually overlapping
 frames. In other words, our decision of using a tiling viewer scheme
-{\it globally\/} can easily be overwritten {\it locally\/}.
+\emph{globally} can easily be overwritten \emph{locally}.
 
 An even more important example of a predefined structure is provided
-by the abstract class of so-called {\it menu viewers\/} whose shape is
+by the abstract class of so-called \emph{menu viewers} whose shape is
 familiar from most snapshots taken of the standard Oberon display
 screen. A menu viewer consists of a thin rectangular boundary line and
 an interior area being vertically decomposed into a menu region at the
@@ -1780,8 +1779,8 @@ about the contents of the two descendant frames. In the standard case,
 however, the menu frame is a text frame, displaying a line of commands
 in inverse video mode. By definition, the nature of the main frame
 specifies the type of the viewer. If it is a text frame as well, then
-we call the viewer a {\it text viewer\/}, if it a graphics frame, we call it a
-{\it graphics viewer\/} etc.
+we call the viewer a \emph{text viewer}, if it a graphics frame, we call it a
+\emph{graphics viewer} etc.
 
 \beginsubsection 4.4. DISPLAY MANAGEMENT.
 
@@ -1789,7 +1788,7 @@ Oberon's display system comprises two main topics: Viewer management
 and cursor handling. Let us first turn to the much more involved topic
 of viewer management and postpone cursor handling to the end of this
 Section. Before we can actually begin our explanations we need to
-introduce the concept of the {\it logical display area\/}. It is modeled as a
+introduce the concept of the \emph{logical display area}. It is modeled as a
 two-dimensional Cartesian plane housing the totality of objects to be
 displayed. The essential point of this abstraction is a rigorous
 decoupling of any aspects of physical display devices. As a matter of
@@ -1843,7 +1842,7 @@ of the display area''. From the previous discussion we are well
 acquainted already with the structure of the global display space as
 well as with its building blocks: The display area is hierarchically
 tiled with display frames, where the first two levels in the frame
-hierarchy correspond to {\it tracks\/} and {\it viewers\/} respectively.
+hierarchy correspond to \emph{tracks} and \emph{viewers} respectively.
 
 This is the formal definition:
 \begintt
@@ -2067,16 +2066,16 @@ Upper neighbor of opening viewer Upper neighbor of changing viewer Closing viewe
 \beginsubsubsection 4.4.2. Menu Viewers.
 
 So far, we have treated viewers abstractly as black boxes. Our next
-step is now to focus on a special class of viewers called {\it menu viewers\/}. Remembering the definition given earlier we know that a menu
+step is now to focus on a special class of viewers called \emph{menu viewers}. Remembering the definition given earlier we know that a menu
 viewer is characterized by a structure consisting of two vertically
-tiled ``descendant'' frames, a {\it menu frame\/} at the top and a {\it frame of contents\/} at the bottom. Because the nature and contents of these
+tiled ``descendant'' frames, a \emph{menu frame} at the top and a \emph{frame of contents} at the bottom. Because the nature and contents of these
 frames are typically unknown by their ``ancestor'' (or ``parent'') viewer,
 a collection of abstract messages is again a postulating form of
 interface. As net effect, the handling of menu viewers boils down to a
 combination of preprocessing, transforming and forwarding messages to
 the descendant frames. In short, the display space in Oberon is
 hierarchically organized and message passing within the display space
-obeys the pattern of strict {\it parental control\/}.
+obeys the pattern of strict \emph{parental control}.
 
 Again, we start our more detailed discussion with a module interface definition:
 \begintt
@@ -2188,38 +2187,38 @@ ELSIF message requests change of location or size THEN
 END
 \endtt
 
-\noindent In principle, the handler acts as a {\it message dispatcher\/} that
+\noindent In principle, the handler acts as a \emph{message dispatcher} that
 either processes a message directly and/or delegates its processing to
 the descendant frames. Note that the handler's main alternative
 statement discriminates precisely among the four basic categories of
 messages.
 
-From the above outlined algorithm handling {\it copy messages\/}, that
-is, requests for generating a {\it copy\/} or {\it clone\/} of a menu
+From the above outlined algorithm handling \emph{copy messages}, that
+is, requests for generating a \emph{copy} or \emph{clone} of a menu
 viewer, we can derive a general recursive scheme for the creation of a
 clone of an arbitrary frame:
 
-send {\it copy\/} message to each element in the list of descendants;
+send \emph{copy} message to each element in the list of descendants;
 
 generate copy of the original frame descriptor;
 
 attach copies of descendants to the copy of descriptor
 
-\noindent The essential point here is the use of new {\it outgoing\/} messages in order
-to process a given {\it incoming\/} message. We can regard message processing
+\noindent The essential point here is the use of new \emph{outgoing} messages in order
+to process a given \emph{incoming} message. We can regard message processing
 as a transformation that maps incoming messages into a set of outgoing
 messages, with possible side-effects. The simplest case of such a
-transformation is known as {\it delegation\/}. In this case, the input message
+transformation is known as \emph{delegation}. In this case, the input message
 is simply passed on to the descendant(s).
 
 As a fine point we clarify that the above algorithm is designed to
-create a {\it deep\/} copy of a composite object (a menu viewer in our
-case). If a {\it shallow\/} copy would be desired, the descendants would not
+create a \emph{deep} copy of a composite object (a menu viewer in our
+case). If a \emph{shallow} copy would be desired, the descendants would not
 have to be copied, and the original descendants instead of their
 copies would be attached to the copy of the composite object.
 
 Another example of message handling is provided by mouse
-tracking. Assume that a {\it mouse message\/} is received by a menu viewer
+tracking. Assume that a \emph{mouse message} is received by a menu viewer
 while the mouse is located in the upper part of its menu frame and the
 left mouse key is kept down. This means ``change viewer's height by
 moving its top line vertically''. No message to express the required
@@ -2258,12 +2257,12 @@ TODO: Figure 4.7 The modify frame operation
 \beginsubsubsection 4.4.3. Cursor Management.
 
 Traditionally, a cursor indicates and visualizes on the screen the
-current location of the {\it caret\/} in a text or, more generally, the
-current {\it focus\/} of attention. A small arrow or similar graphic symbol is
+current location of the \emph{caret} in a text or, more generally, the
+current \emph{focus} of attention. A small arrow or similar graphic symbol is
 typically used for this purpose. In Oberon, we have slightly
 generalized and abstracted this concept. A cursor is a path in the
 logical display area whose current position can be made visible by a
-{\it marker\/}.
+\emph{marker}.
 
 The viewer manager and the cursor handler are two concurrent users of
 the same display area. Actually, we should imagine two parallel
@@ -2392,7 +2391,7 @@ corresponding source pixel:
 
 $d := F(s, d)$
 
-{\it F\/} is sometimes called the {\it mode\/} of combination of the
+\emph{F} is sometimes called the \emph{mode} of combination of the
 raster operation. The raster is stored as an array of values of type
 {\tt SET\/}, each set representing 32 black/white pixels. The modes of
 combining source and destination is implemented by the following set
