@@ -3409,6 +3409,55 @@ END;
 \noindent \code{x}, \code{y} specify the envisioned location relative to the text frame's origin, and \code{dx} is the width of the character at this location. \code{pos} is the corresponding position in the text and \code{org} is the origin position of the corresponding text line.
 
 The following is a simplified version of the message handler employed by text frames. It fully determines the behavior and capabilities of text frames.
+\begintt
+PROCEDURE Handle* (F: Display.Frame; VAR M: Display.FrameMsg);
+  VAR F1: Frame;
+  buf: Texts.Buffer;
+BEGIN
+  CASE M OF
+  Oberon.InputMsg:
+    IF M.id = Oberon.track THEN Edit(F(Frame), M.X, M.Y, M.keys)
+    ELSIF M.id = Oberon.consume THEN
+    IF F(Frame).hasCar THEN Write(F(Frame), M.ch, M.fnt, M.col, M.voff)
+    END END |mid
+  Oberon.ControlMsg:
+    IF M.id = Oberon.defocus THEN Defocus(F(Frame))
+    ELSIF M.id = Oberon.neutralize THEN Neutralize(F(Frame)) END |mid
+  Oberon.SelectionMsg:
+    GetSelection(F(Frame), M.text, M.beg, M.end, M.time) |mid
+  Oberon.CopyMsg:
+    Copy(F(Frame), F1); M.F := F1 |mid
+  MenuViewers.ModifyMsg:
+    Modify(F(Frame), M.id, M.dY, M.Y, M.H) |mid
+  CopyOverMsg:
+    CopyOver(F(Frame), M.text, M.beg, M.end) |mid
+  UpdateMsg:
+    IF F(Frame).text = M.text THEN Update(F(Frame), M) END
+  END
+END Handle;
+\endtt
+
+Explanations:
+
+1) Mouse tracking message: Call built-in editor immediately
+
+2) Consume message: In case of valid caret insert character
+
+3) Defocus message: Remove caret
+
+4) Neutralize message: Remove caret and selection
+
+5) Selection message: Return current selection with time stamp
+
+6) Copyover message: Copy given stretch of text to caret
+
+7) Copy message: Create a copy (clone)
+
+8) Modify message: Translate and change size
+
+9) Update message: If text was changed then update display
+
+
 
 
 
