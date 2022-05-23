@@ -3339,8 +3339,46 @@ A problem of another kind, again affecting the file system, arises if, say, a si
 
 And finally, typed characters that are supposed to be inserted into a text need to be stored on the so-called \emph{keyboard file}. For this (continuously growing) file, several readers and one writer must be allowed to coexist concurrently.
 
+As a consequence, the following qualities of the underlying file system are mandatory for the piece technique to work properly:
 
-% \beginsubsection 5.3. TEXT FRAMES.
+1. Once a file page is allocated it must not be reused (until system restart).
+
+2. A versatile file buffering mechanism supporting multiple buffers per file is required.
+
+3. Files must be allowed to be open in read mode and in write mode simultaneously.
+
+\noindent The format of text sections in files obeys a set of syntactical rules (productions) that can easily be specified in EBNF-notation:
+\begintt
+TextSection = ident header {char}.
+header = type offset run {run} null length.
+run = font [name] color offset length.
+\endtt
+
+\noindent In the \code{TextSection} production ident is an identifier for text blocks. In the header production \code{type} is a type-discriminator, \code{offset}
+is the offset to the character part, \code{run} is a run-descriptor, \code{null} is
+a null-character, and \code{length} is the length of the character
+sequence. In the \code{run} production \code{font}, \code{color}, and \code{offset} are
+specifications of looks, and \code{length} is the run-length. In order to
+save space, font names are coded as ordinal numbers within a text
+section. If and only if a font appears for the first time in a text
+block it is followed by the actual font name.
+
+Let us conclude this Section with two side-remarks and a summary.
+
+\noindent Remarks:
+
+TODO: indent these two lines
+
+For compatibility reasons, plain ASCII-files are accepted as text files as well. They are mapped to texts consisting of a single run with standard looks.
+
+Internalizing a text section from a file is extremely efficient because it is obviously sufficient to read the header and translate it into the initial state of the piece list.
+
+Summary: The mechanism used for the implementation of the abstract data type \code{Text} is completely hidden from clients. It is a generalized version of the original piece list technique, adapted to texts with looks. The piece list technique in turn is based on the principle of indirection: Operations operate on descriptors of texts rather than on texts themselves. The benefits are efficiency and non-destructive operations. However, the technique works properly only in combination with an efficient (and reliable) garbage collector and a suitable file system.
+
+\beginsubsection 5.3. TEXT FRAMES.
+
+
+
 % \beginsubsection 5.4. THE FONT MACHINERY.
 % \beginsubsection 5.5. THE EDIT TOOLBOX.
 % \beginchapter CHAPTER 6: THE MODULE LOADER.
