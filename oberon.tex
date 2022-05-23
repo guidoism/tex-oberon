@@ -358,11 +358,11 @@ does, define several, even many commands. Such a (general) command may
 be invoked at any time by pointing at its name in any
 
 text visible in any viewer on the display, and by clicking the middle
-mouse button. The command name has the form {\tt M.P}, where {\tt P} is the
-procedure's identifier and {\tt M} that of the module in which {\tt P} is
+mouse button. The command name has the form \code{M.P}, where \code{P} is the
+procedure's identifier and \code{M} that of the module in which \code{P} is
 declared. As a consequence, any command click may cause the loading of
-one or several modules, if {\tt M} is not already present in main store. The
-next invocation of {\tt M.P} occurs instantaneously, since {\tt M} is already
+one or several modules, if \code{M} is not already present in main store. The
+next invocation of \code{M.P} occurs instantaneously, since \code{M} is already
 loaded. A further consequence is that modules are never
 (automatically) removed, because a next command may well refer to the
 same module.
@@ -417,8 +417,8 @@ character's insertion at the caret position.
 
 A special facility is introduced for designating viewers as operands:
 the star marker. It is placed at the cursor position when the
-keyboard's mark key ({\tt SETUP}) is pressed. The procedure
-{\tt Oberon.MarkedViewer} identifies the viewer in whose area the star
+keyboard's mark key (\code{SETUP}) is pressed. The procedure
+\code{Oberon.MarkedViewer} identifies the viewer in whose area the star
 lies. Commands which take it as their parameter are typically followed
 by an asterisk in the text. Whether the text contained in a text
 viewer, or a graph contained in a graphic viewer, or any other part of
@@ -464,7 +464,7 @@ Perhaps it is best explained by considering the basic mode of
 operation. Unless engaged in the interpretation of a command, the
 processor is engaged in a loop continuously polling event
 sources. This loop is called the \emph{central loop}; it is contained in
-module {\tt Oberon} which may be regarded as the system's heart. The two
+module \code{Oberon} which may be regarded as the system's heart. The two
 fixed event sources are the mouse and the keyboard. If a keyboard
 event is sensed, control is dispatched to the handler installed in the
 so-called \emph{focus viewer}, designated as the one holding the caret. If a
@@ -548,19 +548,19 @@ can be regarded as individually configurable private menus.
 
 The rarity of issuing commands by typing them has the most agreeable
 benefit that their names can be meaningful words. For example, the
-copy operation is denoted by {\tt Copy} instead of {\tt cp}, rename by {\tt Rename}
-instead of {\tt rn}, the call for a file directory excerpt is named
-{\tt Directory} instead of {\tt ls}. The need for memorizing an infinite list of
+copy operation is denoted by \code{Copy} instead of \code{cp}, rename by \code{Rename}
+instead of \code{rn}, the call for a file directory excerpt is named
+\code{Directory} instead of \code{ls}. The need for memorizing an infinite list of
 cryptic abbreviations, which is another hallmark of user-unfriendly
 systems, vanishes.
 
 But the influence of the Oberon concept is not restricted to the style
 in which the computer is used. It extends also to the way programs are
 designed to communicate with the environment. The definition of the
-abstract type {\tt Text} in the system's core suggests the replacement
+abstract type \code{Text} in the system's core suggests the replacement
 of files by texts as carrier of input and output data in very many
 cases. The advantage to be gained lies in the text's immediate
-editability. For example, the output of the command {\tt System.Directory}
+editability. For example, the output of the command \code{System.Directory}
 produces the desired excerpt of the file directory
 in the form of a (displayed) text. Parts of it or the whole may be
 selected and copied into other texts by regular editing commands
@@ -650,37 +650,33 @@ these top members \emph{command modules} or tool modules.
 The hierarchy of the basic system is shown in a table of direct
 imports and as a graph in Figure 2.2. The picture is simplified by
 omitting direct import edges if an indirect path also leads from the
-source to the destination. For example, {\tt Files\/} imports {\tt Kernel\/}; the
-direct import is not shown, because a path from {\tt Kernel\/} leads to {\tt Files\/}
-via {\tt FileDir\/}.
+source to the destination. For example, \code{Files\/} imports \code{Kernel\/}; the
+direct import is not shown, because a path from \code{Kernel\/} leads to \code{Files\/}
+via \code{FileDir\/}.
 
 TODO: Insert Figure 2.2
 
 Module names in the plural form typically indicate the definition of
 an abstract data type in the module. The type is exported together
-with the pertinent operations. Examples are {\tt Files\/}, {\tt
-  Modules\/}, {\tt Fonts\/}, {\tt Texts\/}, {\tt Viewers\/}, {\tt
-  MenuViewers\/}, and {\tt TextFrames\/}. Modules whose names are in
+with the pertinent operations. Examples are \code{Files\/}, \code{  Modules\/}, \code{Fonts\/}, \code{Texts\/}, \code{Viewers\/}, \code{  MenuViewers\/}, and \code{TextFrames\/}. Modules whose names are in
 singular form typically denote a resource that the module manages, be
 it a global variable or a device. The variable or the device is itself
 hidden (not exported) and becomes accessible through the module's
-exported procedures. Examples are all device drivers, {\tt Input\/}
-for keyboard and mouse, {\tt Kernel\/} for memory and disk, and {\tt
-  Display\/}. Exceptions are the command modules whose name is mostly
-chosen according to the activity they primarily represent, like {\tt
-  System\/}, and {\tt Edit\/}.
+exported procedures. Examples are all device drivers, \code{Input\/}
+for keyboard and mouse, \code{Kernel\/} for memory and disk, and \code{  Display\/}. Exceptions are the command modules whose name is mostly
+chosen according to the activity they primarily represent, like \code{  System\/}, and \code{Edit\/}.
 
-Module {\tt Oberon\/} is, as already mentioned, the heart of the system
+Module \code{Oberon\/} is, as already mentioned, the heart of the system
 containing the central loop to which control returns after each
 command interpretation, independent of whether it terminates normally
-or abnormally. {\tt Oberon\/} exports several procedures of auxiliary nature,
-but primarily also the one allowing the invocation of commands ({\tt Call\/})
+or abnormally. \code{Oberon\/} exports several procedures of auxiliary nature,
+but primarily also the one allowing the invocation of commands (\code{Call\/})
 and access to the command's parameter text through variable
-{\tt Oberon.Par}. Furthermore, it contains global, exported variables: the
+\code{Oberon.Par}. Furthermore, it contains global, exported variables: the
 log text. The log text typically serves to issue prompts and short
 failure reports of commands. The text is displayed in a log viewer
-that is automatically opened when module {\tt System\/} is initialized. Module
-{\tt Oberon\/} furthermore contains the two markers used globally on the
+that is automatically opened when module \code{System\/} is initialized. Module
+\code{Oberon\/} furthermore contains the two markers used globally on the
 display, the \emph{mouse cursor} and the \emph{star pointer}. It exports procedures
 to draw and to erase them, and allows the installation of different
 patterns for them.
@@ -741,7 +737,7 @@ outline of the system control toolbox.
 Chapter 4 explains Oberon's display system. It starts with a
 discussion of our choice of a hierarchical tiling strategy for the
 allocation of viewers. A detailed study of the exact role of Oberon
-viewers follows. Type {\tt Viewer\/} is presented as an object class with an
+viewers follows. Type \code{Viewer\/} is presented as an object class with an
 open message interface providing a conceptual basis for far-reaching
 extensibility. Viewers are then recognized as just a special case of
 so-called \emph{frames} that may be nested. A category of standard viewers
@@ -762,7 +758,7 @@ Text as an abstract data type that is integrated in the central
 system. Numerous fundamental consequences are discussed. For example,
 a text can be produced by one command, edited by a user, and then
 consumed by a next command. Commands themselves can be represented
-textually in the form {\tt M.P\/}o, followed by a textual parameter
+textually in the form \code{M.P\/}o, followed by a textual parameter
 list. Consequently, any command can be called directly from within a
 text (so-called \emph{tool}) simply by pointing at it with the
 mouse. However, the core of this chapter is a presentation of Oberon's
@@ -775,7 +771,7 @@ discussed.
 
 Chapters 6--9 describe the \emph{inner core}, still in a top-down
 path. Chapter~6 explains the loader of program modules and motivates
-the introduction of the data type {\tt Module\/}. The chapter includes the
+the introduction of the data type \code{Module\/}. The chapter includes the
 management of the memory part holding program code and defines the
 format in which compiled modules are stored as object
 files. Furthermore, it discusses the problems of binding separately
@@ -785,7 +781,7 @@ modules.
 Chapter 7 is devoted to the file system, a part of crucial importance,
 because files are involved in almost every program and
 computation. The chapter consist of two distinct parts, the first
-introducing the type {\tt File\/} and describing the structure of files,
+introducing the type \code{File\/} and describing the structure of files,
 i.e. their representation on disk storage with its sequential
 characteristics, the second describing the directory of file names and
 its organisation as a B-tree for obtaining fast searches.
@@ -796,7 +792,7 @@ guaranteeing an efficient and economical use of storage. The chapter
 explains the store's partitioning into specific areas. Its central
 concern, however, is the discussion of dynamic storage management in
 the partition called the \emph{heap}. The algorithm for allocation
-(corresponding to the intrinsic procedure {\tt NEW\/}) and for retrieval
+(corresponding to the intrinsic procedure \code{NEW\/}) and for retrieval
 (called garbage collection) are explained in detail.
 
 At the lowest level of the module hierarchy we find device
@@ -816,7 +812,7 @@ reference to Chapters 3--9 only.
 
 Although the Oberon System is well-suited for operating stand-alone
 workstations, a facility for connecting a set of computers should be
-considered as fundamental. Module {\tt Net\/}, which makes transmission of
+considered as fundamental. Module \code{Net\/}, which makes transmission of
 files among workstations connected by a bus-like network possible, is
 the subject of Chapter 10. It presents not only the problems of
 network access, of transmission failures and collisions, but also
@@ -828,7 +824,7 @@ When a set of workstations is connected in a network, the desire for a
 central server appears. A central facility serving as a file
 distribution service, as a printing station, and as a storage for
 electronic mail is presented in Chapter 11. It emerges by extending
-the {\tt Net\/} module of Chapter 10, and is a convincing application of the
+the \code{Net\/} module of Chapter 10, and is a convincing application of the
 tasking facilities explained in Section 2.2. In passing we note that
 the server operates on a machine that is not under observation by a
 user. This circumstance requires an increased degree of robustness,
@@ -888,7 +884,7 @@ as searches, insertions, and deletions. The middle module in the
 hierarchy defines a respective frame and contains all procedures
 concerned with displaying the respective objects including the frame
 handler defining interpretation of mouse and keyboard events. The top
-modules are the respective tool modules ({\tt Edit\/}, {\tt Draw\/}). The presented
+modules are the respective tool modules (\code{Edit\/}, \code{Draw\/}). The presented
 graphics editor is particularly interesting in so far as it
 constitutes a convincing example of Oberon's extensibility. The
 graphics editor is integrated into the entire system; it embeds its
@@ -986,14 +982,14 @@ displayed entity.
 Every interactive task is represented by a so-called \emph{viewer}. Viewers
 constitute the interface to Oberon's display-system. They embody a
 variety of roles that are collected in an abstract data type
-{\tt Viewer\/}. We shall give a deeper insight into the display system in
+\code{Viewer\/}. We shall give a deeper insight into the display system in
 Chapter 4. For the moment it suffices to know that viewers are
 represented graphically as rectangles on the display screen and that
 they are implicit carriers of interactive tasks. Figure 3.1 shows a
 typical Oberon display screen that is divided up into seven viewers
 corresponding to seven simultaneously active interactive tasks.
 
-In order to get firmer ground under our feet, we now present the programmed declaration of type {\tt Viewer\/} in a slightly abstracted form:
+In order to get firmer ground under our feet, we now present the programmed declaration of type \code{Viewer\/} in a slightly abstracted form:
 \begintt
 Viewer = POINTER TO ViewerDesc;
 
@@ -1003,10 +999,10 @@ ViewerDesc = RECORD X, Y, W, H: INTEGER;
 END;
 \endtt
 
-\noindent {\tt X\/}, {\tt Y\/}, {\tt W\/}, {\tt H\/} define the viewer's rectangle on the screen, i.e. location
-{\tt X\/}, {\tt Y\/} of the lower left corner relative to the display origin, width {\tt W\/}
-and height {\tt H\/}. The variable {\tt state\/} informs about the current state of
-visibility (visible, closed, covered), while {\tt handle\/} represents the
+\noindent \code{X\/}, \code{Y\/}, \code{W\/}, \code{H\/} define the viewer's rectangle on the screen, i.e. location
+\code{X\/}, \code{Y\/} of the lower left corner relative to the display origin, width \code{W\/}
+and height \code{H\/}. The variable \code{state\/} informs about the current state of
+visibility (visible, closed, covered), while \code{handle\/} represents the
 functional interface of viewers. The type of the handler is
 \begintt
 Handler = PROCEDURE (V: Viewer; VAR M: ViewerMsg);
@@ -1020,25 +1016,25 @@ ViewerMsg = RECORD ... (*basic parameter fields*) END;
 TODO: Figure 3.1 Typical Oberon display configuration with tool track on the right
 
 However, we should point out the use of object-oriented
-terminology. It is justified because {\tt handle\/} is a procedure variable (a
+terminology. It is justified because \code{handle\/} is a procedure variable (a
 \emph{handler}) whose identity depends on the specific viewer. A call
-{\tt V.handle(V, M)} can therefore be interpreted as the sending of a
-message {\tt M\/} to be handled by the method of the receiving viewer {\tt V\/}.
+\code{V.handle(V, M)} can therefore be interpreted as the sending of a
+message \code{M\/} to be handled by the method of the receiving viewer \code{V\/}.
 
 We recognize an important difference between the standard
 object-oriented model and our handler paradigm. The standard model is
 closed in the sense that only a fixed set of messages is understood by
 a given class of objects. In contrast, the handler paradigm is \emph{open}
-because it defines just the root ({\tt ViewerMsg\/}) of a potentially
+because it defines just the root (\code{ViewerMsg\/}) of a potentially
 unlimited tree of extending message types. For example, a concrete
-handler might be able to handle messages of type {\tt MyViewerMsg\/}, where
+handler might be able to handle messages of type \code{MyViewerMsg\/}, where
 \begintt
 MyViewerMsg = RECORD (ViewerMsg)
   mypar: MyParameters
 END;
 \endtt
 
-\noindent is an extended type of {\tt ViewerMsg\/}.
+\noindent is an extended type of \code{ViewerMsg\/}.
 
 It is worth noting that our open object-oriented model is extremely
 flexible. Notably, extending the set of message types that are handled
@@ -1058,7 +1054,7 @@ the interactive task that it represents.
 Oberon background tasks are not connected a priori with any specific
 aggregate in the system. Seen technically, they are instances of an
 abstract data type consisting of type declarations Task and TaskDesc
-together with intrinsic operations {\tt NewTask\/}, {\tt Install\/} and {\tt Remove\/}:
+together with intrinsic operations \code{NewTask\/}, \code{Install\/} and \code{Remove\/}:
 \begintt
 Task = POINTER TO TaskDesc;
 TaskDesc = RECORD state: INTEGER; handle: PROCEDURE END;
@@ -1068,10 +1064,10 @@ PROCEDURE Install (T: Task);
 PROCEDURE Remove (T: Task);
 \endtt
 
-\noindent The procedures {\tt Install\/} and {\tt Remove\/} are called explicitly in order to
-transfer the state of the specified task from {\tt offline\/} to {\tt idle\/} and from
-{\tt idle\/} to {\tt offline\/} respectively. Installed tasks take their turns in
-becoming {\tt active\/}, that is, in being executed. The installed handlers
+\noindent The procedures \code{Install\/} and \code{Remove\/} are called explicitly in order to
+transfer the state of the specified task from \code{offline\/} to \code{idle\/} and from
+\code{idle\/} to \code{offline\/} respectively. Installed tasks take their turns in
+becoming \code{active\/}, that is, in being executed. The installed handlers
 are simple, parameterless procedures specifying their own actions and
 conditions for execution, with one exception: Resumption may be
 delayed until a certain period of time has elapsed. This period is
@@ -1105,7 +1101,7 @@ dispatching. Interactive tasks are (re)activated exclusively upon
 interactions by the user and are dispatched with high priority. In
 contrast, background tasks are polled with low priority.
 
-We already know that interactive tasks are activated by sending messages. The types of messages used for this purpose are {\tt InputMsg\/} and {\tt ControlMsg\/} reporting keyboard events and mouse events respectively. Slightly simplified, they are declared as
+We already know that interactive tasks are activated by sending messages. The types of messages used for this purpose are \code{InputMsg\/} and \code{ControlMsg\/} reporting keyboard events and mouse events respectively. Slightly simplified, they are declared as
 \begintt
 InputMsg = RECORD (ViewerMsg)
   id: INTEGER;
@@ -1120,20 +1116,19 @@ ControlMsg = RECORD (ViewerMsg)
 END;
 \endtt
 
-\noindent The field {\tt id\/} specifies the exact request transmitted with this
-specific reactivation. In the case of {\tt InputMsg\/} the possible
-requests are consume (the character specified by field {\tt ch\/}) and
-track (mouse, starting from state given by keys and {\tt X\/}, {\tt
-  Y\/}). In case of {\tt ControlMsg\/} the choice is mark (the viewer
-at position {\tt X\/}, {\tt Y\/}) or neutralize. Mark means moving the
+\noindent The field \code{id\/} specifies the exact request transmitted with this
+specific reactivation. In the case of \code{InputMsg\/} the possible
+requests are consume (the character specified by field \code{ch\/}) and
+track (mouse, starting from state given by keys and \code{X\/}, \code{  Y\/}). In case of \code{ControlMsg\/} the choice is mark (the viewer
+at position \code{X\/}, \code{Y\/}) or neutralize. Mark means moving the
 global system pointer (typically represented as a star-shaped mark) to
 the current position of the mouse. Neutralizing a viewer is equivalent
 to removing all marks and graphical attributes from this viewer.
 
 All tasking facilities are collected in one program module, called
-{\tt Oberon\/}. In particular, the module's definition exposes the
+\code{Oberon\/}. In particular, the module's definition exposes the
 declarations of the abstract data type Task and of the message types
-{\tt InputMsg\/} and {\tt ControlMsg\/}. The module's most important contribution,
+\code{InputMsg\/} and \code{ControlMsg\/}. The module's most important contribution,
 however, is the task scheduler (often referred to as ``Oberon loop'')
 that can be regarded as the system's dynamic center.
 
@@ -1145,11 +1140,11 @@ the focus task, hereby making use of the one-to-one correspondence
 between viewers and tasks.
 
 Module Oberon provides the following facilities in connection with the
-focus viewer: A global variable {\tt FocusViewer\/}, a procedure {\tt PassFocus\/} for
+focus viewer: A global variable \code{FocusViewer\/}, a procedure \code{PassFocus\/} for
 transferring the role of focus to a new viewer, and a defocus variant
-of {\tt ControlMsg\/} for notifying the old focus viewer of such a transfer.
+of \code{ControlMsg\/} for notifying the old focus viewer of such a transfer.
 
-The implementation details of the abstract data type {\tt Task\/} are hidden
+The implementation details of the abstract data type \code{Task\/} are hidden
 from the clients. It is sufficient to know that all task descriptors
 are organized in a ring and that a pointer points to the previously
 activated task. The ring is guaranteed never to be empty because the
@@ -1158,7 +1153,7 @@ task at system loading time.
 
 The following is a slightly abstracted version of the actual scheduler
 code operating on the task ring. It should be associated with
-procedure {\tt Loop\/} in the module {\tt Oberon\/}.
+procedure \code{Loop\/} in the module \code{Oberon\/}.
 \begintt
 get mouse position and state of keys;
 REPEAT
@@ -1242,8 +1237,8 @@ result of our efforts is a highly expressive and consistent
 hierarchy of module definitions. Perhaps the most significant and most
 notable outcome of this approach is a collection of very powerful and
 system-wide abstract data types like
-{\tt Task\/}, {\tt Frame\/}, {\tt Viewer\/}, {\tt File\/}, {\tt Font\/},
-{\tt Text\/}, {\tt Module\/}, {\tt Reader\/}, {\tt Scanner\/}, {\tt Writer\/} etc..
+\code{Task\/}, \code{Frame\/}, \code{Viewer\/}, \code{File\/}, \code{Font\/},
+\code{Text\/}, \code{Module\/}, \code{Reader\/}, \code{Scanner\/}, \code{Writer\/} etc..
 
 \beginsubsubsection 3.3.1. Atomic actions.
 
@@ -1252,11 +1247,11 @@ executing \emph{programs}. A clarification of the term \emph{program} as it is u
 in Oberon comprises two views: a \emph{static} one and a \emph{dynamic}
 one. Statically, an Oberon program is simply a package of software
 together with an entry point. More formally, an Oberon program is a
-pair {\tt (M*, P)\/}, where {\tt M\/} is an arbitrary module, {\tt P\/} is an exported
-parameterless procedure of {\tt M\/}, and {\tt M*\/} denotes the hierarchy consisting
-of {\tt M\/} itself and of all directly and indirectly imported modules. Note
-that two hierarchies {\tt M*\/} and {\tt N*\/} are not generally disjoint, even if {\tt M\/}
-and {\tt N\/} are different modules. Rather, their intersection is a superset
+pair \code{(M*, P)\/}, where \code{M\/} is an arbitrary module, \code{P\/} is an exported
+parameterless procedure of \code{M\/}, and \code{M*\/} denotes the hierarchy consisting
+of \code{M\/} itself and of all directly and indirectly imported modules. Note
+that two hierarchies \code{M*\/} and \code{N*\/} are not generally disjoint, even if \code{M\/}
+and \code{N\/} are different modules. Rather, their intersection is a superset
 of the operating system.
 
 Viewed dynamically, an Oberon program is defined as an atomic action
@@ -1285,15 +1280,15 @@ END
 \endtt
 
 \noindent The system interface to the command mechanism itself is again provided
-by module {\tt Oberon\/}. Its primary operation can be paraphrased as
+by module \code{Oberon\/}. Its primary operation can be paraphrased as
 ``call a command by its name and pass a list of actual parameters'':
 \begintt
 PROCEDURE Call (name: ARRAY OF CHAR; par: ParList;
                 VAR res: INTEGER);
 \endtt
 
-\noindent {\tt name\/} is the name of the desired command in the form {\tt M.P\/}, {\tt par\/} is the
-list of actual parameters, and {\tt res\/} is a result code. But in fact we
+\noindent \code{name\/} is the name of the desired command in the form \code{M.P\/}, \code{par\/} is the
+list of actual parameters, and \code{res\/} is a result code. But in fact we
 have separated the setting of parameters from the actual
 call. Parameters are set by calling
 \begintt
@@ -1306,15 +1301,15 @@ PROCEDURE SetPar (F: Display.Frame; T: Texts.Text;
 PROCEDURE Call (name: ARRAY OF CHAR; VAR res: INTEGER);
 \endtt
 
-\noindent The pair {\tt (T, pos)\/} specifies the starting position of a textual
-parameter list. {\tt F\/} indicates the calling viewer. Notice the occurrence
-of yet another abstract data type of name {\tt Text\/} that is exported by
-module {\tt Texts\/}. We shall devote Chapter 5 to a thorough discussion of
+\noindent The pair \code{(T, pos)\/} specifies the starting position of a textual
+parameter list. \code{F\/} indicates the calling viewer. Notice the occurrence
+of yet another abstract data type of name \code{Text\/} that is exported by
+module \code{Texts\/}. We shall devote Chapter 5 to a thorough discussion of
 Oberon's text system. For the moment we can simply look at a text as a
 sequence of characters.
 
 The list of actual parameters is handed over to the called command by
-module {\tt Oberon\/} in the form of an exported global variable {\tt Par\/}:
+module \code{Oberon\/} in the form of an exported global variable \code{Par\/}:
 \begintt
 Par: RECORD vwr: Viewers.Viewer;
        frame: Display.Frame;
@@ -1328,7 +1323,7 @@ interface, of which the list of actual parameters is just one
 component. Another one is the so-called \emph{system log} which is a
 system-wide protocol reporting on the progress of command execution
 and on exceptional events in chronological order. The log is
-represented as a global variable of type {\tt Text\/}:
+represented as a global variable of type \code{Text\/}:
 \begintt
 Log: Texts.Text;
 \endtt
@@ -1339,10 +1334,10 @@ current system state and make it accessible. In other words, they may
 rely on a high degree of system integration. Therefore, Oberon
 features an extraordinarily broad spectrum of mutually integrated
 facilities. For example, the system distinguishes itself by a complete
-integration of the abstract data types {\tt Viewer\/} and {\tt Text\/} that we
+integration of the abstract data types \code{Viewer\/} and \code{Text\/} that we
 encountered above. They will be the subject of Chapters 4 and 5.
 
-Module {\tt Oberon\/} assists the integration of these types with the
+Module \code{Oberon\/} assists the integration of these types with the
 following conceptual features, of which the first two are familiar to
 us already: Standard parameter list for commands, system log, generic
 text selection, and generic copy viewer. At this point we should add a
@@ -1383,26 +1378,26 @@ END;
 
 Generic copying is synonymous with reproducing and cloning. It is the
 most elementary generic operation possible. Again, a variant of type
-{\tt ViewerMsg\/} is used for the purpose of transmitting requests of the
+\code{ViewerMsg\/} is used for the purpose of transmitting requests of the
 desired type:
 \begintt
 CopyMsg = RECORD (ViewerMsg) vwr: Viewers.Viewer END
 \endtt 
 
-\noindent Receivers of a {\tt copy\/} message typically generate a clone of
-themselves and return it to the sender via field {\tt vwr\/}.
+\noindent Receivers of a \code{copy\/} message typically generate a clone of
+themselves and return it to the sender via field \code{vwr\/}.
 
 Let us now summarize this Section:. Oberon is an operating system that
 presents itself to its clients in the form of a highly expressive
 abstract modular interface that exports many powerful abstract data
-types like, for example, {\tt Viewer\/} and {\tt Text\/}. A rich arsenal of global
+types like, for example, \code{Viewer\/} and \code{Text\/}. A rich arsenal of global
 data types and generic facilities serve the purpose of system
 integration at a high degree. Programs in Oberon are modeled as
 so-called commands, i.e. as exported parameterless procedures that do
 not interact with the user. The collection of commands provided by a
 module appears as its user interface. Parameters are passed to
 commands via a global parameter list, registered by the calling task
-in the central module {\tt Oberon\/}. Commands operate on the global state of
+in the central module \code{Oberon\/}. Commands operate on the global state of
 the system.
 
 \beginsubsection 3.4. TOOLBOXES.
@@ -1410,12 +1405,12 @@ the system.
 Modules typically appear in three different forms. The first is a
 module that encapsulates some data, letting them be accessed only
 through exported procedures and functions. A good example is Module
-{\tt FileDir\/}, encapsulating the file directory and protecting it from
+\code{FileDir\/}, encapsulating the file directory and protecting it from
 disruptive access. A second kind is the module representing an
 \emph{abstract data type}, exporting a type and its associated
-operators. Typical examples are modules {\tt Files\/}, {\tt Modules\/}, {\tt Viewers\/}, and
-{\tt Texts\/}. A third kind is the collection of procedures pertaining to the
-same topic, such as module {\tt RS-232\/} handling communication over a serial
+operators. Typical examples are modules \code{Files\/}, \code{Modules\/}, \code{Viewers\/}, and
+\code{Texts\/}. A third kind is the collection of procedures pertaining to the
+same topic, such as module \code{RS-232\/} handling communication over a serial
 line.
 
 Oberon adds a fourth form: the \emph{toolbox}. By definition, this is a pure
@@ -1424,11 +1419,11 @@ distinguish themselves principally from the other forms of modules by
 the fact that they lie on top of the modular hierarchy. Toolbox
 modules are ``imported'' by system users at run-time. In other words,
 their definitions define the user interface. Typical examples are
-modules {\tt System\/} and {\tt Edit\/}. As a rule of thumb there exists a toolbox for
+modules \code{System\/} and \code{Edit\/}. As a rule of thumb there exists a toolbox for
 every topic or application.
 
 As an example of a toolbox definition we quote an annotated version of
-module {\tt System\/}:
+module \code{System\/}:
 \begintt
 DEFINITION System;
 
@@ -1476,20 +1471,20 @@ CommandTool = { [Comment] CommandName [ParameterList] }.
 
 \noindent If present, the parameter list is made available to the called command
 via fields text and pos in the global variable Par that is exported
-from module {\tt Oberon\/}. Because this parameter list is interpreted
+from module \code{Oberon\/}. Because this parameter list is interpreted
 individually by each command, its format is completely open. However,
 we postulate some conventions and rules for the purpose of a
 standardized user interface:
 
 1.) The elements of a textual parameter list are universal syntactical tokens like name, literal string, integer, real number, and special character.
 
-2.) An arrow ``{\tt \^\/}'' in the textual parameter list refers to the current text selection for continuation. In the special case of the arrow following the command name immediately, the entire parameter list is represented by the text selection.
+2.) An arrow ``\code{\^\/}'' in the textual parameter list refers to the current text selection for continuation. In the special case of the arrow following the command name immediately, the entire parameter list is represented by the text selection.
 
-3.) An asterisk ``{\tt *}'' in the textual parameter list refers to the currently marked viewer. Typically, the asterisk replaces the name of a file. In such a case the contents of the viewer marked by the system pointer (star) is processed by the command interpreter instead of the contents of a file.
+3.) An asterisk ``\code{*}'' in the textual parameter list refers to the currently marked viewer. Typically, the asterisk replaces the name of a file. In such a case the contents of the viewer marked by the system pointer (star) is processed by the command interpreter instead of the contents of a file.
 
-4.) An at-character ``{\tt @}' in the textual parameter list indicates that the selection marks the (beginning of the) text which is taken as operand.
+4.) An at-character ``\code{@}' in the textual parameter list indicates that the selection marks the (beginning of the) text which is taken as operand.
 
-5.) A terminator-character ``{\tt \~{}}'' terminates the textual parameter list in case of a variable number of parameters.
+5.) A terminator-character ``\code{\~{}}'' terminates the textual parameter list in case of a variable number of parameters.
 
 Because command tools are ordinary, editable texts (in contrast to
 menus in conventional systems) they can be customized ``on the fly'',
@@ -1502,15 +1497,15 @@ displaying the system log, two tool-viewers making available the
 standard system tool and a customized private tool respectively.
 
 In concluding this Chapter, let us exemplify the concepts of command
-and tool by the system control section of the {\tt System\/}
-toolbox. Consisting of the commands {\tt SetUser\/}, {\tt Date\/},
-{\tt SetFont\/}, {\tt SetColor\/}, and {\tt Collect\/} it is used to control
+and tool by the system control section of the \code{System\/}
+toolbox. Consisting of the commands \code{SetUser\/}, \code{Date\/},
+\code{SetFont\/}, \code{SetColor\/}, and \code{Collect\/} it is used to control
 system-wide facilities. In detail, their function is installing the
 user's identification, displaying or setting the system date and time,
 presetting the system type-font for typed text, setting the system
 color, and activating the garbage collector.
 
-In summary, a toolbox is a special form of an {\tt Oberon\/} module. It is
+In summary, a toolbox is a special form of an \code{Oberon\/} module. It is
 defined as a collection of commands. Appearing at the top of the
 modular hierarchy the toolboxes in their entirety fix the system’s
 user interface. Command tools are sequences of textually represented
@@ -1631,8 +1626,8 @@ objects, carriers of tasks, processes, applications, etc. Therefore,
 we first need to define our own precise understanding of the concept
 of viewer.
 
-The best guide to this aim is the abstract data type {\tt Viewer\/} that we
-introduced in Chapter 3. We recapitulate: Type {\tt Viewer\/} serves as a
+The best guide to this aim is the abstract data type \code{Viewer\/} that we
+introduced in Chapter 3. We recapitulate: Type \code{Viewer\/} serves as a
 template describing viewers abstractly as ``black boxes'' in terms of a
 state of visibility, a rectangle on the display screen, and a message
 handler. The exact functional interface provided by a given variant of
@@ -1707,7 +1702,7 @@ displaying a collection of objects or an excerpt of a document. In
 particular, frames may recursively contain other frames, a capability
 that makes them an extremely powerful tool for any display organizer.
 
-The type {\tt Frame\/} is declared as
+The type \code{Frame\/} is declared as
 \begintt
 Frame = POINTER TO FrameDesc;
 FrameDesc = RECORD
@@ -1717,11 +1712,11 @@ FrameDesc = RECORD
 END;
 \endtt
 
-\noindent The components {\tt next\/} and {\tt dsc\/} are connections to further frames. Their
-names suggest a multi-level recursive hierarchical structure: {\tt next\/}
-points to the next frame on the same level, while {\tt dsc\/} points to the
+\noindent The components \code{next\/} and \code{dsc\/} are connections to further frames. Their
+names suggest a multi-level recursive hierarchical structure: \code{next\/}
+points to the next frame on the same level, while \code{dsc\/} points to the
 (first) descendant, i.e. to the next lower level of the hierarchy of
-nested frames. {\tt X\/}, {\tt Y\/}, {\tt W\/}, {\tt H\/}, and the handler handle serve the original
+nested frames. \code{X\/}, \code{Y\/}, \code{W\/}, \code{H\/}, and the handler handle serve the original
 purpose to that we introduced them. In particular, the handler allows
 frames to react individually on the receipt of messages. Its type is
 \begintt
@@ -1733,7 +1728,7 @@ Handler = PROCEDURE (F: Frame; VAR M: FrameMsg);
 FrameMsg = RECORD END;
 \endtt
 
-\noindent Having now introduced the concept of frames, we can reveal the whole truth about viewers. As a matter of fact, type {\tt Viewer\/} is a derived type, it is a type extension of {\tt Frame\/}:
+\noindent Having now introduced the concept of frames, we can reveal the whole truth about viewers. As a matter of fact, type \code{Viewer\/} is a derived type, it is a type extension of \code{Frame\/}:
 \begintt
 Viewer = POINTER TO ViewerDesc;
 ViewerDesc = RECORD (FrameDesc)
@@ -1748,7 +1743,7 @@ viewers inherit the hierarchical structure of frames. This is an
 extremely useful property immediately opening an unlimited spectrum of
 possibilities for designers of a specific subclass of viewers to
 organize the representing rectangular area. For example, the area of
-viewers of, say, class {\tt Desktop\/} may take the role of a background being
+viewers of, say, class \code{Desktop\/} may take the role of a background being
 covered by an arbitrary collection of possibly mutually overlapping
 frames. In other words, our decision of using a tiling viewer scheme
 \emph{globally} can easily be overwritten \emph{locally}.
@@ -1763,7 +1758,7 @@ top and a contents region at the bottom (see Figure 4.4).
 TODO: Figure 4.4 The compositional structure of a menu viewer
 
 In terms of data structures, the class of menu viewers is defined as a
-type extension of {\tt Viewer\/} with an additional component {\tt menuH\/}
+type extension of \code{Viewer\/} with an additional component \code{menuH\/}
 specifying the height of the menu frame:
 \begintt
 MenuViewer = POINTER TO MenuViewerDesc;
@@ -1772,9 +1767,9 @@ MenuViewerDesc = RECORD (ViewerDesc)
 END;
 \endtt
 
-\noindent Each menu viewer {\tt V\/} specifies exactly two
-descendants: The menu frame {\tt V.dsc\/} and the frame of main
-contents or main frame {\tt V.dsc.next\/}. Absolutely nothing is fixed
+\noindent Each menu viewer \code{V\/} specifies exactly two
+descendants: The menu frame \code{V.dsc\/} and the frame of main
+contents or main frame \code{V.dsc.next\/}. Absolutely nothing is fixed
 about the contents of the two descendant frames. In the standard case,
 however, the menu frame is a text frame, displaying a line of commands
 in inverse video mode. By definition, the nature of the main frame
@@ -1799,7 +1794,7 @@ system.
 Being a subsystem of a system with a well-defined modular structure
 the display system appears in the form of a small hierarchy of
 modules. Its core is a linearly ordered set consisting of three
-modules: {\tt Display\/}, {\tt Viewers\/}, and {\tt MenuViewers\/}, the latter building upon
+modules: \code{Display\/}, \code{Viewers\/}, and \code{MenuViewers\/}, the latter building upon
 the formers. Conceptually, each module contributes an associated class
 of display-oriented objects and a collection of related service
 routines.
@@ -1817,18 +1812,18 @@ Service
 Message handling for menu viewers Tiling viewer management Block-oriented raster operations
 
 Inspecting the column titled Type we recognize precisely our familiar
-types {\tt Frame\/}, {\tt Viewer\/}, and {\tt MenuViewer\/} respectively, where the latter is
-an abbreviation of {\tt MenuViewers.Viewer\/}.
+types \code{Frame\/}, \code{Viewer\/}, and \code{MenuViewer\/} respectively, where the latter is
+an abbreviation of \code{MenuViewers.Viewer\/}.
 
 In addition to the core modules of the display system a section in
-module {\tt Oberon\/} provides a specialized application programming interface
+module \code{Oberon\/} provides a specialized application programming interface
 (API) that simplifies the use of the viewer management package by
 applications in the case of standard Oberon display configurations. We
 shall come back to this topic in Section 4.6.
 
 For the moment let us concentrate on the core of the viewer management
-and in particular on the modules {\tt Viewers\/} and {\tt MenuViewers\/}, saving the
-discussion of the module {\tt Display\/} for the next section. Typically, we
+and in particular on the modules \code{Viewers\/} and \code{MenuViewers\/}, saving the
+discussion of the module \code{Display\/} for the next section. Typically, we
 start the presentation of a module by listing and commenting its
 definition, and we refer to subsequent listings for its
 implementation.
@@ -1836,7 +1831,7 @@ implementation.
 \beginsubsubsection 4.4.1. Viewers.
 
 
-Focusing first on module {\tt Viewers\/} we can roughly define the domain of
+Focusing first on module \code{Viewers\/} we can roughly define the domain of
 its responsibility as ``initializing and maintaining the global layout
 of the display area''. From the previous discussion we are well
 acquainted already with the structure of the global display space as
@@ -1880,11 +1875,10 @@ DEFINITION Viewers;
 END Viewers.
 \endtt
 
-\noindent Some comments: A first group of procedures consisting of {\tt
-InitTrack\/}, {\tt OpenTrack\/}, and {\tt CloseTrack\/} supports the
-track structure of the display area. {\tt InitTrack\/} creates a new track of
-width {\tt W\/} and height {\tt H\/} by partitioning off a vertical strip of width {\tt W\/}
-from the display area. In addition, {\tt InitTrack\/} initializes the newly
+\noindent Some comments: A first group of procedures consisting of \code{InitTrack\/}, \code{OpenTrack\/}, and \code{CloseTrack\/} supports the
+track structure of the display area. \code{InitTrack\/} creates a new track of
+width \code{W\/} and height \code{H\/} by partitioning off a vertical strip of width \code{W\/}
+from the display area. In addition, \code{InitTrack\/} initializes the newly
 created track with a filler viewer that is supplied as a
 parameter. The filler viewer essentially serves as background filling
 up the track at its top end. It reduces to height 0 if the track is
@@ -1896,50 +1890,50 @@ startup. It amounts to executing a sequence of steps of the form
 NEW(Filler); Filler.handle := HandleFiller; InitTrack(W, H, Filler)
 \endtt
 
-\noindent where {\tt HandleFiller\/} is supposed to handle messages
+\noindent where \code{HandleFiller\/} is supposed to handle messages
 that require modifications of size and cursor drawing.
 
-The global variable {\tt curW\/} indicates the width of the already configured
-part of the display area. Note that configuring starts with {\tt x = 0\/} and
+The global variable \code{curW\/} indicates the width of the already configured
+part of the display area. Note that configuring starts with \code{x = 0\/} and
 is non-reversible in the sense that the grid defined by the
 initialized tracks cannot be refined later. However, remember that it
 can be coarsened at any time by overlaying a contiguous sequence of
 existing tracks by a single new track.
 
-Procedure {\tt OpenTrack\/} serves exactly this purpose. The track (or
+Procedure \code{OpenTrack\/} serves exactly this purpose. The track (or
 sequence of tracks) to be overlaid in the display-area must be spanned
-by the segment {\tt [X, X + W)\/}. Procedure {\tt CloseTrack\/} is inverse to
-{\tt OpenTrack\/}. It is called to close the (topmost) track located at {\tt X\/} in
+by the segment \code{[X, X + W)\/}. Procedure \code{CloseTrack\/} is inverse to
+\code{OpenTrack\/}. It is called to close the (topmost) track located at \code{X\/} in
 the display area, and to restore the previously covered track (or
 sequence of tracks).
 
 The next three procedures are used to organize viewers within
-individual tracks. Procedure {\tt Open\/} allocates a given viewer at a given
-position. More precisely, {\tt Open\/} locates the viewer containing the point
-{\tt (X, Y)\/}, splits it horizontally at height {\tt Y\/}, and opens the viewer {\tt V\/} in
-the lower part of the area. In the special case of {\tt Y\/} coinciding with
+individual tracks. Procedure \code{Open\/} allocates a given viewer at a given
+position. More precisely, \code{Open\/} locates the viewer containing the point
+\code{(X, Y)\/}, splits it horizontally at height \code{Y\/}, and opens the viewer \code{V\/} in
+the lower part of the area. In the special case of \code{Y\/} coinciding with
 the upper boundary line of the located viewer this is closed
-automatically. Procedure {\tt Change\/} allows to change the height of a given
-viewer {\tt V\/} by moving its upper boundary line to a new location {\tt Y\/} (within
-the limits of its neighbors). Procedure {\tt Close\/} removes the given viewer
-{\tt V\/} from the display area. Figure 4.5 makes these operations clear.
+automatically. Procedure \code{Change\/} allows to change the height of a given
+viewer \code{V\/} by moving its upper boundary line to a new location \code{Y\/} (within
+the limits of its neighbors). Procedure \code{Close\/} removes the given viewer
+\code{V\/} from the display area. Figure 4.5 makes these operations clear.
 
 TODO: Figure 4.5 Basic operations on viewers
 
 The last group of procedures provides miscellaneous
-services. Procedure {\tt This\/} identifies the viewer displayed at {\tt (X, Y)\/}.
-Procedure {\tt Next\/} returns the next upper neighbor of a given
-displayed viewer {\tt V\/}. Procedure {\tt Recall\/} allows recalling and restoring
-the most recently closed viewer. {\tt Locate\/} is a procedure that assists
+services. Procedure \code{This\/} identifies the viewer displayed at \code{(X, Y)\/}.
+Procedure \code{Next\/} returns the next upper neighbor of a given
+displayed viewer \code{V\/}. Procedure \code{Recall\/} allows recalling and restoring
+the most recently closed viewer. \code{Locate\/} is a procedure that assists
 heuristic allocation of new viewers. For any given track and desired
-minimum height, procedure {\tt Locate\/} offers a choice of some distinguished
+minimum height, procedure \code{Locate\/} offers a choice of some distinguished
 viewers in the track: the filler viewer, the viewer at the bottom, an
 alternative choice, and the viewer of maximum height. Finally,
-procedure {\tt Broadcast\/} broadcasts a message to the display area, that is,
+procedure \code{Broadcast\/} broadcasts a message to the display area, that is,
 sends the given message to all viewers that are currently displayed.
 
 It is now a good time to throw a glance behind the scenes. Let us
-start with revealing module {\tt Viewer\/}’s internal data structure. Remember
+start with revealing module \code{Viewer\/}’s internal data structure. Remember
 that according to the principle of information hiding an internal data
 structure is fully private to the containing module and accessible
 through the module’s procedural interface only. Figure 4.6 shows a
@@ -1959,8 +1953,8 @@ and shaded in Figure 4.6.
 
 TODO: Figure 4.6 A snapshot of the internal data structure corresponding to Figure 4.3
 
-Technically, the track descriptor type {\tt TrackDesc\/} is a private
-extension of the viewer descriptor type {\tt ViewerDesc\/}. Repeating the
+Technically, the track descriptor type \code{TrackDesc\/} is a private
+extension of the viewer descriptor type \code{ViewerDesc\/}. Repeating the
 declarations of viewer descriptors and frame descriptors, we get to
 this hierarchy of types:
 \begintt
@@ -1980,10 +1974,10 @@ END;
 \endtt
 
 \noindent It is noteworthy that the data structure of the viewer
-manager is heterogeneous with {\tt Frame\/} as base type. It provides
+manager is heterogeneous with \code{Frame\/} as base type. It provides
 a nice example of a nested hierarchy of frames with the additional
 property that the first two levels correspond to the first two levels
-in the type hierarchy defined by {\tt Track\/}, {\tt Viewer\/}, and {\tt Frame\/}.
+in the type hierarchy defined by \code{Track\/}, \code{Viewer\/}, and \code{Frame\/}.
 
 
 In an object-oriented environment objects are autonomous entities in
@@ -1992,21 +1986,21 @@ than the system) temporarily. For example, we can look at the objects
 belonging to a module's private data structure as bound to this
 module. Deciding if an object is currently bound is then a fundamental
 problem. In the case of viewers, this information is contained in an
-extra instance variable called {\tt state\/}.
+extra instance variable called \code{state\/}.
 
-As a system invariant, we have for every viewer {\tt V\/}
+As a system invariant, we have for every viewer \code{V\/}
 
-{\tt V\/} is bound to module {\tt Viewers\/} \Leftrightarrow {\tt V.state} \neq 0
+\code{V\/} is bound to module \code{Viewers\/} \Leftrightarrow \code{V.state} \neq 0
 
 If we call visible any displayed viewer and suspended any viewer that
 is covered by an overlaying track we can refine this invariant to
 
-({\tt V\/} is visible \Leftrightarrow ${\tt V.state\/} > 0$) and ( {\tt V\/} is suspended \Leftrightarrow ${\tt V.state\/} < 0$)
+(\code{V\/} is visible \Leftrightarrow $\code{V.state\/} > 0$) and ( \code{V\/} is suspended \Leftrightarrow $\code{V.state\/} < 0$)
 
 TODO: Clean this math shit up
 
-In addition, more detailed information about the kind of viewer {\tt V\/} is given by the magnitude
-TODO: absolute value ${\tt V.state\/}$ :
+In addition, more detailed information about the kind of viewer \code{V\/} is given by the magnitude
+TODO: absolute value $\code{V.state\/}$ :
 
 TODO: table
 V.state kind of viewer
@@ -2014,26 +2008,26 @@ V.state kind of viewer
 1 filler
 -1 productive
 
-The magnitude $ \vert V.state \vert $ is kept invariant by module {\tt Viewers\/}. It could
+The magnitude $ \vert V.state \vert $ is kept invariant by module \code{Viewers\/}. It could
 be used, for example, to distinguish different levels of importance or
 preference with the aim of supporting a smarter algorithm for
 heuristic allocation of new viewers. The variable state is treated as
-read-only by every module other than {\tt Viewers\/}.
+read-only by every module other than \code{Viewers\/}.
 
 We are now sufficiently prepared to understand how the exported
-procedures of module {\tt Viewers\/} work behind the scenes. All of them
+procedures of module \code{Viewers\/} work behind the scenes. All of them
 operate on the internal dynamic data structure just explained. Some
 use the structure as a reference only or operate on individual
-elements (procedures {\tt This\/}, {\tt Next\/}, {\tt Locate\/}, {\tt Change\/}), others add new
-elements to the structure (procedures {\tt InitTrack\/}, {\tt OpenTrack\/}, {\tt Open\/}), and
-even others remove elements (procedures {\tt CloseTrack\/}, {\tt Close\/}). Most
+elements (procedures \code{This\/}, \code{Next\/}, \code{Locate\/}, \code{Change\/}), others add new
+elements to the structure (procedures \code{InitTrack\/}, \code{OpenTrack\/}, \code{Open\/}), and
+even others remove elements (procedures \code{CloseTrack\/}, \code{Close\/}). Most
 procedures have side-effects on the size or state of existing
 elements.
 
-Let us now change perspective and look at module {\tt Viewers\/} as a general
+Let us now change perspective and look at module \code{Viewers\/} as a general
 low-level manager of viewers whose exact contents are unknown to it
 (and whose controlling software might have been developed years
-later). In short, let us look at module {\tt Viewers\/} as a manager of black
+later). In short, let us look at module \code{Viewers\/} as a manager of black
 boxes. Such an abstraction immediately makes it impossible for the
 implementation to call fixed procedures for, say, changing a viewer's
 size or state. The facility needed is a message-oriented interface.
@@ -2045,8 +2039,8 @@ TYPE ViewerMsg = RECORD (Display.FrameMsg)
 END;
 \endtt
 
-\noindent There exist three variants of {\tt Viewer\/} messages, discriminated by the
-field {\tt id\/}: Restore contents, modify height (extend or reduce at
+\noindent There exist three variants of \code{Viewer\/} messages, discriminated by the
+field \code{id\/}: Restore contents, modify height (extend or reduce at
 bottom), and suspend (close temporarily or permanently). The
 additional components of the message inform about the desired new
 location, size, and state.
@@ -2099,8 +2093,8 @@ END MenuViewers.
 \endtt
 
 The interface represented by this definition is conspicuously
-narrow. There are just two procedures: A generator procedure {\tt New\/} and a
-standard message handler {\tt Handle\/}. The generator returns a newly created
+narrow. There are just two procedures: A generator procedure \code{New\/} and a
+standard message handler \code{Handle\/}. The generator returns a newly created
 menu viewer displaying the two (arbitrary) frames passed as
 parameters. The message handler implements the entire ``behavior'' of an
 object and in particular the above mentioned message dispatching
@@ -2119,7 +2113,7 @@ of three basic steps:
 
 allocate memory block; install message handler; initialize state variables
 
-\noindent In the case of a standard menu viewer {\tt V\/} this can be expressed as
+\noindent In the case of a standard menu viewer \code{V\/} this can be expressed as
 \begintt
 NEW(V);
 V.handle := Handle;
@@ -2128,14 +2122,14 @@ V.dsc.next := Main;
 V.menuH := menuH
 \endtt
 
-\noindent With that, calling {\tt New\/} is equivalent with
+\noindent With that, calling \code{New\/} is equivalent with
 \begintt
 create V; open V at X, Y
 \endtt
 
-\noindent where opening {\tt V\/} needs assistance by module {\tt Viewers\/}.
+\noindent where opening \code{V\/} needs assistance by module \code{Viewers\/}.
 
-The implementation of procedure {\tt Handle\/} embodies the standard strategy of message handling by
+The implementation of procedure \code{Handle\/} embodies the standard strategy of message handling by
 menu viewers. The following code is a coarse-grained view of it.
 \begintt
 Message handler for menu viewers
@@ -2223,8 +2217,8 @@ while the mouse is located in the upper part of its menu frame and the
 left mouse key is kept down. This means ``change viewer's height by
 moving its top line vertically''. No message to express the required
 transformation of the sub-frames yet exists. Consequently, module
-{\tt MenuViewers\/} takes advantage of our open (extensible) message model and
-simply introduces an appropriate message type called {\tt ModifyMsg\/}:
+\code{MenuViewers\/} takes advantage of our open (extensible) message model and
+simply introduces an appropriate message type called \code{ModifyMsg\/}:
 \begintt
 ModifyMsg = RECORD (Display.FrameMsg)
   id: INTEGER;
@@ -2232,21 +2226,21 @@ ModifyMsg = RECORD (Display.FrameMsg)
 END;
 \endtt
 
-\noindent The field {\tt id\/} specifies one of two variants: {\tt extend\/} or {\tt reduce\/}. The
+\noindent The field \code{id\/} specifies one of two variants: \code{extend\/} or \code{reduce\/}. The
 first variant of the message requests the receiving frame to move by
-the vertical translation vector {\tt dY\/} and then to extend to height {\tt H\/} at
-bottom. The second variant requests the frame to reduce to height {\tt H\/} at
-bottom and then to move by {\tt dY\/}. In both cases {\tt Y\/} indicates the
+the vertical translation vector \code{dY\/} and then to extend to height \code{H\/} at
+bottom. The second variant requests the frame to reduce to height \code{H\/} at
+bottom and then to move by \code{dY\/}. In both cases \code{Y\/} indicates the
 Y-coordinate of the new lower-left corner. Figure 4.7 summarizes this
 graphically.
 
 Messages arriving from the viewer manager and requesting the receiving
 viewer to extend or reduce at its bottom are also mapped into messages
-of type {\tt ModifyMsg\/}. Of course, no translation is needed in these cases,
-and {\tt dY\/} is 0.
+of type \code{ModifyMsg\/}. Of course, no translation is needed in these cases,
+and \code{dY\/} is 0.
 
 The attentive reader might perhaps have asked why the standard handler
-is exported by module {\tt MenuViewers\/} at all. The thought behind is
+is exported by module \code{MenuViewers\/} at all. The thought behind is
 reusability of code. For example, a message handler for a subclass of
 menu viewers could be implemented effectively by reusing menu viewer's
 standard handler. After having handled all new or differing cases
@@ -2275,7 +2269,7 @@ the area must be locked first after turning invisible all markers in
 the area.
 
 The technical support of cursor management is again contained in
-module {\tt Oberon\/}. The corresponding application programming interface is
+module \code{Oberon\/}. The corresponding application programming interface is
 \begintt
 DEFINITION Oberon;
   TYPE Marker = RECORD
@@ -2298,34 +2292,34 @@ END Oberon.
 \endtt
 
 \noindent The state of a cursor is given by its mode of visibility (on), its
-position (X, Y) in the display area, and the current marker. {\tt Marker\/} is
+position (X, Y) in the display area, and the current marker. \code{Marker\/} is
 an abstract data type with an interface consisting of two operations
-{\tt Fade\/} and {\tt Draw\/}. The main benefit we can draw from this abstraction is
+\code{Fade\/} and \code{Draw\/}. The main benefit we can draw from this abstraction is
 once more conceptual independence of the underlying hardware. For
-example, {\tt Fade\/} and {\tt Draw\/} can adapt to a given monitor hardware with
+example, \code{Fade\/} and \code{Draw\/} can adapt to a given monitor hardware with
 built-in cursor support or, in case of absence of such support, can
 simply be implemented as identical procedures (an involution) drawing
 the marker pattern in inverse video mode.
 
 The functional interface to cursors consists of three operations:
-{\tt OpenCursor\/} to open a new cursor, {\tt FadeCursor\/} to switch off the marker
-of an open cursor, and {\tt DrawCursor\/} to extend the path of a cursor to a
+\code{OpenCursor\/} to open a new cursor, \code{FadeCursor\/} to switch off the marker
+of an open cursor, and \code{DrawCursor\/} to extend the path of a cursor to a
 new position and mark it with the given marker. We emphasize that the
 marker representing a given cursor can change its shape dynamically on
 the fly.
 
-Two cursors, {\tt Mouse\/} and {\tt Pointer\/} are predefined. They represent the
+Two cursors, \code{Mouse\/} and \code{Pointer\/} are predefined. They represent the
 mouse and an interactively controlled global system pointer
 respectively. Typically (but not necessarily) these cursors are
-visualized by the built-in markers {\tt Arrow\/} (a small arrow pointing to
-north-west) and {\tt Star\/} (a star symbol) respectively. The pointer can be
+visualized by the built-in markers \code{Arrow\/} (a small arrow pointing to
+north-west) and \code{Star\/} (a star symbol) respectively. The pointer can be
 used to mark any displayed object. It serves primarily as an implicit
 parameter of commands.
 
-Two assisting service procedures {\tt MarkedViewer\/} and {\tt RemoveMarks\/} are
-added in connection with the predefined cursors. {\tt MarkedViewer\/} returns
+Two assisting service procedures \code{MarkedViewer\/} and \code{RemoveMarks\/} are
+added in connection with the predefined cursors. \code{MarkedViewer\/} returns
 the viewer that is currently marked by the pointer. Its resulting
-value is equivalent to {\tt Viewers.This(Pointer.X, Pointer.Y)\/}. {\tt RemoveMarks\/}
+value is equivalent to \code{Viewers.This(Pointer.X, Pointer.Y)\/}. \code{RemoveMarks\/}
 turns invisible the predefined cursors within a given rectangle in the
 display area. This procedure is used to lock the rectangle for its
 caller.
@@ -2336,7 +2330,7 @@ Summary of the essential points and characteristics of Oberon's concept of curso
 
 2.) Cursor handling is decentralized by delegating it to the individual handlers that are installed in viewers. Typically, a handler reacts on the receipt of a mouse tracking message by drawing the mouse cursor at the indicated new position. The benefit of such individualized handling is flexibility. For example, a smart local handler might choose the shape of the visualizing marker depending on the exact location, or it might force the cursor onto a grid point.
 
-3.) Even though cursor handling is decentralized, there is some intrinsic support for cursor drawing built into the declaration of type {\tt Cursor\/}. Cursors are objects of full value and, as such, can ``memorize'' their current state. Consequently, the interface operations {\tt FadeCursor\/} and {\tt DrawCursor\/} need to refer to the desired future state only.
+3.) Even though cursor handling is decentralized, there is some intrinsic support for cursor drawing built into the declaration of type \code{Cursor\/}. Cursors are objects of full value and, as such, can ``memorize'' their current state. Consequently, the interface operations \code{FadeCursor\/} and \code{DrawCursor\/} need to refer to the desired future state only.
 
 4.) Looking at the viewer manager as one user of the display area, the cursor handler is a second (and logically concurrent) user of the same resource. If there is just one physical plane implementing the display area, any region must be locked by a current user before destructive painting. Therefore, markers are usually painted non-destructively in inverse-video mode.
 
@@ -2381,10 +2375,10 @@ more important role in practice. By a block we mean a rectangular area
 of pixels whose bounding lines are parallel to the axes of the
 coordinate system.
 
-Raster operations are based on a common principle: A block of width {\tt SW\/}
-and height {\tt SH\/} of source pixels is placed at a given point of
-destination {\tt (DX, DY)\/} in the display area. In the simplest case, the
-destination block {\tt (DX, DY, SW, SH)\/} is plainly overwritten by the
+Raster operations are based on a common principle: A block of width \code{SW\/}
+and height \code{SH\/} of source pixels is placed at a given point of
+destination \code{(DX, DY)\/} in the display area. In the simplest case, the
+destination block \code{(DX, DY, SW, SH)\/} is plainly overwritten by the
 source block. In general, the new value of a pixel in the destination
 block is a combination of its old value and the value of the
 corresponding source pixel:
@@ -2393,7 +2387,7 @@ $d := F(s, d)$
 
 \emph{F} is sometimes called the \emph{mode} of combination of the
 raster operation. The raster is stored as an array of values of type
-{\tt SET\/}, each set representing 32 black/white pixels. The modes of
+\code{SET\/}, each set representing 32 black/white pixels. The modes of
 combining source and destination is implemented by the following set
 operations:
 
@@ -2404,20 +2398,20 @@ operation
 s
 s + d (or) s / d (xor)
 
-Note that invert is equivalent with inverse video mode if {\tt s\/} is {\tt TRUE\/}
+Note that invert is equivalent with inverse video mode if \code{s\/} is \code{TRUE\/}
 for all pixels.
 
 There are many different variants of raster operations. Some refer to
 a source block in the display area, others specify a constant pattern
 to be taken as source block. Some variants require replication of the
-source block within a given destination block {\tt (DX, DY, DW, DH)\/} rather
+source block within a given destination block \code{(DX, DY, DW, DH)\/} rather
 than simple placement.
 
 The challenge when designing a raster interface is finding a unified,
 small and complete set of raster operations that covers all needs, in
 particular including the need of placing character glyphs. The
 amazingly compact resulting set of Oberon raster operations is
-exported by module {\tt Display\/}:
+exported by module \code{Display\/}:
 \begintt
 DEFINITION Display;
   CONST black = 0; white = 1; (*colors*)
@@ -2430,21 +2424,21 @@ DEFINITION Display;
 END Display.
 \endtt
 
-\noindent In the parameter lists of the above raster operations, {\tt mode\/} is the
-mode of combination (replace, paint, or invert). {\tt  CopyBlock\/} copies the
-source block {\tt (sx, sy, w, h)\/} to position {\tt (dx, dy)\/} and uses mode to
-combine new contents in the destination block {\tt (dx, dy, w, h)\/}. It is
+\noindent In the parameter lists of the above raster operations, \code{mode\/} is the
+mode of combination (replace, paint, or invert). \code{ CopyBlock\/} copies the
+source block \code{(sx, sy, w, h)\/} to position \code{(dx, dy)\/} and uses mode to
+combine new contents in the destination block \code{(dx, dy, w, h)\/}. It is
 assumed tacitly that the numbers of colors per pixel in the source
 block and in the destination area are identical. It is perhaps
-informative to know that {\tt CopyBlock\/} is essentially equivalent with the
-famous {\tt BitBlt\/} (bit block transfer) in the SmallTalk project
-\footnote1{[Goldberg] A. Goldberg, Smalltalk-80: The Interactive Programming Environment, Addison-Wesley 1984.}. In Oberon, {\tt CopyBlock\/} is used primarily for scrolling
+informative to know that \code{CopyBlock\/} is essentially equivalent with the
+famous \code{BitBlt\/} (bit block transfer) in the SmallTalk project
+\footnote1{[Goldberg] A. Goldberg, Smalltalk-80: The Interactive Programming Environment, Addison-Wesley 1984.}. In Oberon, \code{CopyBlock\/} is used primarily for scrolling
 contents within a viewer.
 
 The remaining raster operations use a constant pattern. Patterns are
 implemented as arrays of bytes, and the parameter patadr is the
-address of the relevant pattern. The first two bytes indicate width {\tt w\/}
-and height {\tt h\/} of the pattern. Pattern data are given as a sequence of
+address of the relevant pattern. The first two bytes indicate width \code{w\/}
+and height \code{h\/} of the pattern. Pattern data are given as a sequence of
 bytes to be placed into the destination block from left to right and
 from bottom to top. Each line takes an integral number of
 bytes. Hence, the number of data bytes is $((w+7) \div 8) \times h$. An
@@ -2452,27 +2446,27 @@ example is shown in Figure 4.8.
 
 TODO: Figure 4.8 A pattern and its encoding as an array of bytes (in hex)
 
-Some standard patterns are included in module {\tt Display\/} and exported as
+Some standard patterns are included in module \code{Display\/} and exported as
 global variables. Among them are patterns arrow, hook, and star
 intended to represent the cursor, the caret, and the marker. A second
 group of predefined patterns supports drawing graphics.
 
 The parameter col in the pattern-oriented raster operations specifies
 the pattern's foreground color. Colors black (background) and white
-are predefined. Procedure {\tt CopyPattern\/} copies the pattern to location
+are predefined. Procedure \code{CopyPattern\/} copies the pattern to location
 x, y in the display area, using the given combination mode. It is
 probably the most frequently used operation of all because it is
-needed to write text. Procedure {\tt ReplPattern\/} replicates the given
+needed to write text. Procedure \code{ReplPattern\/} replicates the given
 pattern to the given destination block. It starts at bottom left and
-proceeds from left to right and from bottom to top. Procedures {\tt Dot\/} and
-{\tt ReplConst\/} are special cases of {\tt CopyPattern\/} and {\tt ReplPattern\/}
+proceeds from left to right and from bottom to top. Procedures \code{Dot\/} and
+\code{ReplConst\/} are special cases of \code{CopyPattern\/} and \code{ReplPattern\/}
 respectively, taking a fixed implicit pattern consisting of a single
-foreground pixel. {\tt Dot\/} is exactly our previously mentioned ``set pixel''.
-{\tt ReplConst\/} is used to draw horizontal and vertical lines of
+foreground pixel. \code{Dot\/} is exactly our previously mentioned ``set pixel''.
+\code{ReplConst\/} is used to draw horizontal and vertical lines of
 various widths.
 
 The raster operations are a prominent example of the use of Oberon's
-data type {\tt SET\/}. Formally, variables are sets of integers between 0 and
+data type \code{SET\/}. Formally, variables are sets of integers between 0 and
 31. Here, they are taken as sets of bits numbered from 0 to 31. We
 consider the replication of 1's (mode = replace or paint) in the
 rectangle with origin x, y, width w, and height h. Every line consists
@@ -2491,7 +2485,7 @@ FOR a0 := al TO al + (h-1)*128 BY 128 DO
 END
 \endtt
 
-\noindent The definition (and even more so the implementation) of module {\tt Display\/}
+\noindent The definition (and even more so the implementation) of module \code{Display\/}
 provides support for a restricted class of possible hardware
 configurations only. Any number of display monitors is theoretically
 possible. However, they must be mapped to a regular horizontal array
@@ -2506,14 +2500,14 @@ configuration.
 TODO: Figure 4.9 General, regular cell structure of display area
 
 Under these restrictions any concrete configuration can be
-parameterized by the variables of the definition above. {\tt Unit\/}, {\tt Width\/},
-and {\tt Height\/} specify the extent of a displayed region, where {\tt Width\/} and
-{\tt Height\/} are width and height in pixel units, and {\tt Unit\/} is the size of a
+parameterized by the variables of the definition above. \code{Unit\/}, \code{Width\/},
+and \code{Height\/} specify the extent of a displayed region, where \code{Width\/} and
+\code{Height\/} are width and height in pixel units, and \code{Unit\/} is the size of a
 pixel in units of 1/36’000 mm. 1/36’000 mm is a common divisor of all
 of the standard metric units used by the typesetting community, like
-mm, inch, Pica point and point size of usual printing devices. {\tt Bottom\/}
-and {\tt UBottom\/} specify the bottom y-coordinate of the primary region and
-the secondary region respectively. Finally, {\tt Left\/} and {\tt ColLeft\/} give the
+mm, inch, Pica point and point size of usual printing devices. \code{Bottom\/}
+and \code{UBottom\/} specify the bottom y-coordinate of the primary region and
+the secondary region respectively. Finally, \code{Left\/} and \code{ColLeft\/} give the
 left x-coordinate of the area of black-and-white monitors and of color
 monitors respectively.
 
@@ -2523,7 +2517,7 @@ Let us now take up again our earlier topic of configuring the display
 area. We have seen that no specific layout of the display area is
 distinguished by the general viewer management itself. However, some
 support of the familiar standard Oberon display look is provided by
-module {\tt Oberon\/}.
+module \code{Oberon\/}.
 
 In the terminology of this module, a standard configuration consists
 of one or several horizontally adjacent displays, where a display is a
@@ -2546,30 +2540,30 @@ DEFINITION Oberon;
 END Oberon.
 \endtt
 
-\noindent Procedure {\tt OpenDisplay\/} initializes and opens a new display of the
-dimensions {\tt H\/} (height), {\tt UW\/} (width of user track), and {\tt SW\/} (width of
-system track). Procedure {\tt OpenTrack\/} overlays the sequence of existing
+\noindent Procedure \code{OpenDisplay\/} initializes and opens a new display of the
+dimensions \code{H\/} (height), \code{UW\/} (width of user track), and \code{SW\/} (width of
+system track). Procedure \code{OpenTrack\/} overlays the sequence of existing
 tracks spanned by the segment $[X, X + W)$ by a new track. Both
-procedure {\tt OpenDisplay\/} and {\tt OpenTrack\/} take from the client the burden
+procedure \code{OpenDisplay\/} and \code{OpenTrack\/} take from the client the burden
 of creating a filler viewer.
 
-The next group of procedures {\tt DisplayWidth\/}, {\tt DisplayHeight\/},
-{\tt UserTrack\/} and {\tt SystemTrack\/} return
+The next group of procedures \code{DisplayWidth\/}, \code{DisplayHeight\/},
+\code{UserTrack\/} and \code{SystemTrack\/} return
 width or height of the respective structural entity located at
 position X in the display area.
 
-Procedures {\tt AllocateUserViewer\/} and {\tt AllocateSystemViewer\/} make proposals
+Procedures \code{AllocateUserViewer\/} and \code{AllocateSystemViewer\/} make proposals
 for the allocation of a new viewer in the desired track of the display
-located at {\tt DX\/}. In first priority, the location is determined by the
+located at \code{DX\/}. In first priority, the location is determined by the
 system pointer that can be set manually. If the pointer is not set, a
 location is calculated on the basis of some heuristics whose
 strategies rely on different splitting fractions that are applied in
 the user track and in the system track respectively, with the aim of
 generating aesthetically satisfactory layouts.
 
-In addition to the programming interface provided by module {\tt Oberon\/} for
+In addition to the programming interface provided by module \code{Oberon\/} for
 the case of standard display layouts, the display management section
-in the {\tt System\/} toolbox provides a user interface:
+in the \code{System\/} toolbox provides a user interface:
 \begintt
 DEFINITION System; (*Display management*)
   PROCEDURE Open; (*viewer*)
@@ -2585,9 +2579,9 @@ END System.
 \noindent In turn, these commands are called to open a text viewer in
 the system track, close a viewer, close a track, recall (and reopen)
 the most recently closed viewer, copy a viewer, and grow a viewer. The
-commands {\tt Close\/}, {\tt CloseTrack\/}, {\tt Recall\/}, {\tt Copy\/},
-and {\tt Grow\/} are generic. {\tt Close\/}, {\tt Copy\/},
-and {\tt Grow\/} are typically included in the title bar of a menu
+commands \code{Close\/}, \code{CloseTrack\/}, \code{Recall\/}, \code{Copy\/},
+and \code{Grow\/} are generic. \code{Close\/}, \code{Copy\/},
+and \code{Grow\/} are typically included in the title bar of a menu
 viewer. Their detailed implementations follow subsequently.
 
 \beginchapter CHAPTER 5: THE TEXT SYSTEM.
@@ -2681,7 +2675,7 @@ by presenting it as an abstract data type. It is important not to
 confuse this type with the far less powerful type String as it is
 often supported by advanced programming languages. In this Section we
 carefully avoid revealing any implementation aspects of the abstract
-type {\tt Text\/}. Our viewpoint is that of an application program operating
+type \code{Text\/}. Our viewpoint is that of an application program operating
 on text abstractly or using it as a medium of communication.
 
 Nevertheless, let us first use a symbolic looking glass to get a
@@ -2700,7 +2694,7 @@ a (rich) text as a sequence of characters with looks. We shall treat
 the topic of fonts and glyphs thoroughly in Section 5.4.
 
 For the moment, however, let us continue our discussion of the
-abstract data type {\tt Text\/}. Formally, we define it as
+abstract data type \code{Text\/}. Formally, we define it as
 \begintt
 Text = POINTER TO TextDesc;
 TextDesc = RECORD
@@ -2716,7 +2710,7 @@ included as a method (occasionally called after-method) to notify
 interested clients of state changes.
 
 By definition, each abstract data type comes with a complete set of
-operations. In the case of {\tt Text\/}, three different groups corresponding
+operations. In the case of \code{Text\/}, three different groups corresponding
 to three different topics need to be considered, loading (from file),
 storing (to file), editing, and accessing (reading and writing)
 respectively.
@@ -2742,10 +2736,10 @@ the structure of sections obeys the following syntax:
 section = identification type length contents.
 \endtt
 
-\noindent Procedure {\tt Open\/} internalizes a named text file (consisting of a single
-text section), procedure {\tt Load\/} internalizes an arbitrary text section
-starting at (f, pos), and procedure {\tt Store\/} externalizes a text section
-to (f, pos). The parameter {\tt T\/} designates the internalized text. len
+\noindent Procedure \code{Open\/} internalizes a named text file (consisting of a single
+text section), procedure \code{Load\/} internalizes an arbitrary text section
+starting at (f, pos), and procedure \code{Store\/} externalizes a text section
+to (f, pos). The parameter \code{T\/} designates the internalized text. len
 returns the length of the section. Note that in case of Load the
 identification of the section must have been read and consumed before
 the loader is called.
@@ -2761,13 +2755,13 @@ PROCEDURE ChangeLooks (T: Text; beg, end: INTEGER; sel: SET; fnt: Fonts.Font; co
 \endtt
 
 \noindent Again, we should first explain the types of parameters. Procedures
-{\tt Delete\/} and {\tt ChangeLooks\/} each take a stretch of text as an argument
+\code{Delete\/} and \code{ChangeLooks\/} each take a stretch of text as an argument
 which, by definition, is an interval [beg, end) within the given
-text. In the parameter lists of {\tt Insert\/} and {\tt Append\/} we recognize a new
-data type {\tt Buffer\/}.
+text. In the parameter lists of \code{Insert\/} and \code{Append\/} we recognize a new
+data type \code{Buffer\/}.
 
 Buffers are a facility to hold anonymous sequences of characters. Type
-{\tt Buffer\/} presents itself again as an abstract data type:
+\code{Buffer\/} presents itself again as an abstract data type:
 \begintt  
 Buffer = POINTER TO BufDesc;
 BufDesc = RECORD
@@ -2775,7 +2769,7 @@ BufDesc = RECORD
 END;
 \endtt
 
-\noindent {\tt len\/} specifies the current length of the buffered sequence. The
+\noindent \code{len\/} specifies the current length of the buffered sequence. The
 following procedures represent the intrinsic operations on buffers:
 \begintt
 PROCEDURE OpenBuf (B: Buffer);
@@ -2783,18 +2777,18 @@ PROCEDURE Copy (SB, DB: Buffer);
 PROCEDURE Save (T: Text; beg, end: INTEGER; B: Buffer);
 \endtt
 
-\noindent Their function is in turn opening a given buffer {\tt B\/}, copying a buffer
-{\tt SB\/} to {\tt DB\/}, saving a stretch [beg, end) of text in a given buffer, and
+\noindent Their function is in turn opening a given buffer \code{B\/}, copying a buffer
+\code{SB\/} to \code{DB\/}, saving a stretch [beg, end) of text in a given buffer, and
 recalling the most recently deleted stretch of text and putting it
-into buffer {\tt B\/}.
+into buffer \code{B\/}.
 
-{\tt Buffer\/} is used as an auxiliary data type in editing
-procedures. Procedure {\tt Delete\/} deletes the given stretch [beg, end)
-within text {\tt T\/}, Insert inserts the buffer's contents at position pos
-within text {\tt T\/}, and {\tt Append(T, B)\/} is a shorthand form for {\tt Insert(T, T.len, B)\/}. Note that, as a side-effect of {\tt Insert\/} and {\tt Append\/}, the
-buffer involved is emptied. Finally, procedure {\tt ChangeLooks\/} allows to
+\code{Buffer\/} is used as an auxiliary data type in editing
+procedures. Procedure \code{Delete\/} deletes the given stretch [beg, end)
+within text \code{T\/}, Insert inserts the buffer's contents at position pos
+within text \code{T\/}, and \code{Append(T, B)\/} is a shorthand form for \code{Insert(T, T.len, B)\/}. Note that, as a side-effect of \code{Insert\/} and \code{Append\/}, the
+buffer involved is emptied. Finally, procedure \code{ChangeLooks\/} allows to
 change selected looks within the given stretch [beg, end) of text
-{\tt T\/}. {\tt sel\/} is a mask selecting a subset of the set of looks {\tt { font,
+\code{T\/}. \code{sel\/} is a mask selecting a subset of the set of looks \code{{ font,
 color, vertical offset }\/}.
 
 It is time now to come back to the notifier concept. Recapitulate that
@@ -2805,12 +2799,12 @@ operation. Its signature is
 Notifier = PROCEDURE (T: Text; op, beg, end: INTEGER);
 \endtt
 
-\noindent The parameters {\tt op\/}, {\tt beg\/}, and {\tt end\/} report about the operation ({\tt op\/}) that
+\noindent The parameters \code{op\/}, \code{beg\/}, and \code{end\/} report about the operation (\code{op\/}) that
 calls the notifier and on the affected stretch [beg, end) of the
-text. There are three different possible variants of {\tt op\/}
+text. There are three different possible variants of \code{op\/}
 corresponding to the three different editing operations: op =
-delete, insert, replace correspond to procedures {\tt Delete\/}, {\tt Insert\/} (and
-{\tt Append\/}), and {\tt ChangeLooks\/} respectively.
+delete, insert, replace correspond to procedures \code{Delete\/}, \code{Insert\/} (and
+\code{Append\/}), and \code{ChangeLooks\/} respectively.
 
 By far the most important application of the notifier is updating the
 display, i.e. adjusting all affected views of the text that are
@@ -2851,11 +2845,11 @@ PROCEDURE OpenReader (VAR R: Reader; T: Text; pos: INTEGER);
 PROCEDURE Read (VAR R: Reader; VAR ch: CHAR);
 \endtt
 
-\noindent Procedure {\tt OpenReader\/} sets up a reader {\tt R\/} at position {\tt pos\/} in text
-{\tt T\/}. Procedure {\tt Read\/} returns the character at the current position of {\tt R\/}
-and makes {\tt R\/} move to the next position.
+\noindent Procedure \code{OpenReader\/} sets up a reader \code{R\/} at position \code{pos\/} in text
+\code{T\/}. Procedure \code{Read\/} returns the character at the current position of \code{R\/}
+and makes \code{R\/} move to the next position.
 
-\noindent The current position of reader {\tt R\/} is returned by a call to the function {\tt Pos\/}:
+\noindent The current position of reader \code{R\/} is returned by a call to the function \code{Pos\/}:
 \begintt
 PROCEDURE Pos (VAR R: Reader): INTEGER;
 \endtt
@@ -2882,7 +2876,7 @@ number = digit { digit }.
 spexchar = any character except letters, digits, space, tab, and carriage-return.
 \endtt
 
-\noindent Type {\tt Scanner\/} is defined correspondingly as
+\noindent Type \code{Scanner\/} is defined correspondingly as
 \begintt
 Scanner = RECORD (Reader)
   nextCh: CHAR;
@@ -2898,7 +2892,7 @@ END;
 
 \noindent This type is actually a variant record type with class as
 discriminating tag. Depending on its class the value of the current
-token is stored in one of the fields {\tt i\/}{\tt , x\/}{\tt , c\/}{\tt , or\/}{\tt  s\/}. {\tt len\/} gives the length of {\tt s\/}, {\tt nextCh\/} typically exposes the character terminating the current token, and line counts the number of lines scanned.
+token is stored in one of the fields \code{i\/}\code{, x\/}\code{, c\/}\code{, or\/}\code{ s\/}. \code{len\/} gives the length of \code{s\/}, \code{nextCh\/} typically exposes the character terminating the current token, and line counts the number of lines scanned.
 
 The operations on scanners are
 \begintt
@@ -2906,14 +2900,14 @@ PROCEDURE OpenScanner (VAR S: Scanner; T: Text; pos: INTEGER);
 PROCEDURE Scan (VAR S: Scanner);
 \endtt
 
-\noindent They correspond exactly to their counterparts {\tt OpenReader\/} and {\tt Read\/} respectively.
+\noindent They correspond exactly to their counterparts \code{OpenReader\/} and \code{Read\/} respectively.
 
 Writers are dual to readers. They serve the purpose of creating and
 extending texts. However, again, they do not operate on texts
 directly. Rather, they act as self-contained aggregates, continuously
 consuming and buffering textual data.
 
-The formal declaration of type {\tt Writer\/} resembles that of type {\tt Reader\/}:
+The formal declaration of type \code{Writer\/} resembles that of type \code{Reader\/}:
 \begintt
 Writer = RECORD buf:
   Buffer;
@@ -2922,9 +2916,9 @@ Writer = RECORD buf:
 END;
 \endtt
 
-\noindent {\tt buf\/} is an internal buffer containing the consumed data. {\tt fnt\/}, {\tt col\/}, and {\tt voff\/} specify the current looks for the next character consumed by this writer.
+\noindent \code{buf\/} is an internal buffer containing the consumed data. \code{fnt\/}, \code{col\/}, and \code{voff\/} specify the current looks for the next character consumed by this writer.
 
-The following procedures constitute the {\tt Writer\/} API:
+The following procedures constitute the \code{Writer\/} API:
 \begintt
 PROCEDURE OpenWriter (VAR W: Writer);
 PROCEDURE SetFont (VAR W: Writer; fnt: Fonts.Font);
@@ -2932,9 +2926,9 @@ PROCEDURE SetColor (VAR W: Writer; col: INTEGER);
 PROCEDURE SetOffset (VAR W: Writer; voff: INTEGER);
 \endtt
 
-\noindent Procedure {\tt OpenWriter\/} opens a new writer with an empty buffer. Procedures {\tt SetFont\/}, {\tt SetColor\/}, and {\tt SetOffset\/} set the respective current look. For example,
-{\tt SetFont(W, fnt)\/} is equivalent with {\tt W.fnt := fnt\/}.
-These procedures are included because {\tt fnt\/}, {\tt col\/}, and {\tt voff\/} are read-only for clients.
+\noindent Procedure \code{OpenWriter\/} opens a new writer with an empty buffer. Procedures \code{SetFont\/}, \code{SetColor\/}, and \code{SetOffset\/} set the respective current look. For example,
+\code{SetFont(W, fnt)\/} is equivalent with \code{W.fnt := fnt\/}.
+These procedures are included because \code{fnt\/}, \code{col\/}, and \code{voff\/} are read-only for clients.
 
 The question may arise how data is produced and transferred to
 writers. The answer is a set of writer procedures, each of them
@@ -2974,8 +2968,8 @@ time.
 Let us summarize: Text in Oberon is a powerful abstract data type with
 intrinsic operations from three areas: Loading/storing, editing, and
 accessing (reading/writing). The latter two areas on their part
-introduce further abstract types called {\tt Buffer\/}, {\tt Reader\/}, {\tt Scanner\/}, and
-{\tt Writer\/}. In combination they guarantee a clean separation of very
+introduce further abstract types called \code{Buffer\/}, \code{Reader\/}, \code{Scanner\/}, and
+\code{Writer\/}. In combination they guarantee a clean separation of very
 different concerns. The benefits of such a rigorous decoupling are
 numerous. For example, it makes it possible to freely choose (and
 vary) the granularity at which a text and its views are
@@ -2990,10 +2984,10 @@ decomposition of a topic into modules with relatively thin interfaces
 or, in other words, into modules with a great potential for
 information hiding. Text systems provide a welcome opportunity of an
 exercise. A closer analysis immediately leads to the following
-separate concerns corresponding to the components {\tt Model\/}, {\tt View\/} and
-{\tt Controller\/} of the MVC scheme: Text management, text rendering, and
-text editing. If we combine {\tt View\/} and {\tt Controller\/} and add an auxiliary
-font handling module {\tt Fonts\/}, we arrive at the following three-module
+separate concerns corresponding to the components \code{Model\/}, \code{View\/} and
+\code{Controller\/} of the MVC scheme: Text management, text rendering, and
+text editing. If we combine \code{View\/} and \code{Controller\/} and add an auxiliary
+font handling module \code{Fonts\/}, we arrive at the following three-module
 import hierarchy:
 
 TODO: table
@@ -3009,9 +3003,9 @@ Font management
 Note that, in contrast to the display-subsystem, the associated object
 types are not connected hierarchically here.
 
-Separate Sections 5.3 and 5.4 will be devoted to modules {\tt TextFrames\/}
-and {\tt Fonts\/} respectively. In the current Section
-we focus on module {\tt Texts\/}. Regarding it as a model of the
+Separate Sections 5.3 and 5.4 will be devoted to modules \code{TextFrames\/}
+and \code{Fonts\/} respectively. In the current Section
+we focus on module \code{Texts\/}. Regarding it as a model of the
 abstract data type Text presented in the previous Section, its
 definition is congruent with the specification of the abstract data
 type itself, and we need not repeat it here.
@@ -3019,7 +3013,7 @@ type itself, and we need not repeat it here.
 The main topics of this Section are internal representation and file
 representation of texts. We first emphasize that the internal
 representation of a text is a completely private matter of module
-{\tt Texts\/} that is encapsulated and hidden from clients. In particular, the
+\code{Texts\/} that is encapsulated and hidden from clients. In particular, the
 representation could be changed at any time without invalidating any
 single client. In principle, the same is true for the file
 representation. However, stability is of paramount importance here
@@ -3052,7 +3046,7 @@ text without looks. It is based on two principles:
 section of a text file consisting of a sequence of contiguous
 characters.
 
-2.) Every piece is represented by a descriptor {\tt (f, pos, len)\/}, where
+2.) Every piece is represented by a descriptor \code{(f, pos, len)\/}, where
 the components designate a file, a starting position, and a length
 respectively. The whole text is represented as a list of piece
 descriptors (in short: piece list). The editing operations operate on
@@ -3117,7 +3111,7 @@ We conclude that the new aspects do not invalidate the positive rating given abo
 
 Eventually, we decided in favor of a simpler solution that we can easily justify by pointing out that the typical editing scenario is zooming into a local region of text, i.e. positioning at an arbitrary location once and subsequently positioning at locations in its immediate neighborhood many times. Therefore, an appropriate solution is caching the most recently calculated values (pos, piece) of the translation map. Of course, this does not solve the problem of cache misses. Notice, however, that this problem is acute only in the case of extremely long piece lists that do not occur in ordinary texts and editing sessions.
 
-We shall now illustrate the piece technique in detail at the example of two important but basic operations: Insert and read. Let us start with an overview of the data types involved. Apart from some auxiliary private variables marked with an arrow, the types {\tt Text\/}, {\tt Buffer\/}, and {\tt Reader\/} are already familiar to us from the previous Section. Type {\tt Piece\/} is completely private and hidden from the clients.
+We shall now illustrate the piece technique in detail at the example of two important but basic operations: Insert and read. Let us start with an overview of the data types involved. Apart from some auxiliary private variables marked with an arrow, the types \code{Text\/}, \code{Buffer\/}, and \code{Reader\/} are already familiar to us from the previous Section. Type \code{Piece\/} is completely private and hidden from the clients.
 \begintt
 Text = POINTER TO TextDesc;
 
