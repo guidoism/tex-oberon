@@ -4151,11 +4151,38 @@ The frequent use of the low-level procedures \code{SYSTEM.GET} and \code{SYSTEM.
 
 \beginsubsection 6.4. THE TOOLBOX OF THE LOADER.
 
+User commands directed to the loader are contained in module \code{System}. The toolbox offers the following three commands:
+
+System.ShowModules
+
+System.ShowCommands modname
+
+System.Free {modname} ~
+
+\noindent The first command opens a viewer and provides a list of all loaded modules. The list indicates the block length and the number of clients importing a module (the reference count). \code{ShowCommands} opens a viewer and lists the commands provided by the specified module. The commands are prefixed by the module name, and hence can immediately be activated by a mouse click. \code{Free} is called in order to remove modules either to regain storage space or to replace a module by a newly compiled version. A module can be dispensed only if (1) it has no clients, and (2) if does not declare any record types which are extensions of imported types.
+
+\beginsubsection 6.5. THE OBERON OBJECT FILE FORMAT.
+
+The name extension of object files is \code{.rsc}. Their syntax is the following:
+\begintt
+CodeFile = name key version size
+imports typedesc varsize strings code commands entries ptrrefs fixP fixD fixT body "O".
+imports = {modname key} 0X.
+typedesc = nof {byte}.
+strings = nof {char}.
+code = nof {word}.
+commands = {comname offset} 0X.
+entries = nof {word}.
+ptrrefs = {word} 0.
+\endtt
+
+\noindent \code{fixP}, \code{fixD}, \code{fixT} are the origins of chains of instructions to be updated (fixed up). \code{body} is the entry point offset of the module body.
+
+\beginchapter CHAPTER 7: THE FILE SYSTEM.
 
 
 
-% \beginsubsection 6.5. THE OBERON OBJECT FILE FORMAT.
-% \beginchapter CHAPTER 7: THE FILE SYSTEM.
+
 % \beginsubsection 7.1. FILES.
 % \beginsubsection 7.2 IMPLEMENTATION OF FILES ON A RANDOM-ACCESS STORE.
 % \beginsubsection 7.3 IMPLEMENTATION OF FILES ON A DISK.
