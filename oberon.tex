@@ -3791,8 +3791,193 @@ Explanations:
 Note that the need to read characters from the text (again) in \code{LocateChar} has its roots in the so-called \emph{proportional} fonts in which our rich texts are represented. We found that keeping character widths is an unnecessary optimization thanks to the buffering capabilities of the underlying file system. In the case of fixed-pitch fonts a simple division by the character width would be sufficient, of course.
 
 Finally, procedure \code{LocateLine} uses the line list to locate the desired text line without reading text at all.
+\begintt
+PROCEDURE LocateLine (F: Frame; y: INTEGER; VAR loc: Location);
+VAR L: Line; org, cury: INTEGER;
+BEGIN
+  org := F.org;
+1:org := F.org; L := F.trailer.next; cury := F.H - F.top - asr;
+2:WHILE (L.next # F.trailer) & (cury > y + dsr) DO
+  org := org + L.len; L := L.next; cury := cury - lsp
+3:END;
+4:loc.org := org; loc.lin := L; loc.y := cury
+END LocateLine;
+\endtt
 
-% \beginsubsection 5.4. THE FONT MACHINERY.
+Explanations:
+
+1) start with first line in the frame
+
+2) - 3) traverse line chain until last line or y is reached
+
+4) return found line
+
+\noindent After text editing text, rendering is our next topic. Let us pursue the case in that a user pressed the point-key and then interclicked the middle key, corresponding to line 56) in procedure \code{Edit}. Remember that notifier is called at the end of every editing operation and in particular at the end of \code{Texts.Insert}. In case of standard text frames, the notifier simply broadcasts an update message into the display space:
+\begintt
+PROCEDURE NotifyDisplay (T: Texts.Text; op, beg, end: INTEGER);
+VAR M: UpdateMsg;
+BEGIN
+  M.id := op; M.text := T; M.beg := beg; M.end := end;
+  Viewers.Broadcast(M)
+END NotifyDisplay;
+\endtt
+
+Let us now take the perspective of a text frame receiving an update message. Looking at line 9) in the text frame handler, we see that procedure \code{Update} is called, which in turn calls procedure \code{Insert} in \code{TextFrames}:
+\begintt
+PROCEDURE Insert (F: Frame; beg, end: INTEGER);
+VAR R: Texts.Reader;
+L, L0, l: Line;
+org, len, curY, botY, Y0, Y1, Y2, dY, wid: INTEGER;
+BEGIN
+IF beg < F.org THEN F.org := F.org + (end - beg) ELSE
+org := F.org; L := F.trailer.next; curY := F.Y + F.H - F.top - asr; WHILE (L # F.trailer) & (org + L.len <= beg) DO
+org := org + L.len; L := L.next; curY := curY - lsp END;
+IF L # F.trailer THEN
+botY := F.Y + F.bot + dsr;
+Texts.OpenReader(R, F.text, org); Texts.Read(R, nextCh);
+len := beg - org; wid := Width(R, len);
+ReplConst (F.col, F, F.X + F.left + wid, curY - dsr, L.wid - wid, lsp, 0); DisplayLine(F, L, R, F.X + F.left + wid, curY, len);
+org := org + L.len; curY := curY - lsp;
+Y0 := curY; L0 := L.next;
+WHILE (org <= end) & (curY >= botY) DO
+NEW(l);
+Display.ReplConst(F.col, F.X + F.left, curY - dsr, F.W - F.left, lsp, 0); DisplayLine(F, l, R, F.X + F.left, curY, 0);
+L.next := l; L := l;
+org := org + L.len; curY := curY - lsp
+END;
+IF L0 # L.next THEN Y1 := curY;
+L.next := L0;
+WHILE (L.next # F.trailer) & (curY >= botY) DO
+L := L.next; curY := curY - lsp END;
+L.next := F.trailer;
+dY := Y0 - Y1;
+IF Y1 > curY + dY THEN Display.CopyBlock
+(F.X + F.left, curY + dY + lsp - dsr, F.W - F.left, Y1 - curY - dY, F.X + F.left, curY + lsp - dsr,
+0);
+Y2 := Y1 - dY ELSE Y2 := curY END;
+curY := Y1; L := L0; WHILE curY # Y2 DO
+Display.ReplConst(F.col, F.X + F.left, curY - dsr, F.W - F.left, lsp, 0); DisplayLine(F, L, R, F.X + F.left, curY, 0);
+L := L.next; curY := curY - lsp
+END END
+END END;
+UpdateMark(F) END Insert;
+\endtt
+
+TODO: Add line numbers from page 74
+
+\noindent Some explanations:
+
+1) - 2) search line where inserted part starts
+
+3) if it is displayed in this viewer
+
+4) setup reader on this line
+
+5) get width of unaffected part of line (avoid touching it)
+
+6) clear remaining part of line
+
+7) display new remaining part of line
+
+8) - 9) display newly inserted text lines
+
+10) if it was not a one line update
+
+11) - 12) skip overwritten text lines
+
+13) use fast block move to adjust reusable lines
+
+14) - 15) redisplay previously overwritten text lines
+
+16) adjust position marker
+
+Special care needs to be exercised in the implementation to avoid ``flickering'' and to minimize processing time. Concretely, the following measures are taken for this purpose:
+
+1.) Avoid writing the same data again.
+
+2.) Keep the number of newly rendered text lines at a minimum.
+
+3.) Use raster operations (block moves) to adjust reusable displayed lines.
+
+Of course, the rules governing the rendering and formatting process crucially influence the complexity of procedures like \code{Insert}. For text frames we have consciously chosen the simplest possible set of formatting rules. They can be summarized as:
+
+1.) For a given text frame the distance between lines is constant.
+
+2.) There are no implicit line breaks.
+
+It is exactly this set of rules that makes it possible to display a text line in one pass. Two passes are inevitable if line distances have to adjust to font sizes or if lines must be broken implicitly.
+
+Updating algorithms make use of the following one-pass rendering procedures \code{Width} and \code{DisplayLine}:
+\begintt
+PROCEDURE Width (VAR R: Texts.Reader; len: INTEGER): INTEGER;
+  VAR patadr, pos, ox, dx, x, y, w, h: INTEGER;
+1:BEGIN pos:=0; ox:=0;
+    WHILE pos < len DO
+      Fonts.GetPat(R.fnt, nextCh, dx, x, y, w, h, pat);
+      ox := ox + dx; INC(pos); Texts.Read(R, nextCh)
+2:  END;
+3:  RETURN ox
+END Width;
+\endtt
+
+\noindent Explanations:
+
+1) - 2) scan through len characters of this line
+
+3) return accumulated width
+
+Procedures \code{Width} and \code{LocateChar} are similar. Therefore the above comment about relying on the buffering capabilities of the underlying file system applies to procedure Width equally well.
+\begintt
+PROCEDURE DisplayLine (F: Frame; L: Line; VAR R: Texts.Reader; X, Y, len : INTEGER); VAR patadr; NX, Xlim, dx, x, y, w, h: INTEGER; BEGINNX:=F.X+F.W;Xlim:=NX-40;
+WHILE (nextCh # CR) & ((nextCh > " ") OR (X < Xlim)) & (R.fnt # NIL) DO Fonts.GetPat(R.fnt, nextCh, dx, x, y, w, h, patadr);
+IF (X + x + w <= NX) & (h # 0) THEN
+Display.CopyPattern(R.col, patadr, X + x, Y + y, Display.invert) END;
+X := X + dx; INC(len); Texts.Read(R, nextCh)
+END; L.len:=len+1;L.wid:=X+eolW-(F.X+F.left);
+L.eot := R.fnt = NIL; Texts.Read(R, nextCh) END DisplayLine;
+\endtt
+TODO: Add line numbers for explanations from page 74
+
+Explanations:
+1) set right margin
+2) - 8) display characters of this line
+3) get width dx, box x, y, w, h, and pattern address of next character
+4) if there is enough space in the rectangle of contents
+5) display pattern
+7) jump to location of next character; read next character
+9) - 10) setup line descriptor
+
+Procedure \code{DisplayLine} is again similar to \code{LocateChar}, and the comment about relying on the file system’s buffering capabilities applies once more. The principal difference between \code{LocateChar} and \code{Width} on one hand and \code{DisplayLine} on the other hand is the fact that the latter accesses the display screen physically. Therefore, possession of the screen lock is a tacit precondition for calling \code{DisplayLine}.
+
+A quick look at an auxiliary procedure that updates the position marker concludes our tour behind the scenes of the text system:
+\begintt
+PROCEDURE UpdateMark (F: Frame);
+VAR oldH: INTEGER;
+BEGIN
+oldH := F.markH; F.markH := F.org * F.H DIV (F.text.len + 1)); IF (F.mark > 0) & (F.left >= barW) & (F.markH # oldH) THEN
+Display.ReplConst(Display.white, F.X + 1, F.Y + F.H - 1 - oldH, markW, 1, Display.invert);
+Display.ReplConst(Display.white, F.X + 1, F.Y + F.H - 1 - F.markH, markW, 1, Display.invert) END
+END UpdateMark;
+\endtt
+TODO: Add line numbers for explanations from page 75
+
+Explanations
+
+1) shows how the marker's position is calculated. Loosely spoken, the invariant is distance from top of frame / frame height = text position of first character in frame / text length
+
+2) erase the old marker
+
+3) draw the new marker
+
+And this in turn concludes our Section on text frames. Recapitulating the most important points: The tasks of text editing (input oriented) and text rendering (output oriented) are combined in the concept of text frames. Text frames constitute a subclass of display frames, and they are implemented in a separate module called \code{TextFrames}. The implementation of \code{TextFrames} accesses the displayed text exclusively via the ``official'' abstract interface of module \code{Texts} discussed in Section 5.2. It maintains a private data structure of line lists to accelerate locating requests. Text frames use simple formatting rules that allow super-efficient rendering of text in a single pass. In particular, line spacing is fixed for every text frame. Therefore, different styles of a base font are possible within a given text frame while different sizes are not.
+
+Putting into relation the different extensions of type \code{Display.Frame} that we came across in Chapters 4 and 5, we obtain the type hierarchy as shown in Figure 5.5.
+
+TODO: Figure 5.5 Extensions of tye Display.Frame
+
+\beginsubsection 5.4. THE FONT MACHINERY.
+
+
 % \beginsubsection 5.5. THE EDIT TOOLBOX.
 % \beginchapter CHAPTER 6: THE MODULE LOADER.
 % \beginsubsection 6.1. LINKING AND LOADING.
