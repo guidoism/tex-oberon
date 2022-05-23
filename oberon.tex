@@ -3377,6 +3377,39 @@ Summary: The mechanism used for the implementation of the abstract data type \co
 
 \beginsubsection 5.3. TEXT FRAMES.
 
+The tasks of text frames are text rendering and user interaction. A text frame represents a text view and a controller in the form of an interactive text editor. Technically, text frames are a subclass of display frames and, as such, are objects with an open message interface of the kind explained in Chapter 4.
+
+The geometric layout of text frames is determined by two areas: A rectangle of contents and a vertical scroll-bar along the left borderline. The type of text frames is a direct extension of type \code{Display.Frame}:
+\begintt
+Frame = POINTER TO FrameDesc;
+FrameDesc = RECORD (Display.FrameDesc)
+  text: Texts.Text;
+  org, col, lsp: INTEGER;
+  left, right, top, bot: INTEGER;
+  markH, time: INTEGER;
+  hasCar, hasSel, hasMark: BOOLEAN;
+  carloc: Location;
+  selbeg, selend: Location
+END;
+\endtt
+
+\noindent Fields \code{text} and \code{org} specify the text part to be displayed, the former referring to the underlying text and the latter designating the starting position of the displayed part. Fields \code{col} and \code{lsp} are rendering parameters. They specify the frame's background color and the line spacing. Fields \code{left}, \code{right}, \code{top}, and \code{bot} are margins. They determine the rectangle of contents. \code{mark} indicates whether there is a position marker, which is a small horizontal bar indicating the position of the displayed part relative to the whole text. \code{markH} represents its location within the text frame.
+
+\emph{Caret} and \emph{selection} are two important features associated with a text frame. The caret indicates a focus, and it serves as an implicit ``point of insertion'' for placing consumed characters (for example from the keyboard). The selection is a stretch of displayed text. Additionally it serves as a parameter for various operations and commands, among them delete and change looks. The state and location of the caret is given by the variables \code{car} and \code{carloc} respectively. Analogously, the state of the selection and its begin and end are reflected by the fields \code{sel}, \code{selbeg}, and \code{selend} in the frame descriptor. Field \code{time} is a time stamp on the current selection.
+
+In principle, caret and selection could be regarded as ingredients of the underlying text (the model) equally well. However, we deliberately decided to associate these features with frames (views) in order to get increased flexibility. For example, two different selections in adjacent viewers displaying the same text are normally interpreted as one extensive selection across their span.
+
+The auxiliary type \code{Location} summarizes information about a location in a text frame. Its definition is:
+\begintt
+Location = RECORD
+  org, pos, dx, x, y: INTEGER
+END;
+\endtt
+
+\noindent \code{x}, \code{y} specify the envisioned location relative to the text frame's origin, and \code{dx} is the width of the character at this location. \code{pos} is the corresponding position in the text and \code{org} is the origin position of the corresponding text line.
+
+The following is a simplified version of the message handler employed by text frames. It fully determines the behavior and capabilities of text frames.
+
 
 
 % \beginsubsection 5.4. THE FONT MACHINERY.
