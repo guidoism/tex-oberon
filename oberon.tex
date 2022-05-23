@@ -3977,6 +3977,58 @@ TODO: Figure 5.5 Extensions of tye Display.Frame
 
 \beginsubsection 5.4. THE FONT MACHINERY.
 
+We saw in the previous Sections that Oberon texts support attribute specifications (``looks'') for characters. Three different attributes are supported: font, color, and vertical offset. Let us first focus on the font attribute. A font can be regarded as a style the standard character set is designed in. Typically, an entire text is typeset in a single style, that is, there is one font per text. However, sometimes, an author wants to emphasize titles or words by changing the size of the font or by varying it to bold face or italics. In special texts, special characters like mathematical symbols or other kinds of icons may occur. In even more complex documents, mathematical or chemical formulae might flow within the text.
+
+This generalized view leads us to a different interpretation of the notion of font. We can regard a font as an indexed library of (graphical) objects, mostly but not necessarily glyphs. In the case of ordinary characters it is natural to use the ASCII-code as an index, ending up with an interpretation of text as sequence of pairs (library, index). Note that this is a very general view indeed that, in principle, is equivalent with defining text as sequence of arbitrary objects.
+
+The imaging model of characters provides two levels of abstraction. On the first level, characters are black boxes specified by a set of metric data $x$, $y$, $w$, $h$, and $dx$. $(x, y)$ is a vector from the current point of reference on the base line to the origin of the box. $w$ and $h$ are width and height of the box, and $dx$ is the distance to the point of reference of the next character on the same base line. On the second level of abstraction, a character is defined by a digital pattern or glyph that is to be rendered into the box. Figure 5.6 visualizes this model of characters.
+
+The additional two character attributes color and vertical offset appear now as parameters for the character model. The vertical offset allows translating the glyph vertically and the color attribute specifies the foreground color of the pattern.
+
+TODO: Figure 5.6 The geometric character model
+
+Good examples of procedures operating on the first level of abstraction are procedures \code{LocateChar} and \code{Width} that we discussed in the previous Section, as well as text formatters for a remote printer. In contrast, procedure \code{DisplayLine} operates on the second level.
+
+The representation of characters as digital patterns is merely the last step in a complex font design and rendering process. At the beginning is a generic description of the shape of each character in the form of outlines and hints. Outlines are typically composed of straight lines and spline-curves. Hints are included to assist the digitizer in its effort to faithfully map the filled character outlines into the device raster. For example, hinting can guarantee consistency of serif shapes and stem widths across an entire font within a text, independent of the relative positions of the characters with respect to the grid lines. Automatic digitization produces digital patterns of sufficiently high quality for printing media resolutions. For screen resolutions, however, we prefer to add a hand-tuning step. This is the reason why digital patterns are not produced ``on the fly'' in Oberon.
+
+Oberon's font management is encapsulated in module \code{Fonts}, with a low-level extension into the module \code{Display} that we already know from Chapter 4. The interface to module \code{Fonts} is very simple and narrow:
+\begintt
+MODULE Fonts;
+TYPE Font = POINTER TO FontDesc; FontDesc = RECORD
+name: ARRAY 32 OF CHAR;;
+height, minX, maxX, minY, maxY: INTEGER;
+h voff
+next: Font END;
+VAR Default: Font;
+PROCEDURE GetPat(fnt: Font; ch: CHAR; VAR dx, x, y, w, h, patadr: INTEGER); PROCEDURE This (name: ARRAY OF CHAR): Font;
+PROCEDURE Free;
+END Fonts.
+\endtt
+
+\noindent Variable \code{name} in type \code{Font} is the name of the underlying file. The variables \code{height}, \code{minX}, \code{maxX}, \code{minY}, and \code{maxY} designate line height and summary metric data. Default is a system-wide default font. It is installed at system loading time. \code{GetPat} delivers the geometric data for a given character in a given font (see Figure 5.5). This is a procedure to internalize (load) a font from a file given by its name. \code{Free} releases from storage fonts that are no longer needed.
+
+Type \code{Font} should again be regarded as an abstract data type with two intrinsic operations \code{This} and \code{GetPat}. Thinking of the immutable nature of fonts, multiple internal copies of the same font are certainly undesirable. Therefore, internalized fonts are cached in a private list that manifests itself in a private field next in type \code{FontDesc}. The cache is maintained by the internalizing procedure \code{This} according to the following scheme:
+\begintt
+search font in cache;
+IF found THEN return cached internalization
+ELSE internalize font; cache it
+END
+\endtt
+
+The implementation of type Font did not raise many challenges. One, however, is an undesirable side-effect of caching. The problem arises if a font is used for a limited time only. Because it is referenced by the cache it will never be collected by the system's garbage collector. Two possible solutions offer themselves: a) provide an explicit freeing operation and b) enforce some special handling by the garbage collector based on a concept of ``weak'' pointers.
+
+We conclude this Section with a formal specification of the font file format. Note that on the one hand, the file format is completely private to the managing Fonts module and on the other hand, it should be ultimately stable because it is probably used for long-term backup and for wide-range data exchange across multi-system platforms.
+
+This is an EBNF specification of the Oberon font file format:
+\begintt
+FontFile = ident header contents.
+header = abstraction family variant height minX maxX minY maxY.
+contents = nofRuns { beg end } { dx x y w h } { rasterByte }.
+\endtt
+
+\noindent \code{ident}, \code{abstraction}, \code{family}, and \code{variant} are one-byte values indicating file identification, abstraction (first level without raster bytes, second level with raster bytes), font family (Times Roman, Oberon, etc.), and variant (bold face, italics etc.). The values \code{height}, \code{minX}, \code{maxX}, \code{minY} and \code{maxY} are two bytes long each. They define in turn line height, minimum x-coordinate (of a box), maximum x-coordinate, minimum y-coordinate, and maximum y-coordinate. All values in production contents are two bytes long. \code{nofRuns} specifies the number of runs within the ASCII-code range (intervals occupied without gaps) and every pair $[beg, end)$ describes one run. The tuples $(dx, x, y, w, h)$ are the metric data of the corresponding characters (in their ASCII-code order), and the sequence of rasterByte gives the total of raster information.
+
+In summary, fonts in Oberon are indexed libraries of objects. The objects are descriptions of character images in two levels of abstraction: As metric data of black boxes and as binary patterns (glyphs). Type \code{Font} is an abstract data type with intrinsic operations to internalize and to get character object data. Internalized fonts are cached in a private list.
 
 % \beginsubsection 5.5. THE EDIT TOOLBOX.
 % \beginchapter CHAPTER 6: THE MODULE LOADER.
