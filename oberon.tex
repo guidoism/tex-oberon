@@ -3497,6 +3497,140 @@ PROCEDURE TrackWord (F: Frame; X, Y: INTEGER; VAR pos: INTEGER; VAR keysum: SET)
 \endtt
 
 \noindent Let us now take a closer look at the implementation of some selected operations. For this purpose, we must first explain the notion of line descriptor that is used to optimize the operation of locating positions within text frames.
+\begintt
+Line = POINTER TO LineDesc;
+
+LineDesc = RECORD
+  len, wid: INTEGER;
+  eot: BOOLEAN;
+  next: Line
+END;
+\endtt
+
+\noindent Each line descriptor provides detailed information about a single line of text that is currently displayed: \code{len} is the number of characters on the line, \code{wid} is the line width, \code{eot} indicates terminating line, and \code{next} points to the next line descriptor.
+
+Text frames maintain a private data structure called \emph{line list} that describes the list of text lines displayed:
+\begintt
+Frame = POINTER TO FrameDesc;
+
+FrameDesc = RECORD (Display.FrameDesc)
+  text: Texts.Text;
+  org, col, lsp: INTEGER;
+  left, right, top, bot: INTEGER;
+  markH, time: INTEGER;
+  hasChar, hasSel, hasMark: BOOLEAN;
+  carloc, selbeg, selend: Location;
+→ trailer: Line
+END;
+\endtt
+
+TODO: Make sure unicode arrows show up, maybe need to change to macro
+
+Field \code{trailer} represents a sentinel element that closes the line list to a ring.
+
+The line list contains useful summary information about the current contents of the text frame. It can be used beneficially by some related data types, for example by type \code{Location} that was introduced earlier:
+\begintt
+Location = RECORD
+  org, pos, dx, x, y: INTEGER;
+→ lin: Line
+END;
+\endtt
+
+\noindent The built-in editor procedure \code{Edit} is a worthwhile part to look at in more detail. It is called by the task scheduler to handle mouse events within a text frame. The following code excerpt shows nicely how the different components of the text system interoperate.
+\begintt
+PROCEDURE Edit* (F: Frame; X, Y: INTEGER; Keys: SET);
+VAR M: CopyOverMsg;
+    text: Texts.Text;
+    buf: Texts.Buffer;
+    v: Viewers.Viewer;
+    loc0, loc1: Location;
+    beg, end, time, pos: INTEGER; keysum: SET;
+    fnt: Fonts.Font;
+    col, voff: INTEGER;
+BEGIN
+  IF X < F.X + Min(F.left, barW) THEN (*cursor is in scroll bar*)
+    Oberon.DrawMouse(ScrollMarker, X, Y);
+    keysum := Keys;
+    IF Keys = {2} THEN (*ML, scroll up*)
+      TrackLine(F, X, Y, pos, keysum);
+      IF (pos >= 0) & (keysum = {2}) THEN
+        RemoveMarks(F); Oberon.RemoveMarks(F.X, F.Y, F.W, F.H);
+          Show(F, pos)
+      END
+    ELSIF Keys = {1} THEN (*MM*)
+      keysum := Keys;
+      REPEAT Input.Mouse(Keys, X, Y); keysum := keysum + Keys;
+        Oberon.DrawMouse(ScrollMarker, X, Y)
+      UNTIL Keys = {};
+      IF ~(keysum = {0, 1, 2}) THEN
+        IF 0 IN keysum THEN pos := 0
+        ELSIF 2 IN keysum THEN pos := F.text.len - 100
+        ELSE pos := (F.Y + F.H - Y) * (F.text.len) DIV F.H
+        END ;
+        RemoveMarks(F); Oberon.RemoveMarks(F.X, F.Y, F.W, F.H);
+        Show(F, pos)
+      END
+    ELSIF Keys = {0} THEN (*MR, scroll down*)
+      TrackLine(F, X, Y, pos, keysum);
+      IF keysum = {0} THEN
+        LocateLine(F, Y, loc0); LocateLine(F, F.Y, loc1);
+        pos := F.org - loc1.org + loc0.org;
+        IF pos < 0 THEN pos := 0 END ;
+        RemoveMarks(F); Oberon.RemoveMarks(F.X, F.Y, F.W, F.H);
+        Show(F, pos)
+      END
+    END
+  ELSE (*cursor is in text area*)
+    Oberon.DrawMouseArrow(X, Y);
+    IF 0 IN Keys THEN (*MR: select*)
+      TrackSelection(F, X, Y, keysum);
+      IF F.hasSel THEN
+        IF keysum = {0, 2} THEN (*MR, ML: delete text*)
+          Oberon.GetSelection(text, beg, end, time);
+          Texts.Delete(text, beg, end, TBuf);
+          Oberon.PassFocus(Viewers.This(F.X, F.Y)); SetCaret(F, beg)
+        ELSIF keysum = {0, 1} THEN (*MR, MM: copy to caret*)
+          Oberon.GetSelection(text, beg, end, time);
+          M.text := text;
+          M.beg := beg;
+          M.end := end;
+          Oberon.FocusViewer.handle(Oberon.FocusViewer, M)
+        END
+      END
+    ELSIF 1 IN Keys THEN (*MM: call*)
+      TrackWord(F, X, Y, pos, keysum);
+      IF (pos >= 0) & ~(0 IN keysum) THEN Call(F, pos, 2 IN keysum) END
+    ELSIF 2 IN Keys THEN (*ML: set caret*)
+      Oberon.PassFocus(Viewers.This(F.X, F.Y));
+      TrackCaret(F, X, Y, keysum);
+      IF keysum = {2, 1} THEN (*ML, MM: copy from selection to caret*)
+        Oberon.GetSelection(text, beg, end, time);
+        IF time >= 0 THEN
+          NEW(TBuf); Texts.OpenBuf(TBuf);
+          Texts.Save(text, beg, end, TBuf);
+          Texts.Insert(F.text, F.carloc.pos, TBuf);
+          SetSelection(F, F.carloc.pos, F.carloc.pos + (end - beg));
+          SetCaret(F, F.carloc.pos + (end - beg))
+        ELSIF TBuf # NIL THEN
+          NEW(buf); Texts.OpenBuf(buf);
+          Texts.Copy(TBuf, buf);
+          Texts.Insert(F.text, F.carloc.pos, buf);
+          SetCaret(F, F.carloc.pos + buf.len)
+        END
+      ELSIF keysum = {2, 0} THEN (*ML, MR: copy looks*)
+        Oberon.GetSelection(text, beg, end, time);
+        IF time >= 0 THEN
+          Texts.Attributes(F.text, F.carloc.pos, fnt, col, voff);
+          IF fnt # NIL THEN Texts.ChangeLooks(text, beg, end, {0,1,2}, fnt, col, voff) END
+        END
+      END
+    END
+  END
+END Edit;
+\endtt
+
+\noindent We see that the editing operation is determined by the first key pressed (primary key) and can then be varied by ``interclicking'' that is, by clicking a secondary key while holding down the primary key. As a convention, (inter)clicking all keys means cancelling the operation. Mouse clicks and subsequent actions can now be summarized as follows:
+
 
 
 % \beginsubsection 5.4. THE FONT MACHINERY.
