@@ -79,7 +79,7 @@ discarded? And where were they rooted? Could the system's essence be
 distilled and extracted, like in a chemical process?
 
 During the ensuing discussions, the idea emerged slowly to undertake
-our own design. And suddenly it had become concrete. ``crazy'' was my
+our own design. And suddenly it had become concrete. ``Crazy'' was my
 first reaction, and ``impossible''. The sheer amount of work appeared as
 overwhelming. After all, we both had to carry our share of teaching
 duties back home. But the thought was implanted and continued to
@@ -160,9 +160,7 @@ led to the decision to start from a clean slate also in the domain of
 language design, and to apply the same principle to it: concentrate on
 the essential, purge the rest. The new language, which still bears
 much resemblance to Modula-2, was given the same name as the system:
-Oberon
-\footnote1{N. Wirth. The programming language Oberon. Software - Practice and Experience 18, 7, (July 1988) 671-690.}
-\footnote2{M. Reiser and N. Wirth. Programming in Oberon - Steps beyond Pascal and Modula. Addison- Wesley, 1992.}
+Oberon\footnote{$_1$}{N. Wirth. The programming language Oberon. Software - Practice and Experience 18, 7, (July 1988) 671-690.}\footnote{$_2$}{M. Reiser and N. Wirth. Programming in Oberon - Steps beyond Pascal and Modula. Addison- Wesley, 1992.}
 In contrast to its ancestor it is terser and, above
 all, a significant step towards expressing programs on a high level of
 abstraction without reference to machine-specific features.
@@ -184,13 +182,10 @@ target computer Ceres, together with the operability of the text
 editing facility, the umbilical cord to Lilith could be cut off. The
 Oberon System had become real, at least its draft version. This
 happened around the middle of 1987; its description was published
-thereafter
-\footnote3{N. Wirth and J. Gutknecht. The Oberon System. Software - Practice and Experience, 19, 9 (Sept. 1989), 857-893.}, and a manual and guide followed in 1991
-\footnote5{M. Reiser. The Oberon System - User Guide and Programmer's Manual. Addison-Wesley, 1991.}.
+thereafter\footnote{$_3$}{N. Wirth and J. Gutknecht. The Oberon System. Software - Practice and Experience, 19, 9 (Sept. 1989), 857-893.}, and a manual and guide followed in 1991\footnote{$_5$}{M. Reiser. The Oberon System - User Guide and Programmer's Manual. Addison-Wesley, 1991.}.
 
 The system's completion took another year and concentrated on
-connecting the workstations in a network for file transfer
-\footnote4{N. Wirth. Ceres-Net: A low-cost computer network. Software - Practice and Experience, 20, 1 (Jan. 1990), 13-24.}, on a
+connecting the workstations in a network for file transfer\footnote{$_4$}{N. Wirth. Ceres-Net: A low-cost computer network. Software - Practice and Experience, 20, 1 (Jan. 1990), 13-24.}, on a
 central printing facility, and on maintenance tools. The goal of
 completing the system within three years had been met. The system was
 introduced in the middle of 1988 to a wider user community, and work
@@ -210,7 +205,8 @@ our introductory programming courses.
 
 In order to warrant the sizeable effort of designing and constructing
 an entire operating system from scratch, a number of basic concepts
-need to be novel. We start this chapter with a discussion of the
+need to be novel. % TODO: Maybe put an annotation about how this is stupid and is the reason why we have so much novel crap
+We start this chapter with a discussion of the
 principal concepts underlying the Oberon System and of the dominant
 design decisions. On this basis, a presentation of the system's
 structure follows. It will be restricted to its coarsest level, namely
@@ -224,14 +220,13 @@ computer to the user and to the programmer at a certain level of
 abstraction. For example, the store is presented in terms of
 requestable pieces or variables of a specified data type, the disk is
 presented in terms of sequences of characters (or bytes) called files,
-the display is presented as rectangular areas called viewers, the
+the display is presented as rectangular areas called \emph{viewers}, the
 keyboard is presented as an input stream of characters, and the mouse
 appears as a pair of coordinates and a set of key states. Every
 abstraction is characterized by certain properties and governed by a
 set of operations. It is the task of the system to implement these
 operations and to manage them, constrained by the available resources
-of the underlying computer. This is commonly called resource
-management.
+of the underlying computer. This is commonly called \emph{resource management}.
 
 Every abstraction inherently hides details, namely those from which it
 abstracts. Hiding may occur at different levels. For example, the
@@ -269,7 +264,7 @@ faster and cheaper electronic memory components. The high-resolution
 display marked one of the few very significant break-throughs in the
 history of computer development. The typical bandwidth of a modern
 display is in the order of 100 MHz. Primarily the high-resolution
-display made visual output a subject of abstraction and \emph{resource management}.
+display made visual output a subject of abstraction and resource management.
 In the Oberon System, the display is partitioned into
 \emph{viewers}, also called \emph{windows}, or more precisely, into \emph{frames},
 rectangular areas of the screen(s). A viewer typically consists of two
@@ -296,11 +291,12 @@ This was by no means just a lucky coincidence. The mouse comes to
 fruition only through appropriate software and the high-resolution
 display. It is itself a conceptually very simple device delivering
 signals when moved on the table. These signals allow the computer to
-update the position of a mark--- the cursor ---on the display. Since
+update the position of a mark---the cursor---on the display. Since
 feedback occurs through the human eye, no great precision is required
 from the mouse. For example, when the user wishes to identify a
 certain object on the screen, such as a letter, he moves the mouse as
-long as required until the mapped cursor reaches the object. This
+long as required until the mapped cursor reaches the object.
+This % TODO: Consider adding an annotation about https://en.wikipedia.org/wiki/Fitts%27s_law
 stands in marked contrast to a digitizer which is supposed to deliver
 exact coordinates. The Oberon System relies very much on the
 availability of a mouse.
@@ -309,8 +305,8 @@ Perhaps the cleverest idea was to equip mice with buttons. By being
 able to signal a request with the same hand that determines the cursor
 position, the user obtains the direct impression of issuing
 position-dependent requests. Position-dependence is realized in
-software by delegating interpretation of the signal to a procedure---
-a so-called \emph{handler} or interpreter ---which is local to the viewer in
+software by delegating interpretation of the signal to a procedure---a
+so-called \emph{handler} or interpreter---which is local to the viewer in
 whose area the cursor momentarily appears. A surprising flexibility of
 command activation can be achieved in this manner by appropriate
 software. Various techniques have emerged in this connection,
@@ -347,27 +343,25 @@ commands. Conventionally, such commands are issued through the
 keyboard by typing the program's name that is to be executed into a
 special command text. In this respect, the Oberon System offers a
 novel and much more flexible solution which is presented in the
-following paragraphs.  First of all we remark that a program in the
+following paragraphs.
+
+First of all we remark that a program in the
 common sense of a text compiled as a unit is mostly a far too large
 unit of action to serve as a command. Compare it, for example, with
 the insertion of a piece of text through a mouse command. In Oberon,
 the notion of a unit of action is separated from the notion of unit of
-compilation. The former is a command represented by a (exported)
-procedure, the latter is a module. Hence, a module may, and typically
-does, define several, even many commands. Such a (general) command may
-be invoked at any time by pointing at its name in any
+compilation. The former is a \emph{command} represented by a (exported)
+procedure, the latter is a \emph{module}. Hence, a module may, and typically
+does, define several, even many commands. Such a (general) command may be invoked at any time by pointing at its name in any text visible in any viewer on the display, and by clicking the middle mouse button. The command name has the form \code{M.P}, where \code{P} is the procedure's identifier and \code{M} that of the module in which \code{P} is declared. As a consequence, any command click may cause the loading of one or several modules, if \code{M} is not already present in main store. The next invocation of \code{M.P} occurs instantaneously, since \code{M} is already loaded. A further consequence is that modules are never (automatically) removed, because a next command may well refer to the same module.
 
-text visible in any viewer on the display, and by clicking the middle
-mouse button. The command name has the form \code{M.P}, where \code{P} is the
-procedure's identifier and \code{M} that of the module in which \code{P} is
-declared. As a consequence, any command click may cause the loading of
-one or several modules, if \code{M} is not already present in main store. The
-next invocation of \code{M.P} occurs instantaneously, since \code{M} is already
-loaded. A further consequence is that modules are never
-(automatically) removed, because a next command may well refer to the
-same module.
+\medskip
+\directlua 0 {
+  a = img.new{filename = "pdfs/image.46.rev.png", width = "4.7in"}
+  img.write(a)
+}
 
-TODO: Fig. 2.1. Oberon display with tiled viewers
+% Taken from \caption
+\noindent {\ninepoint{\bf Fig.\ 2.1.}\enspace Oberon display with tiled viewers} \medskip
 
 Every command has the purpose to alter the state of some
 operands. Typically, they are denoted by text following the command
@@ -4407,9 +4401,101 @@ PROCEDURE FreeSector(sec: INTEGER); (*used in Purge*)
 
 \beginsubsection 7.3. IMPLEMENTATION OF FILES ON A DISK.
 
+First we recall that the organization of files as sets of individually allocated blocks (sectors) is inherently required by the allocation considerations of dynamically growing sequences. However, if the storage medium is a tape, a disk, or a flash-RAM, there exists an additional reason for the use of blocks. They constitute the subsequences to be individually buffered for transmission in order to overcome the timing constraints imposed by the medium. If an adequate space utilization is to be achieved, the blocks must not be too long. A typical size is 1, 2, or 4K bytes.
 
+This necessity of buffering has a profound influence on the implementation of file access. The complication arises because the abstraction of the sequence of individual bytes needs to be maintained. The increase in complexity of file access is considerable, as can be seen by comparing the program listings of the two respective implementations.
 
-% \beginsubsection 7.4. THE FILE DIRECTORY.
+The first, obvious measure is to copy the file's sector table into primary store when a file is ``opened'' through a call of \code{New()} or \code{Old()}. The record holding this copy is the file descriptor, and the value \code{f} denoting the file points to this handle (instead of the actual header on disk). The descriptor also contains the remaining information stored in the header, in particular the file's length.
+
+If a file is read (or written) in purely sequential manner, a single buffer is appropriate for the transfer of data. For reading, the buffer is filled by reading a sector from the disk, and bytes are picked up individually from the buffer. For writing, bytes are deposited individually, and the buffer is written onto disk as a whole when full. The buffer is associated with the file, and a pointer to it is contained in the descriptor.
+
+However, we recall that several riders may be placed on a file and be moved independently. It might be appealing to associate a buffer with each rider. But this proposal must quickly be rejected when we realize that several riders may be active at neighbouring positions. If these positions refer to the same sector, which is duplicated in the riders' distinct buffers, the buffers may easily become inconsistent. Obviously, buffers must not be associated with riders, but with the file itself. The descriptor therefore contains the head of a list of linked buffers. Each buffer is identified by its position in the file. An invariant of the system is that no two buffers represent the same sector.
+
+Even with the presence of a single rider, the possibility of having several buffers associated with a file can be advantageous, if a rider is frequently repositioned. It becomes a question of strategy and heuristics when to allocate a new buffer. In the Oberon system, we have adopted the following solution:
+
+1. The first buffer is created when the file is opened (New, Old).
+
+2. Additional buffers may be allocated when a rider is placed (or repositioned) on the file.
+
+3. At most four buffers are connected to the same file.
+
+4. Purely sequential movements of riders do not cause allocation of buffers.
+
+5. Separate buffers are generated when extensions of the file's sector table need be accessed
+(rider position > 64K). Each buffers the 256 sector addresses of the respective index sector.
+
+\noindent The outlined scheme requires and is based upon the following data structures and types:
+\begintt
+File = Buffer = Index =
+POINTER TO FileDesc; POINTER TO BufferRecord; POINTER TO IndexRecord;
+FileDesc = RECORD next: File;
+aleng, bleng: INTEGER; (*file length*)
+nofbufs: INTEGER; (*no. of buffers allocated*)
+modH, registered: BOOLEAN; (*header has been modified*) firstbuf: Buffer: (*head of buffer chain*)
+sechint: DiskAdr; (*sector hint*)
+name: FileDir.FileName;
+date: INTEGER;
+ext: ARRAY FileDir.ExTabSize OF Index;
+sec: ARRAY 64 OF DiskAdr END;
+BufferRecord = RECORD apos, lim: INTEGER;(*lim = no. of bytes*) mod: BOOLEAN; (*buffer has been modified*)
+next: Buffer; (*buffer chain*)
+data: FileDir.DataSector END;
+IndexRecord = RECORD adr: DiskAdr;
+mod: BOOLEAN; (*index record has been modified*)
+Rider =
+sec: FileDir.IndexSector END;
+RECORD eof: BOOLEAN; res: INTEGER;
+file: File;
+apos, bpos: INTEGER; buf: Buffer
+END ;
+(*end of file reached*) (*no. of unread bytes*)
+(*position*)
+(*hint: likely buffer*)
+\endtt
+
+\noindent In order to increase efficiency of access, riders have been provided with a field containing the address of the element of the rider's position. From the conditions stated above for the allocation of buffers, it is evident that the value of this field can be a hint only. This implies that there can be no reliance on its information. Whenever it is used, its validity has to be checked. The check consists in a comparison of the riders' position \code{r.apos} with the hinted buffer's actual position \code{r.buf.apos}. If they differ, a buffer with the desired position must be searched and, if not present, allocated. The advantage of the hint lies in the fact that the hint is correct with a very high probability. The check is included in procedures \code{Read}, \code{ReadByte}, \code{Write}, and \code{WriteByte}.
+
+Some fields of the record types require additional explanations:
+
+1. The length is stored in a ``preprocessed'' form, namely by the two integers \code{aleng} and \code{bleng} such that aleng is a sector number and
+
+length = (aleng * SS) + bleng - HS
+
+aleng = (length + HS) DIV SS
+
+bleng = (length + HS) MOD SS
+
+The same holds for the form of the position in riders (\code{apos}, \code{bpos}).
+
+2. The field \code{nofbufs} indicates the number of buffers in the list headed by \code{firstbuf}:
+
+1 \le nofbufs \le Maxbufs.
+
+3. Whenever data are written into a buffer, the file becomes inconsistent, i.e. the data on the disk are outdated. The file is updated, i.e. the buffer is copied into the corresponding disk sector, whenever the buffer is reallocated, e.g. during sequential writing after the buffer is full and is ``advanced''. During sequential reading, a buffer is also advanced and reused, but needs not be copied onto disk, because it is still consistent. Whether a buffer is consistent or not is indicated by its state variable \code{mod} (modified). Similarly, the field \code{modH} in the file descriptor indicates whether or not the header had been modified.
+
+4. The field \code{sechint} records the number of the last sector allocated to the file and serves as a hint to the kernel's allocation procedure, which allocates a next sector with an address larger than the hint. This is a measure to gain speed in sequential scans.
+
+5. The buffer's position is specified by its field \code{apos}. Used as index in the file header's sector table, it yields the sector corresponding to the current buffer contents. The field \code{lim} specifies the number of bytes's stored in the buffer. Reading cannot proceed beyond this limiting index; writing beyond it implies an increase in the file's length. All buffers except the one for the last sector are filled and specify \code{lim = SS}.
+
+6. The hidden rider field buf is merely a hint to speed up localization of the concerned buffer. A hint is likely, but not guaranteed to be correct. Its validity must be checked before use. The buffer hint is invalidated when a buffer is reallocated and/or a rider is repositioned.
+
+The structure of riders remains practically the same as for files using main store. The hidden field \code{adr} is merely replaced by a pointer to the buffer covering the rider's position. A configuration of a file \code{f} with two riders is shown in Fig 7.2.
+
+TODO: Figure 7.2 File f with two riders and two buffers
+
+1. After the writing of a file has been completed, its name is usually registered in the directory. \code{Register} invokes procedure \code{Unbuffer}. It inspects the associated buffers and copies those onto disk which had been modified. During this process, new index sectors may have to be transferred as well. If a file is to remain anonymous and local to a module or command, i.e. is not to be registered, but merely to be read, the release of buffers must be specified by an explicit call to \code{Close} (meaning ``close buffers''), which also invokes \code{Unbuffer}.
+
+2. Procedure \code{Old} (and for reasons of consistency also \code{New}) deviates from the general Oberon programming rule that an object be allocated by the calling (instead of the called) module. This rule would suggest the statements
+\begintt
+New(f); Files.Open(f, name)
+\endtt
+
+\noindent instead of \code{f := Files.Old(name)}. The justification for the rule is that any extension of the type of \code{f} could be allocated, providing for more flexibility. And the reason for our deviation in the case of files is that, upon closer inspection, not a new file, but only a new descriptor is to be allocated. The distinction becomes evident when we consider that several statements \code{f := Files.Old(name)} with different \code{f} and identical name may occur, probably in different modules. In this case, it is necessary that the same descriptor is referenced by the delivered pointers in order to avoid file inconsistency. Each (opened) file must have exactly one descriptor. When a file is opened, the first action is therefore to inspect whether a descriptor of this file already exists. For this purpose, all descriptors are linked together in a list anchored by the global variable \code{root} and linked by the descriptor field \code{next}. This measure may seem to solve the problem of avoiding inconsistencies smoothly. However, there exists a pitfall that is easily overlooked: All opened files would permanently remain accessible via \code{root}, and the garbage collector could never remove a file descriptor nor its associated buffers. This would be unacceptable. In order to hide this list from the garbage collector, it is represented by integers (addresses) instead of pointers.
+
+3. Sector pointers are represented by sector numbers of type \code{INTEGER}. Actually, we use the numbers multiplied by 29. This implies that any single-bit error leads to a number which is not a multiple of 29, and hence can easily be detected. Thereby the crucial sector addresses are software parity checked and are safe (against single-bit errors) even on computers without hardware parity check. The check is performed by procedures \code{Kernel.GetSector} and \code{Kernel.PutSector}.
+
+\beginsubsection 7.4. THE FILE DIRECTORY.
+
 % \beginsubsection 7.5. THE TOOLBOX OF FILE UTILITIES.
 % \beginchapter CHAPTER 8: STORAGE LAYOUT AND MANAGEMENT.
 % \beginsubsection 8.1. LAYOUT AND RUN-TIME ORGANIZATION.
