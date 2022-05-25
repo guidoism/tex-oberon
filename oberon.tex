@@ -4496,6 +4496,20 @@ New(f); Files.Open(f, name)
 
 \beginsubsection 7.4. THE FILE DIRECTORY.
 
+A directory is a set of pairs, each pair consisting of a name (key) and an object (here: file). It serves to retrieve objects by their name. If efficiency matters, the directory is organized as an ordered set, ordered according to the keys. The most frequently used structures for ordered sets are trees and hash tables. The latter have disadvantages when the size of the set is unknown, particularly when its order of magnitude is unknown, and when deletions occur. The Oberon system therefore uses a tree structure for its file directory, more specifically a B-tree, which was developed especially for cases where not individual pairs, but only sets of pairs as a whole (placed on a disk sector) can be accessed.
+
+For a thorough study of B-trees we refer the reader to the literature [1, 2]. Here it must suffice to specify the B-tree's principal characteristics:
+
+1. In a B-tree of order $N$, each node (called page) contains $m$ elements (pairs), where $N \le m \le 2N$, except the root, where $0 \le m \le 2N$.
+
+2. A page with $m$ elements has either 0 descendants, in which case it is called a leaf page, or $m + 1$ descendants.
+
+3. All leaf pages are on the same (bottom) level.
+
+From 3. it follows that the B-tree is a balanced tree. Its height, and with it the longest path's length, has an upper bound of, roughly, $2 \times \log{k}$, where $k$ is the number of elements and the logarithm is taken to the base $N$ and rounded up to the next larger integer. Its minimal height is $\log{k}$ taken to the base $2N$.
+
+On each page, space must be available for $2N$ elements and for $2N + 1$ references to descendants. Hence, $N$ is immediately determined by the size of a page and the size of elements. In the case of the Oberon system, names are limited to 32 characters (bytes), and the object is a reference to the associated file (4 bytes). Each descendant pointer takes 4 bytes, and the page size is given by the sector size (1024) minus the number of bytes needed to store $m$ (2 bytes). Hence
+
 % \beginsubsection 7.5. THE TOOLBOX OF FILE UTILITIES.
 % \beginchapter CHAPTER 8: STORAGE LAYOUT AND MANAGEMENT.
 % \beginsubsection 8.1. LAYOUT AND RUN-TIME ORGANIZATION.
