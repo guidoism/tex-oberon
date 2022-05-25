@@ -4524,7 +4524,40 @@ height&minimum&maximum\cr
 It follows that the height of the B-tree will never be larger than 4, if the disk has a capacity of less than about 400 Mbyte, and assuming that each file occupies a single 1K sector. It is rarely larger than 3 in practice.
 
 The definition of module \code{FileDir} shows the available directory operations. Apart from the procedures \code{Search}, \code{Insert}, \code{Delete}, and \code{Enumerate}, it contains some data definitions, and it should be considered as the non-public part of the file system's interface.
+\begintt
+DEFINITION FileDir; IMPORT SYSTEM, Kernel; CONST
+FnLength = 32; (*max length of file name*) SecTabSize = 64; (*no. of entries in primary table*) ExTabSize = 12;
+SectorSize = 1024;
+IndexSize = SectorSize DIV 4; (*no. of entries in index sector*) HeaderSize = 352;
+DirRootAdr = 29;
+DirPgSize = 24; (*max no. of elements on page*)
+TYPE DiskAdr = INTEGER;
+FileName = ARRAY FnLength OF CHAR;
+SectorTable = ARRAY SecTabSize OF DiskAsr;
+ExtensionTable = ARRAY ExTabSize OF DiskAdr;
+EntryHandler = PROCEDURE (name: FileName; sec: DiskAdr; VAR continue: BOOLEAN);
+FileHeader = RECORD (*first page of each file on disk*) mark: INTEGER;
+name: FileName;
+aleng, bleng, date: INTEGER; ext: ExtensionTable;
+sec: SectorTable
+END ;
+IndexSector = RECORD (Kernel.Sector) x: ARRAY IndexSize OF LONGINT;
+END ;
+DataSector = ARRAY SectorSize OF BYTE;
+DirEntry = RECORD name: FileName;
+adr, p: DiskAdr END ;
+DirPage = RECORD mark: INTEGER;
+m: INTEGER; (*no. of elements on page*) p0: DiskAdr;
+e: ARRAY DirPgSize OF DirEntry;
+END ;
+PROCEDURE Search(name: FileName; VAR fad: DiskAdr); PROCEDURE Insert(name: FileName; fad: DiskAdr);
+PROCEDURE Delete(name: FileName; VAR fad: DiskAdr); PROCEDURE Enumerate(prefix: ARRAY OF CHAR; proc: EntryHandler);
+END FileDir.
+\endtt
 
+\noindent Procedures \code{Search}, \code{Insert}, and \code{Delete} represent the typical operations performed on a directory. Efficiency of the first operation is of primary importance. But the B-tree structure also guarantees efficient insertion and deletion, although the code for these operations is complex. Procedure \code{Enumerate} is used to obtain excerpts of the directory. The programmer must guarantee that no directory changes are performed by the parametric procedure of \code{Enumerate}.
+
+As in the presentation of module \code{Files}, we first discuss a version that uses main storage rather than a disk for the directory. This allows us to concentrate on the algorithms for handling the directory, leaving out the additional complications due to the necessity to read pages (sectors) into main store for selective updating and of restoring them onto disk. In particular, we point out the definitions of the data types for B-tree nodes, called \code{DirPage}, and elements, called \code{DirEntry}. The component E.p of an entry \code{E} points to the page in which all elements (with index \code{k}) have keys \code{E.p.e[k].name} $>$ \code{E.name}. The pointer \code{p.p0} points to a page in which all elements have keys \code{p.p0.e[k].name} $<$ \code{p.e[0].name}. We can visualize these conditions by Fig. 7.3, where names have been replaced by integers as keys.
 
 % \beginsubsection 7.5. THE TOOLBOX OF FILE UTILITIES.
 % \beginchapter CHAPTER 8: STORAGE LAYOUT AND MANAGEMENT.
