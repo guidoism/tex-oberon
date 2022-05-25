@@ -4559,6 +4559,11 @@ END FileDir.
 
 As in the presentation of module \code{Files}, we first discuss a version that uses main storage rather than a disk for the directory. This allows us to concentrate on the algorithms for handling the directory, leaving out the additional complications due to the necessity to read pages (sectors) into main store for selective updating and of restoring them onto disk. In particular, we point out the definitions of the data types for B-tree nodes, called \code{DirPage}, and elements, called \code{DirEntry}. The component E.p of an entry \code{E} points to the page in which all elements (with index \code{k}) have keys \code{E.p.e[k].name} $>$ \code{E.name}. The pointer \code{p.p0} points to a page in which all elements have keys \code{p.p0.e[k].name} $<$ \code{p.e[0].name}. We can visualize these conditions by Fig. 7.3, where names have been replaced by integers as keys.
 
+TODO: Figure 7.3 Example of a B-tree of order 2
+
+Procedure \code{Search} starts by inspecting the root page. It performs a binary search among its elements, according to the following algorithm. Let $e[0 ... m-1]$ be the ordered keys and $x$ the search argument.
+
+
 % \beginsubsection 7.5. THE TOOLBOX OF FILE UTILITIES.
 % \beginchapter CHAPTER 8: STORAGE LAYOUT AND MANAGEMENT.
 % \beginsubsection 8.1. LAYOUT AND RUN-TIME ORGANIZATION.
