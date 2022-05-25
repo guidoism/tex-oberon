@@ -4744,6 +4744,18 @@ Every directory operation starts with an access to the root page. An obvious mea
 
 \beginsubsection 7.5. THE TOOLBOX OF FILE UTILITIES.
 
+We conclude this Chapter with a presentation of the commands which constitute the toolbox for file handling. These commands are contained in the tool module \code{System}, and they serve to copy, rename, and delete files, and to obtain excerpts of the file directory.
+
+Procedures \code{CopyFiles}, \code{RenameFiles}, and \code{DeleteFiles} all follow the same pattern. The parameter text is scanned for file names, and for each operation a corresponding procedure is called. If the parameter text contains an arrow, it is interpreted as a pointer to the most recent text selection which indicates the file name. In the cases of \code{CopyFiles} and \code{RenameFiles} which require two names for a single action, the names are separated by ``\code{=>}'' indicating the direction of the copy or rename actions.
+
+Procedure \code{Directory} serves to obtain excerpts of the file directory. It makes use of procedure \code{FileDir.Enumerate}. The parametric procedure \code{List} tests whether or not the delivered name matches the pattern specified by the parameter of the directory command. If it matches, the name is listed in the text of the viewer opened in the system track. Since the pattern may contain one or several asterisks (wild cards), the test consists of a sequence of searches of the pattern parts (separated by the asterisks) in the file name. In order to reduce the number of calls of \code{List}, \code{Enumerate} is called with the first part of the pattern as parameter prefix. Enumeration then starts with the least name having the specified prefix, and terminates as soon as all names with this prefix have been scanned.
+
+If the specified pattern is followed by an option directive ``\code{!}'', then not only file names are listed, but also the listed files' creation date and length. This requires that not only the directory sectors on the disk are traversed, but that additionally for each listed file its header sector must be read. The two procedures use the global variables \code{pat} and \code{diroption}.
+
+
+TODO: References
+1. R. Bayer and E. M. McCreight. Organization and maintenance of large ordered indexes. Acta Informatica, 1, 3, (1972), 173-189.
+2. D. Comer. The ubiquitous B-tree. ACM Comp Surveys, 11, 2, (June 1979), 121-137.
 
 % \beginchapter CHAPTER 8: STORAGE LAYOUT AND MANAGEMENT.
 % \beginsubsection 8.1. LAYOUT AND RUN-TIME ORGANIZATION.
