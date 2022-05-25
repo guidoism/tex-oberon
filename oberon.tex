@@ -4509,6 +4509,22 @@ For a thorough study of B-trees we refer the reader to the literature [1, 2]. He
 From 3. it follows that the B-tree is a balanced tree. Its height, and with it the longest path's length, has an upper bound of, roughly, $2 \times \log{k}$, where $k$ is the number of elements and the logarithm is taken to the base $N$ and rounded up to the next larger integer. Its minimal height is $\log{k}$ taken to the base $2N$.
 
 On each page, space must be available for $2N$ elements and for $2N + 1$ references to descendants. Hence, $N$ is immediately determined by the size of a page and the size of elements. In the case of the Oberon system, names are limited to 32 characters (bytes), and the object is a reference to the associated file (4 bytes). Each descendant pointer takes 4 bytes, and the page size is given by the sector size (1024) minus the number of bytes needed to store $m$ (2 bytes). Hence
+$$N = ((1024 - 2 - 4) \div (32 + 4 + 4)) \div 2 = 12$$
+A B-tree of height $h$ and order 12 may contain the following minimal and maximal number of elements:
+
+\medskip\halign{#\hfil\quad&#\hfil\quad&#\hfil\cr
+height&minimum&maximum\cr
+\noalign{\hrule}\cr
+1& 0& 24\cr
+2& 25& 624\cr
+3& 625& 15624\cr
+4& 15625& 390624\cr
+}\medskip
+
+It follows that the height of the B-tree will never be larger than 4, if the disk has a capacity of less than about 400 Mbyte, and assuming that each file occupies a single 1K sector. It is rarely larger than 3 in practice.
+
+The definition of module \code{FileDir} shows the available directory operations. Apart from the procedures \code{Search}, \code{Insert}, \code{Delete}, and \code{Enumerate}, it contains some data definitions, and it should be considered as the non-public part of the file system's interface.
+
 
 % \beginsubsection 7.5. THE TOOLBOX OF FILE UTILITIES.
 % \beginchapter CHAPTER 8: STORAGE LAYOUT AND MANAGEMENT.
