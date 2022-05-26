@@ -1159,19 +1159,18 @@ ControlMsg = RECORD (ViewerMsg)
 END;
 \endtt
 
-\noindent The field \code{id\/} specifies the exact request transmitted with this
-specific reactivation. In the case of \code{InputMsg\/} the possible
-requests are consume (the character specified by field \code{ch\/}) and
-track (mouse, starting from state given by keys and \code{X\/}, \code{  Y\/}). In case of \code{ControlMsg\/} the choice is mark (the viewer
-at position \code{X\/}, \code{Y\/}) or neutralize. Mark means moving the
+\noindent The field \code{id} specifies the exact request transmitted with this
+specific reactivation. In the case of \code{InputMsg} the possible
+requests are \emph{consume} (the character specified by field \code{ch}) and \emph{track} (mouse, starting from state given by keys and \code{X}, \code{Y}). In case of \code{ControlMsg} the choice is mark (the viewer
+at position \code{X}, \code{Y}) or \emph{neutralize}. Mark means moving the
 global system pointer (typically represented as a star-shaped mark) to
 the current position of the mouse. Neutralizing a viewer is equivalent
 to removing all marks and graphical attributes from this viewer.
 
 All tasking facilities are collected in one program module, called
-\code{Oberon\/}. In particular, the module's definition exposes the
-declarations of the abstract data type Task and of the message types
-\code{InputMsg\/} and \code{ControlMsg\/}. The module's most important contribution,
+\code{Oberon}. In particular, the module's definition exposes the
+declarations of the abstract data type \code{Task} and of the message types
+\code{InputMsg} and \code{ControlMsg}. The module's most important contribution,
 however, is the task scheduler (often referred to as ``Oberon loop'')
 that can be regarded as the system's dynamic center.
 
@@ -1182,21 +1181,22 @@ subsequent keyboard input. Note that we identify the focus viewer with
 the focus task, hereby making use of the one-to-one correspondence
 between viewers and tasks.
 
-Module Oberon provides the following facilities in connection with the
-focus viewer: A global variable \code{FocusViewer\/}, a procedure \code{PassFocus\/} for
+Module \code{Oberon} provides the following facilities in connection with the
+focus viewer: A global variable \code{FocusViewer}, a procedure \code{PassFocus} for
 transferring the role of focus to a new viewer, and a defocus variant
-of \code{ControlMsg\/} for notifying the old focus viewer of such a transfer.
+of \code{ControlMsg} for notifying the old focus viewer of such a transfer.
 
-The implementation details of the abstract data type \code{Task\/} are hidden
+The implementation details of the abstract data type \code{Task} are hidden
 from the clients. It is sufficient to know that all task descriptors
 are organized in a ring and that a pointer points to the previously
 activated task. The ring is guaranteed never to be empty because the
 above mentioned garbage collector is installed as a permanent sentinel
-task at system loading time.
+task at system loading time. % See Knuth TAOCP about circular lists and sentinels
 
 The following is a slightly abstracted version of the actual scheduler
 code operating on the task ring. It should be associated with
-procedure \code{Loop\/} in the module \code{Oberon\/}.
+procedure \code{Loop} in the module \code{Oberon}.
+% CODE-3.2/Scheduler
 \begintt
 get mouse position and state of keys;
 REPEAT
@@ -1236,7 +1236,8 @@ can identify three sequential actions of recovery taken after a
 program failure:
 \begintt
 recovery after program failure =
-BEGIN save current system state;
+BEGIN
+  save current system state;
   call installed trap handler;
   roll back to start of task scheduler
 END

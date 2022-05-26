@@ -23,6 +23,10 @@ up-to-date with the running source code.
 
 PDF and code taken from http://www.projectoberon.com
 
+## Building
+
+    luatex oberon.tex
+
 ## Quotes
 
 The requirement of many megabytes of store for an operating system is, albeit commonly tolerated, absurd and another hallmark of user-unfriendliness, or perhaps manufacturer friendliness.
