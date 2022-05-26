@@ -380,6 +380,7 @@ commands. The Oberon System broadens this notion; the links between
 consecutive commands are not restricted to files, but can be any
 global variable, because modules do not disappear from storage after
 command termination, as mentioned above.
+% TODO: annotation how does this related to pipes in unix?
 
 This tremendous flexibility seems to open Pandora's box, and indeed it
 does when misused. The reason is that global variables' states may
@@ -390,11 +391,11 @@ value. The positive aspect of using global variables as interfaces
 between commands is that some of them may well be visible on the
 display. All viewers---and with them also their contents---are
 organized in a data structure that is rooted in a global variable (in
-module \emph{Viewers}). Parts of this variable therefore constitute \emph{visible states},
+module \code{Viewers}). Parts of this variable therefore constitute \emph{visible states},
 and it is highly appropriate to refer to them as command
 parameters.
 
-One of the rules of what may be called the Oberon Programming Style is
+One of the rules of what may be called the \emph{Oberon Programming Style} is
 therefore to avoid hidden states, and to reduce the introduction of
 global variables. We do not, however, raise this rule to the rank of a
 dogma. There exist genuinely useful exceptions, even if the variables
@@ -403,7 +404,7 @@ have no visible parts.
 There remains the question of how to denote visible objects as command
 parameters. An obvious case is the use of the most recent selection as
 parameter. A procedure for locating that selection is provided by
-module Oberon. (It is restricted to text selections). Another
+module \code{Oberon}. (It is restricted to text selections). Another
 possibility is the use of the caret position in a text. This is used
 in the case of inserting new text; the pressing of a key on the
 keyboard is also considered to be a command, and it causes the
@@ -625,6 +626,8 @@ multiple copies in different, linked object files is the key to
 storage economy. Prelinked mega-files do not occur in the Oberon
 System, and every module is freely reusable.
 
+% TODO: annotatation I think that this is a concequence of source code always being available and always part of one complete system rather than a bunch of different downloaded projects.
+
 \beginsubsection 2.3. THE SYSTEM'S STRUCTURE.
 
 
@@ -635,7 +638,7 @@ also easy to exhibit their interdependence in the form of a directed
 graph. The edges indicate imports. The module graph of a system
 programmed in Oberon is hierarchical, i.e. has no cycles. The lowest
 members of the hierarchy effectively import hardware only. We refer
-here to modules which contain device drivers. But module Kernel also
+here to modules which contain device drivers. But module \code{Kernel} also
 belongs to this class; it ``imports memory'' and includes the disk
 driver. The modules on the top of the hierarchy effectively export to
 the user. As the user has direct access to command procedures, we call
@@ -648,7 +651,15 @@ source to the destination. For example, \code{Files\/} imports \code{Kernel\/}; 
 direct import is not shown, because a path from \code{Kernel\/} leads to \code{Files\/}
 via \code{FileDir\/}.
 
-TODO: Insert Figure 2.2
+\medskip
+\directlua 0 {
+  a = img.new{filename = "pdfs/fig-2.2.png", width = "1.8in"}
+  img.write(a)
+}
+
+% Taken from \caption
+\noindent {\ninepoint{\bf Fig.\ 2.2.}\enspace The structure of the Oberon core} \medskip
+
 
 Module names in the plural form typically indicate the definition of
 an abstract data type in the module. The type is exported together
@@ -693,10 +704,10 @@ happens to be cheap. The following table lists the core's modules and
 the major application modules, and it indicates the size of code (in
 words) and static variables (in bytes) and, the number of source
 program lines.
-
+\medskip
 \halign{#\hfil\quad&\hfil\quad#&\hfil\quad#&\hfil\quad#\cr
 module&code&data&lines\cr
-\noalign{\hrule}\cr
+\noalign{\smallskip\hrule}\cr
 Kernel      & 1123   & 8244   & 263 \cr
 FileDir     & 1963   & 60     & 352 \cr
 Files       & 2360   & 148    & 505 \cr
@@ -711,14 +722,14 @@ MenuViewers & 1513   & 56     & 208 \cr
 TextFrames  & 5786   & 292    & 874 \cr
 System      & 2134   & 72     & 418 \cr
 Edit        & 1096   & 1104   & 232 \cr
-\cr\noalign{\hrule}\cr
+\noalign{\smallskip\hrule}\cr
             & 24945  & 10856  & 4615 \cr
 \cr
 ORS         & 1762   & 992    & 319 \cr
 ORB         & 2348   & 408    & 437 \cr
 ORG         & 6699   & 34976  &  1125 \cr
 ORP         & 5994   & 144    &  974 \cr
-\cr\noalign{\hrule}\cr
+\noalign{\smallskip\hrule}\cr
             & 16803  & 36520  &  2855 \cr
 \cr
 Graphics    & 3484   & 564    &  685 \cr
@@ -726,7 +737,7 @@ GraphicFrame& 2832   & 288    &  498 \cr
 Draw        & 690    & 40     &  164 \cr
 Rectangles  & 649    & 40     &  118 \cr
 Curves      & 1765   & 72     &  241 \cr
-\cr\noalign{\hrule}\cr
+\noalign{\smallskip\hrule}\cr
             & 9420   & 1004   &  1706 \cr
 }
 
@@ -4757,7 +4768,10 @@ TODO: References
 1. R. Bayer and E. M. McCreight. Organization and maintenance of large ordered indexes. Acta Informatica, 1, 3, (1972), 173-189.
 2. D. Comer. The ubiquitous B-tree. ACM Comp Surveys, 11, 2, (June 1979), 121-137.
 
-% \beginchapter CHAPTER 8: STORAGE LAYOUT AND MANAGEMENT.
+\beginchapter CHAPTER 8: STORAGE LAYOUT AND MANAGEMENT.
+
+
+
 % \beginsubsection 8.1. LAYOUT AND RUN-TIME ORGANIZATION.
 % \beginsubsection 8.2. MANAGEMENT OF DYNAMIC STORAGE.
 % \beginsubsection 8.3. THE KERNEL.
