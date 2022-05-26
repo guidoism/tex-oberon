@@ -1,7 +1,9 @@
 - [X] Proofread chapter 1
 - [X] Proofread until figure 2.1
-- [X] Proofread until figure 2.2
+- [X] Proofread until section 3.2
+
+
+
+
 - [ ] Rewrite in metapost and insert Figure 2.2  
-  
-
-
+- [ ] Figure out a better way to do references in section 2.4

@@ -758,7 +758,7 @@ Chapters 3--5 describe the outer core of the system. Chapter 3
 focusses on the dynamic aspects. In particular, this chapter
 introduces the fundamental operational units of \emph{task} and
 \emph{command}. Oberon's tasking model distinguishes the categories of
-\emph{interactiv taskse} and \emph{background tasks}. Interactive tasks are
+\emph{interactive tasks} and \emph{background tasks}. Interactive tasks are
 represented on the display screen by rectangular areas, so-called
 \emph{viewers}. Background tasks need not be connected with any displayed
 object. They are scheduled with low priority when interactions are
@@ -776,8 +776,8 @@ outline of the system control toolbox.
 Chapter 4 explains Oberon's display system. It starts with a
 discussion of our choice of a hierarchical tiling strategy for the
 allocation of viewers. A detailed study of the exact role of Oberon
-viewers follows. Type \code{Viewer\/} is presented as an object class with an
-open message interface providing a conceptual basis for far-reaching
+viewers follows. Type \code{Viewer\/} is presented as an object class
+with an open message interface providing a conceptual basis for far-reaching
 extensibility. Viewers are then recognized as just a special case of
 so-called \emph{frames} that may be nested. A category of standard viewers
 containing a menu frame and a frame of contents is investigated. The
@@ -793,11 +793,11 @@ elements in the display area. An overview of the system display
 toolbox concludes the chapter.
 
 Chapter 5 introduces text. Oberon distinguishes itself by treating
-Text as an abstract data type that is integrated in the central
+\code{Text} as an abstract data type that is integrated in the central
 system. Numerous fundamental consequences are discussed. For example,
 a text can be produced by one command, edited by a user, and then
 consumed by a next command. Commands themselves can be represented
-textually in the form \code{M.P\/}o, followed by a textual parameter
+textually in the form \code{M.P}, followed by a textual parameter
 list. Consequently, any command can be called directly from within a
 text (so-called \emph{tool}) simply by pointing at it with the
 mouse. However, the core of this chapter is a presentation of Oberon's
@@ -838,9 +838,9 @@ At the lowest level of the module hierarchy we find device
 drivers. They are described in Chapter 9, which contains drivers for
 some widely accepted interface standards. The first is PS-2, a serial
 transmission with synchronous clock. This is used for the keyboard and
-for the Mouse. The second is SPI, a standard for bi-directional,
+for the mouse. The second is SPI, a standard for bi-directional,
 serial transmission with synchronous clock. This is used for the
-``disk'', represented by an SDI-card (flash memory), and for the
+``disk'', represented by an SD-card (flash memory), and for the
 network. And the third standard is RS-232 typically used for simple
 and slow data links. It is bidirectional and asynchronous.
 
@@ -898,7 +898,7 @@ this result is the language's definition: the language is devoid of
 complicated structures and rarely used embellishments.
 
 The compiler and thereby the chapter is partitioned into two main
-parts. The first is language- specific, but does not refer to any
+parts. The first is language-specific, but does not refer to any
 particular target computer. It consist of the \emph{scanner} and the
 \emph{parser}. This part is therefore of most general interest to the
 readership. The second part is, essentially, language-independent, but
@@ -973,12 +973,18 @@ Chapter 17 describes the environment in which the processor is
 embedded. This environment consists of the interfaces to main memory
 and to all external devices.
 
-TODO: References
+References
+
 1. N. Wirth. The programming language Oberon. Software - Practice and Experience 18, 7, (July 1988) 671-690.
+
 2. M. Reiser and N. Wirth. Programming in Oberon - Steps beyond Pascal and Modula. Addison- Wesley, 1992. ISBN 0-201-56543-9
+
 3. N. Wirth and J. Gutknecht. The Oberon System. Software - Practice and Experience, 19, 9 (Sept. 1989), 857-893.
+
 4. N. Wirth. Ceres-Net: A low-cost computer network. Software - Practice and Experience, 20, 1 (Jan. 1990), 13-24.
+
 5. M. Reiser. The Oberon System - User Guide and Programmer's Manual. Addison-Wesley, 1991. ISBN 0-201-54422-9
+
 6. N. Wirth. Compiler Construction. Addison-Wesley, Reading, 1996. ISBN 0-201-40353-6
 
 \beginchapter CHAPTER 3: THE TASKING SYSTEM.
@@ -1003,14 +1009,14 @@ We start the presentation in Section 3.1 with a clarification of the
 technical notion of task. In Section 3.2, we continue with a detailed
 explanation of the scheduling strategy. Then, in Section 3.3, we
 introduce the concept of \emph{command}. And finally, Section 3.4 provides an
-overview of predefined system-oriented toolboxes, i. e. coherent
+overview of predefined system-oriented toolboxes, i.e. coherent
 collections of commands devoted to some specific topic. Example topics
 are system control and diagnosis, display management, and file
 management.
 
 \beginsubsection 3.1. THE CONCEPT OF TASK.
 
-In principle, we distinguish two categories of tasks in Oberon: {\\emph{Interactive tasks} and \emph{background tasks}. Loosely speaking,
+In principle, we distinguish two categories of tasks in Oberon: \emph{Interactive tasks} and \emph{background tasks}. Loosely speaking,
 interactive tasks are bound to local regions on the display screen and
 to interactions with their contents while, in contrast, background
 tasks are system-wide and not necessarily related to any specific
@@ -1024,15 +1030,15 @@ variety of roles that are collected in an abstract data type
 \code{Viewer\/}. We shall give a deeper insight into the display system in
 Chapter 4. For the moment it suffices to know that viewers are
 represented graphically as rectangles on the display screen and that
-they are implicit carriers of interactive tasks. Figure 3.1 shows a
-typical Oberon display screen that is divided up into seven viewers
-corresponding to seven simultaneously active interactive tasks.
+they are implicit carriers of interactive tasks. 
+% TODO: Figure 3.1 shows a typical Oberon display screen that is divided up into seven viewers corresponding to seven simultaneously active interactive tasks. Figure 3.1 Typical Oberon display configuration with tool track on the right
+
 
 In order to get firmer ground under our feet, we now present the programmed declaration of type \code{Viewer\/} in a slightly abstracted form:
 \begintt
 Viewer = POINTER TO ViewerDesc;
-
-ViewerDesc = RECORD X, Y, W, H: INTEGER;
+ViewerDesc = RECORD
+  X, Y, W, H: INTEGER;
   handle: Handler;
   state: INTEGER;
 END;
@@ -1047,14 +1053,12 @@ functional interface of viewers. The type of the handler is
 Handler = PROCEDURE (V: Viewer; VAR M: ViewerMsg);
 \endtt
 
-\noindent where ViewerMsg is some base type of messages whose exact declaration is of minor importance for the moment:
+\noindent where \code{ViewerMsg} is some base type of messages whose exact declaration is of minor importance for the moment:
 \begintt
 ViewerMsg = RECORD ... (*basic parameter fields*) END;
 \endtt
 
-TODO: Figure 3.1 Typical Oberon display configuration with tool track on the right
-
-However, we should point out the use of object-oriented
+\noindent However, we should point out the use of object-oriented
 terminology. It is justified because \code{handle\/} is a procedure variable (a
 \emph{handler}) whose identity depends on the specific viewer. A call
 \code{V.handle(V, M)} can therefore be interpreted as the sending of a
@@ -1062,7 +1066,7 @@ message \code{M\/} to be handled by the method of the receiving viewer \code{V\/
 
 We recognize an important difference between the standard
 object-oriented model and our handler paradigm. The standard model is
-closed in the sense that only a fixed set of messages is understood by
+\emph{closed} in the sense that only a fixed set of messages is understood by
 a given class of objects. In contrast, the handler paradigm is \emph{open}
 because it defines just the root (\code{ViewerMsg\/}) of a potentially
 unlimited tree of extending message types. For example, a concrete
@@ -1082,7 +1086,7 @@ at all on the object’s compile-time interface and on the system
 integrity. It is fair to mention though that such a high degree of
 extensibility does not come for free. The price to pay is the
 obligation of explicit message \emph{dispatching at runtime}. The following
-Chapters will capitalize on this property.
+chapters will capitalize on this property.
 
 Coming back to the perspective of tasks, we note that each sending of
 a message to a viewer corresponds to an activation or reactivation of
@@ -1092,8 +1096,8 @@ the interactive task that it represents.
 
 Oberon background tasks are not connected a priori with any specific
 aggregate in the system. Seen technically, they are instances of an
-abstract data type consisting of type declarations Task and TaskDesc
-together with intrinsic operations \code{NewTask\/}, \code{Install\/} and \code{Remove\/}:
+abstract data type consisting of type declarations \code{Task} and \code{TaskDesc}
+together with intrinsic operations \code{NewTask}, \code{Install} and \code{Remove}:
 \begintt
 Task = POINTER TO TaskDesc;
 TaskDesc = RECORD state: INTEGER; handle: PROCEDURE END;
@@ -1104,9 +1108,9 @@ PROCEDURE Remove (T: Task);
 \endtt
 
 \noindent The procedures \code{Install\/} and \code{Remove\/} are called explicitly in order to
-transfer the state of the specified task from \code{offline\/} to \code{idle\/} and from
-\code{idle\/} to \code{offline\/} respectively. Installed tasks take their turns in
-becoming \code{active\/}, that is, in being executed. The installed handlers
+transfer the state of the specified task from \emph{offline\/} to \emph{idle\/} and from
+\emph{idle\/} to \emph{offline\/} respectively. Installed tasks take their turns in
+becoming \emph{active\/}, that is, in being executed. The installed handlers
 are simple, parameterless procedures specifying their own actions and
 conditions for execution, with one exception: Resumption may be
 delayed until a certain period of time has elapsed. This period is
