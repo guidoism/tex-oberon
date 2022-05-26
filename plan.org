@@ -1,9 +1,58 @@
-- [X] Proofread chapter 1
-- [X] Proofread until figure 2.1
-- [X] Proofread until section 3.4
+* Proofreading
+
+- [X] Proofread until CHAPTER 1: HISTORY AND MOTIVATION.
+- [X] Proofread until 2.1. INTRODUCTION.
+- [X] Proofread until 2.2. CONCEPTS.
+- [X] Proofread until 2.3. THE SYSTEM'S STRUCTURE.
+- [X] Proofread until 2.4. A TOUR THROUGH THE CHAPTERS.
+- [X] Proofread until 3.1. THE CONCEPT OF TASK.
+- [X] Proofread until 3.1.1. Interactive tasks.
+- [X] Proofread until 3.1.2. Background Tasks.
+- [X] Proofread until 3.2. THE TASK SCHEDULER.
+- [X] Proofread until 3.3. THE CONCEPT OF COMMAND.
+- [X] Proofread until 3.3.1. Atomic actions.
+- [X] Proofread until 3.3.2. Generic text selection.
+- [X] Proofread until 3.3.3. Generic copy viewer.
+- [ ] Proofread until 3.4. TOOLBOXES.
+- [ ] Proofread until 4.1. THE SCREEN LAYOUT MODEL.
+- [ ] Proofread until 4.2. VIEWERS AS OBJECTS.
+- [ ] Proofread until 4.3. FRAMES AS BASIC DISPLAY ENTITIES.
+- [ ] Proofread until 4.4. DISPLAY MANAGEMENT.
+- [ ] Proofread until 4.4.1. Viewers.
+- [ ] Proofread until 4.4.2. Menu Viewers.
+- [ ] Proofread until 4.4.3. Cursor Management.
+- [ ] Proofread until 4.5. RASTER OPERATIONS.
+- [ ] Proofread until 4.6. STANDARD DISPLAY CONFIGURATIONS AND TOOLBOX.
+- [ ] Proofread until 5.1. TEXT AS AN ABSTRACT DATA TYPE.
+- [ ] Proofread until 5.1.1. Loading and Storing Text.
+- [ ] Proofread until 5.1.2. Editing Text.
+- [ ] Proofread until 5.1.3. Accessing Text.
+- [ ] Proofread until 5.2. TEXT MANAGEMENT.
+- [ ] Proofread until 5.3. TEXT FRAMES.
+- [ ] Proofread until 5.4. THE FONT MACHINERY.
+- [ ] Proofread until 5.5. THE EDIT TOOLBOX.
+- [ ] Proofread until 6.1. LINKING AND LOADING.
+- [ ] Proofread until 6.2. MODULE REPRESENTATION.
+- [ ] Proofread until 6.3. THE LINKING LOADER.
+- [ ] Proofread until 6.4. THE TOOLBOX OF THE LOADER.
+- [ ] Proofread until 6.5. THE OBERON OBJECT FILE FORMAT.
+- [ ] Proofread until 7.1. FILES.
+- [ ] Proofread until 7.2. IMPLEMENTATION OF FILES ON A RANDOM-ACCESS STORE.
+- [ ] Proofread until 7.3. IMPLEMENTATION OF FILES ON A DISK.
+- [ ] Proofread until 7.4. THE FILE DIRECTORY.
+- [ ] Proofread until 7.5. THE TOOLBOX OF FILE UTILITIES.
+- [ ] Proofread until 8.1. LAYOUT AND RUN-TIME ORGANIZATION.
+- [ ] Proofread until 8.2. MANAGEMENT OF DYNAMIC STORAGE.
+- [ ] Proofread until 8.3. THE KERNEL.
+- [ ] Proofread until 8.4. THE STORAGE MANAGEMENT'S TOOLBOX.
+- [ ] Proofread until 9.1. OVERVIEW.
+- [ ] Proofread until 9.2. KEYBOARD AND MOUSE.
+- [ ] Proofread until 9.3. THE SD-CARD (DISK).
+- [ ] Proofread until 9.4. SERIAL ASYNCHRONOUS INTERFACE (RS 232).
+- [ ] Proofread until 9.5. SERIAL COMMUNICATIONS CONTROLLER (SCC).
 
 
-
+* Other tasks
 
 - [ ] Rewrite in metapost and insert Figure 2.2  
 - [ ] Figure out a better way to do references in section 2.4
