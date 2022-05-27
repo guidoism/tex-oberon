@@ -4998,11 +4998,68 @@ In all driver modules the implementation-dependent procedures \code{SYSTEM.PUT},
 
 \beginsubsection 9.2. KEYBOARD AND MOUSE.
 
+The driver procedures for the keyboard and the mouse are located in module \code{Input}. \code{Available()} signals that a character has been typed on the keyboard, if its value is greater than 0. The character is read by calling \code{Read(ch)}. Module \code{Input} is restricting the data to the ASCII character set Latin-1, i.e. the values lie in the range $0X \ge ch < 80X$ (7-bit values). \code{Mouse(k, x, y)} yields the current state of the mouse keys and the mouse's coordinates.
+\begintt
+MODULE Input;
+PROCEDURE Available(): INTEGER;
+PROCEDURE Read(VAR ch: CHAR);
+PROCEDURE Mouse(VAR keys: SET; VAR x, y: INTEGER); PROCEDURE SetMouseLimits(w, h: INTEGER); PROCEDURE Init;
+END Input.
+\endtt
 
+\noindent The driver software accesses the keyboard via the Standard PS/2 interface represented by an 8-bit register for the received data kbdCode, and a single-bit flag indicating whether a byte had been received.
 
-% \beginsubsection 9.3. THE SD-CARD (DISK).
-% \beginsubsection 9.4. SERIAL ASYNCHRONOUS INTERFACE (RS 232).
-% \beginsubsection 9.5. SERIAL COMMUNICATIONS CONTROLLER (SCC).
+The keyboard codes received from the keyboard via a PS/2 line are not identical with the character values delivered to the Read procedure. A conversion is necessary. This is so, because modern keyboards treat all keys in the same way, including the ones for upper case, control, alternative, etc. Separate codes are sent to signal the pushing down and the release of a key, followed by another code identifying which key had been pressed or released. This requires, besides a translation table from codes to characters, a set of state variables. They are the global, \code{Boolean} variables \code{Recd}, \code{Up}, \code{Shift}, \code{Ctrl}, and \code{Ext}. Procedure \code{Peek} determines whether an actual character is present, or merely a code signalling a key shift. \code{Peek} controls the state.
+
+Procedure \code{Mouse} fetches a word from the mouse interface register and decomposes it into its components (key state and coordinates). (kb is the bit indicating whether a code had been received from the keyboard).
+
+TODO: Fig. 9.1 Format of the mouse register
+
+\beginsubsection 9.3. THE SD-CARD (DISK).
+
+SD-card are high-volume memory devices based on flash-store technology. They are typically organized as individually accessible blocks of 1K bytes. The driver for the SD-card is contained in module \code{Kernel}, which also handles allocation and reservation of blocks, here in analogy to rotating disks still called sectors.
+\begintt
+TYPE Sector = ARRAY SectorLength OF BYTE;
+PROCEDURE GetSector(src: INTEGER; VAR dst: Sector);
+PROCEDURE PutSector(dst: INTEGER; VAR src: Sector);
+PROCEDURE AllocSector(hint: INTEGER; VAR sec: INTEGER);
+PROCEDURE MarkSector(sec: INTEGER);
+PROCEDURE FreeSector(sec: INTEGER);
+\endtt
+
+\noindent Data transfer is sequebtial and handled by procedures \code{ReadSD} and \code{WriteSD} by issuing commands. These are for transmitting a block address, for receiving, and for sending a block of data. Synchronous transmission of sequences of words follows the SPI standard, which uses 3 lines, one for data input, one for dats output, and one for the clock (see also Section 17.2.2). The hardware interface contains a 32-bit register. The bit-rate is 8.3 MB/s.
+
+\beginsubsection 9.4. SERIAL ASYNCHRONOUS INTERFACE (RS 232).
+
+The RS-232 standard serves to transmit sequences of bytes over a data line asynchronously. This implies that there is no separate clock line (see also Section 17.2.3). The hardware interface contains a 10-bit register for the transmitter and one for the receiver. The data rate used here is 19200 bit/s. A byte is sent and received over the line by the following programs.
+\begintt
+CONST data = -56; stat = -52; (*device register addresses*)
+PROCEDURE Send(x: BYTE); BEGIN
+REPEAT UNTIL SYSTEM.BIT(stat, 1);
+SYSTEM.PUT(data, x) END Send;
+PROCEDURE Rec(VAR x: BYTE); BEGIN
+REPEAT UNTIL SYSTEM.BIT(stat, 0);
+SYSTEM.GET(data, x) END Rec;
+\endtt
+
+\noindent These procedures are used in the driver module \code{RS232} presented in Section 15.2. This module itself is not used in the Oberon core, but it was instrumental in building the System on a host computer and downloading it. It is characterized by a very simple interface.
+
+\beginsubsection 9.5. SERIAL COMMUNICATIONS CONTROLLER (SCC).
+
+The interface of the driver for the network was taken over from the original design using a serial communocations controller Zilog 8530. The implementation changed totally. It was designed by Paul Reed for the wireless controller Nordic nRF24L01.
+\begintt
+DEFINITION SCC;
+TYPE Header =
+RECORD valid: BOOLEAN; dadr, sadr, typ: BYTE;
+len: INTEGER; (*of data following header*) END ;
+PROCEDURE Start(filter: BOOLEAN);
+PROCEDURE Send(VAR head: Header; buf: ARRAY OF BYTE); PROCEDURE Available(): INTEGER;
+PROCEDURE ReceiveHead(VAR head: Header);
+PROCEDURE Receive(VAR x: BYTE);
+PROCEDURE Skip(m: INTEGER);
+PROCEDURE Stop;
+END SCC.
+\endtt
 
 
 \bye
