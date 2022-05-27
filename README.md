@@ -27,6 +27,8 @@ PDF and code taken from http://www.projectoberon.com
 
     luatex oberon.tex
 
+The last in-progress PDF can be found [here](https://github.com/guidoism/tex-oberon/raw/main/oberon.pdf)
+
 ## Quotes
 
 The requirement of many megabytes of store for an operating system is, albeit commonly tolerated, absurd and another hallmark of user-unfriendliness, or perhaps manufacturer friendliness.
