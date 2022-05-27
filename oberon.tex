@@ -2,6 +2,11 @@
 
 \def\code#1{{\tt #1\/}}
 \def\emph#1{{\it #1\/}}
+\def\acro#1{{\mc #1\/}}
+\def\btree{{\mc B-T}ree }
+\def\ps2{{\mc PS}-2 }
+\def\rs232{{\mc RS}-232 }
+\def\sdcard{{\mc SD}-card }
 
 % TODO: Change raw tags to use semantic \code and \emph macros
 
@@ -40,7 +45,7 @@ degradation of its role.
 
 While my eyes were glued to the colorful display, and while I was
 confronted with the evidence of my latest inadequacy, in through the
-always open door stepped my colleague (JG). He also happened to spend
+always open door stepped my colleague (\acro{JG}). He also happened to spend
 a leave from duties at home at the same laboratory, yet his face did
 not exactly express happiness, but rather frustration. The chocolate
 bar in his hand did for him what the coffee cup or the pipe does for
@@ -708,35 +713,35 @@ program lines.
 \halign{#\hfil\quad&\hfil\quad#&\hfil\quad#&\hfil\quad#\cr
 module&code&data&lines\cr
 \noalign{\smallskip\hrule}\cr
-Kernel      & 1123   & 8244   & 263 \cr
-FileDir     & 1963   & 60     & 352 \cr
-Files       & 2360   & 148    & 505 \cr
-Modules     & 1214   & 112    & 226 \cr
-Input       & 186    & 32     & 79  \cr
-Fonts       & 628    & 56     & 115 \cr
-Display     & 1033   & 84     & 190 \cr
-Viewers     & 1324   & 104    & 206 \cr
-Texts       & 2906   & 204    & 537 \cr
-Oberon      & 1679   & 288    & 410 \cr
-MenuViewers & 1513   & 56     & 208 \cr
-TextFrames  & 5786   & 292    & 874 \cr
-System      & 2134   & 72     & 418 \cr
-Edit        & 1096   & 1104   & 232 \cr
+\code{Kernel}      & 1123   & 8244   & 263 \cr
+\code{FileDir}     & 1963   & 60     & 352 \cr
+\code{Files}       & 2360   & 148    & 505 \cr
+\code{Modules}     & 1214   & 112    & 226 \cr
+\code{Input}       & 186    & 32     & 79  \cr
+\code{Fonts}       & 628    & 56     & 115 \cr
+\code{Display}     & 1033   & 84     & 190 \cr
+\code{Viewers}     & 1324   & 104    & 206 \cr
+\code{Texts}       & 2906   & 204    & 537 \cr
+\code{Oberon}      & 1679   & 288    & 410 \cr
+\code{MenuViewers} & 1513   & 56     & 208 \cr
+\code{TextFrames}  & 5786   & 292    & 874 \cr
+\code{System}      & 2134   & 72     & 418 \cr
+\code{Edit}        & 1096   & 1104   & 232 \cr
 \noalign{\smallskip\hrule}\cr
             & 24945  & 10856  & 4615 \cr
 \cr
-ORS         & 1762   & 992    & 319 \cr
-ORB         & 2348   & 408    & 437 \cr
-ORG         & 6699   & 34976  &  1125 \cr
-ORP         & 5994   & 144    &  974 \cr
+\code{ORS}         & 1762   & 992    & 319 \cr
+\code{ORB}         & 2348   & 408    & 437 \cr
+\code{ORG}         & 6699   & 34976  &  1125 \cr
+\code{ORP}         & 5994   & 144    &  974 \cr
 \noalign{\smallskip\hrule}\cr
             & 16803  & 36520  &  2855 \cr
 \cr
-Graphics    & 3484   & 564    &  685 \cr
-GraphicFrame& 2832   & 288    &  498 \cr
-Draw        & 690    & 40     &  164 \cr
-Rectangles  & 649    & 40     &  118 \cr
-Curves      & 1765   & 72     &  241 \cr
+\code{Graphics}    & 3484   & 564    &  685 \cr
+\code{GraphicFrame}& 2832   & 288    &  498 \cr
+\code{Draw}        & 690    & 40     &  164 \cr
+\code{Rectangles}  & 649    & 40     &  118 \cr
+\code{Curves}      & 1765   & 72     &  241 \cr
 \noalign{\smallskip\hrule}\cr
             & 9420   & 1004   &  1706 \cr
 }
@@ -823,7 +828,7 @@ computation. The chapter consist of two distinct parts, the first
 introducing the type \code{File\/} and describing the structure of files,
 i.e. their representation on disk storage with its sequential
 characteristics, the second describing the directory of file names and
-its organisation as a B-tree for obtaining fast searches.
+its organisation as a \btree for obtaining fast searches.
 
 The management of memory is the subject of Chapter 8. A single,
 central storage management was one of the key design decisions,
@@ -836,12 +841,12 @@ the partition called the \emph{heap}. The algorithm for allocation
 
 At the lowest level of the module hierarchy we find device
 drivers. They are described in Chapter 9, which contains drivers for
-some widely accepted interface standards. The first is PS-2, a serial
+some widely accepted interface standards. The first is \ps2, a serial
 transmission with synchronous clock. This is used for the keyboard and
-for the mouse. The second is SPI, a standard for bi-directional,
+for the mouse. The second is \acro{SPI}, a standard for bi-directional,
 serial transmission with synchronous clock. This is used for the
-``disk'', represented by an SD-card (flash memory), and for the
-network. And the third standard is RS-232 typically used for simple
+``disk'', represented by an \sdcard (flash memory), and for the
+network. And the third standard is \rs232 typically used for simple
 and slow data links. It is bidirectional and asynchronous.
 
 The second part of the book, consisting of Chapters 10--15, is
@@ -885,7 +890,7 @@ Oberon into target code, i.e. instruction sequences of some target
 computer. Its principles and techniques are explained in [6]. Both,
 source language and target architecture must be understood before
 studying a compiler. Both source language and the target computer's
-RISC architecture are presented in the Appendix.
+\acro{RISC} architecture are presented in the Appendix.
 
 Although here the compiler appears as an application module, it
 naturally plays a distinguished role, because the system (and the
@@ -951,7 +956,7 @@ Chapter 14 covers material that is rarely presented in the literature.
 
 Chapter 15 is devoted to tools that are not used by the Oberon System
 presented so far, but may be essential in some applications. The first
-is a data link with a protocol based on the RS-232 standard shown in
+is a data link with a protocol based on the \rs232 standard shown in
 Chapter 9. Another is a standard set of basic mathematical
 functions. And the third is a tool for creating new macros for the
 Draw System.
@@ -959,8 +964,8 @@ Draw System.
 The third part of this book is devoted to a detailed description of
 the hardware. Chapter 16 defines the processor, for which the compiler
 generates code. The target computer is a truly simple and regular
-processor called RISC with only 14 instructions, represented not by a
-commercial processor, but implemented with an FPGA, a Field
+processor called \acro{RISC} with only 14 instructions, represented not by a
+commercial processor, but implemented with an \acro{FPGA}, a Field
 Programmable Gate Array. It allows its structure to be described in
 full detail. It is a straight-forward, von Neumann type device
 consisting of a register bank, an arithmetic-logic unit, including a
@@ -1277,7 +1282,7 @@ extreme abstraction.
 We have put greatest emphasis in Oberon on closing the \emph{semantic gap}
 between application software packages and the system platform. The
 result of our efforts is a highly expressive and consistent
-\emph{application programming interface} (API) in the form of an explicit
+\emph{application programming interface} (\acro{API}) in the form of an explicit
 hierarchy of module definitions. Perhaps the most significant and most
 notable outcome of this approach is a collection of very powerful and
 system-wide abstract data types like
@@ -1448,7 +1453,7 @@ the system.
 
 Modules typically appear in three different forms. The first is a
 module that encapsulates some data, letting them be accessed only
-through exported procedures and functions. A good example is Module
+through exported procedures and functions. A good example is module
 \code{FileDir}, encapsulating the file directory and protecting it from
 disruptive access. A second kind is the module representing an
 \emph{abstract data type}, exporting a type and its associated
@@ -1507,7 +1512,7 @@ END System;
 \noindent An important consequence of our integrated systems approach is the
 possibility of constructing a universal, interactive 
 \emph{command interpreter} bound to viewers of \emph{textual contents}. If the text obeys
-the following syntax (specified in Extended Backus-Naur Form EBNF), we
+the following syntax (specified in Extended Backus-Naur Form \acro{EBNF}), we
 call it \emph{command tool}:
 \begintt
 CommandTool = { [Comment] CommandName [ParameterList] }.
