@@ -5061,89 +5061,92 @@ PROCEDURE Stop;
 END SCC.
 \endtt
 
+\beginchapter CHAPTER 10: THE NETWORK.
 
-\beginchapter CHAPTER 10. THE NETWORK
-\beginsubsection 10.1. INTRODUCTION
-\beginsubsection 10.2. THE PROTOCOL
-\beginsubsection 10.3. STATION ADDRESSING
-\beginsubsection 10.4. THE IMPLEMENTATION
-\beginchapter CHAPTER 11. A DEDICATED FILE-DISTRIBUTION AND MAIL SERVER
-\beginsubsection 11.1 CONCEPT AND STRUCTURE
-\beginsubsection 11.2. ELECTRONIC MAIL SERVICE
-\beginsubsection 11.3. PRINTING SERVICE
-\beginsubsection 11.4. MISCELLANEOUS SERVICES
-\beginsubsection 11.5. USER ADMINISTRATION
-\beginchapter CHAPTER 12. THE COMPILER
-\beginsubsection 12.1. INTRODUCTION
-\beginsubsection 12.2. CODE PATTERNS
-\beginsubsection 12.3. INTERNAL DATA STRUCTURES AND MODULE INTERFACES
-12.3.1. Data structures
-12.3.2. Module interfaces
-\beginsubsection 12.4. THE PARSER
-\beginsubsection 12.5. THE SCANNER
-\beginsubsection 12.6. SEARCHING THE SYMBOL TABLE, AND HANDLING SYMBOL FILES
-12.6.1. The structure of the symbol table
-12.6.2. Symbol files
-\beginsubsection 12.7. THE CODE GENERATOR
-12.7.1. Expressions
-12.7.2. Relations
-12.7.3. Set operations
-12.7.4. Assignments
-12.7.5. Conditional and repetitive statements
-12.7.6. Boolean expressions
-12.7.7. Procedures
-12.7.8. Type extension
-12.7.9. Import and export, global variables
-12.7.10. Traps
-\beginchapter CHAPTER 13. A GRAPHICS EDITOR
-\beginsubsection 13.1. HISTORY AND GOAL
-\beginsubsection 13.2. A BRIEF USER GUIDE
-13.2.1. Basic commands
-13.2.2. Menu commands
-13.2.3. Further commands
-13.2.4. Macros
-13.2.5. Rectangles
-13.2.6. Oblique lines and circles
-13.2.7. Spline curves
-13.2.8. Constructing new macros
-\beginsubsection 13.3. THE CORE AND ITS STRUCTURE
-\beginsubsection 13.4. DISPLAYING GRAPHICS
-\beginsubsection 13.5. THE USER INTERFACE
-\beginsubsection 13.6. MACROS
-\beginsubsection 13.7. OBJECT CLASSES
-\beginsubsection 13.8. THE IMPLEMENTATION
-13.8.1. Module Draw
-13.8.2. Module GraphicFrames
-13.8.3. Module Graphics
-\beginsubsection 13.9. RECTANGLES AND CURVES
-13.9.1. Rectangles
-13.9.2. Oblique lines and circles
-\beginchapter CHAPTER 14. BUILDING AND MAINTENANCE TOOLS
-\beginsubsection 14.1. THE STARTUP PROCESS
-\beginsubsection 14.2. BUILDING TOOLS
-\beginsubsection 14.3. MAINTENANCE TOOLS
-\beginchapter CHAPTER 15. TOOL AND SERVICE MODULES
-\beginsubsection 15.1. BASIC MATHEMATICAL FUNCTIONS
-\beginsubsection 15.2. A DATA LINK
-\beginsubsection 15.3. A GENERATOR OF GRAPHIC MACROS
-\beginchapter CHAPTER 16. IMPLEMENTATION OF THE RISC PROCESSOR
-\beginsubsection 16.1. INTRODUCTION
-\beginsubsection 16.2. THE ARITHMETIC AND LOGIC UNIT (ALU)
-16.2.1 Shifters
-16.2.2. Multiplication
-16.2.3. Division
-\beginsubsection 16.3. FLOATING-POINT ARITHMETIC
-16.3.1. Floating-point addition
-16.3.2. Floating-point multiplication
-16.3.3. Floating-point division
-\beginsubsection 16.4. THE CONTROL UNIT
-\beginchapter CHAPTER 17. THE PROCESSOR'S ENVIRONMENT
-\beginsubsection 17.1. THE SRAM MEMORY
-\beginsubsection 17.2. PERIPHERAL INTERFACES
-17.2.1. The PS-2 interface
-17.2.2. The SPI interface
-17.2.3. The RS-232 interface
-17.2.4. The display controller
-17.2.5. The Mouse interface
+\beginsubsection 10.1. INTRODUCTION.
+
+Workstations are typically, but not always, connected in a local environment by a network. There exist two basically different views of the architecture of such nets. The more demanding view is that all connected stations constitute a single, unified workspace (also called address-space), in which the individual processors operate. It implies the demand that the ``thin'' connections between processors are hidden from the users. At worst they might become apparent through slower data access rates between the machines. To hide the difference between access within a computer and access between computers is regarded primarily as a challenge to implementors.
+
+% \beginsubsection 10.2. THE PROTOCOL.
+% \beginsubsection 10.3. STATION ADDRESSING.
+% \beginsubsection 10.4. THE IMPLEMENTATION.
+% \beginchapter CHAPTER 11: A DEDICATED FILE-DISTRIBUTION AND MAIL SERVER.
+% \beginsubsection 11.1 CONCEPT AND STRUCTURE.
+% \beginsubsection 11.2. ELECTRONIC MAIL SERVICE.
+% \beginsubsection 11.3. PRINTING SERVICE.
+% \beginsubsection 11.4. MISCELLANEOUS SERVICES.
+% \beginsubsection 11.5. USER ADMINISTRATION.
+% \beginchapter CHAPTER 12: THE COMPILER.
+% \beginsubsection 12.1. INTRODUCTION.
+% \beginsubsection 12.2. CODE PATTERNS.
+% \beginsubsection 12.3. INTERNAL DATA STRUCTURES AND MODULE INTERFACES.
+% \beginsubsubsection 12.3.1. Data structures.
+% \beginsubsubsection 12.3.2. Module interfaces.
+% \beginsubsection 12.4. THE PARSER.
+% \beginsubsection 12.5. THE SCANNER.
+% \beginsubsection 12.6. SEARCHING THE SYMBOL TABLE, AND HANDLING SYMBOL FILES.
+% \beginsubsubsection 12.6.1. The structure of the symbol table.
+% \beginsubsubsection 12.6.2. Symbol files.
+% \beginsubsection 12.7. THE CODE GENERATOR.
+% \beginsubsubsection 12.7.1. Expressions.
+% \beginsubsubsection 12.7.2. Relations.
+% \beginsubsubsection 12.7.3. Set operations.
+% \beginsubsubsection 12.7.4. Assignments.
+% \beginsubsubsection 12.7.5. Conditional and repetitive statements.
+% \beginsubsubsection 12.7.6. Boolean expressions.
+% \beginsubsubsection 12.7.7. Procedures.
+% \beginsubsubsection 12.7.8. Type extension.
+% \beginsubsubsection 12.7.9. Import and export, global variables.
+% \beginsubsubsection 12.7.10. Traps.
+% \beginchapter CHAPTER 13: A GRAPHICS EDITOR.
+% \beginsubsection 13.1. HISTORY AND GOAL.
+% \beginsubsection 13.2. A BRIEF USER GUIDE.
+% \beginsubsubsection 13.2.1. Basic commands.
+% \beginsubsubsection 13.2.2. Menu commands.
+% \beginsubsubsection 13.2.3. Further commands.
+% \beginsubsubsection 13.2.4. Macros.
+% \beginsubsubsection 13.2.5. Rectangles.
+% \beginsubsubsection 13.2.6. Oblique lines and circles.
+% \beginsubsubsection 13.2.7. Spline curves.
+% \beginsubsubsection 13.2.8. Constructing new macros.
+% \beginsubsection 13.3. THE CORE AND ITS STRUCTURE.
+% \beginsubsection 13.4. DISPLAYING GRAPHICS.
+% \beginsubsection 13.5. THE USER INTERFACE.
+% \beginsubsection 13.6. MACROS.
+% \beginsubsection 13.7. OBJECT CLASSES.
+% \beginsubsection 13.8. THE IMPLEMENTATION.
+% \beginsubsubsection 13.8.1. Module Draw.
+% \beginsubsubsection 13.8.2. Module GraphicFrames.
+% \beginsubsubsection 13.8.3. Module Graphics.
+% \beginsubsection 13.9. RECTANGLES AND CURVES.
+% \beginsubsubsection 13.9.1. Rectangles.
+% \beginsubsubsection 13.9.2. Oblique lines and circles.
+% \beginchapter CHAPTER 14: BUILDING AND MAINTENANCE TOOLS.
+% \beginsubsection 14.1. THE STARTUP PROCESS.
+% \beginsubsection 14.2. BUILDING TOOLS.
+% \beginsubsection 14.3. MAINTENANCE TOOLS.
+% \beginchapter CHAPTER 15: TOOL AND SERVICE MODULES.
+% \beginsubsection 15.1. BASIC MATHEMATICAL FUNCTIONS.
+% \beginsubsection 15.2. A DATA LINK.
+% \beginsubsection 15.3. A GENERATOR OF GRAPHIC MACROS.
+% \beginchapter CHAPTER 16: IMPLEMENTATION OF THE RISC PROCESSOR.
+% \beginsubsection 16.1. INTRODUCTION.
+% \beginsubsection 16.2. THE ARITHMETIC AND LOGIC UNIT (ALU).
+% \beginsubsubsection 16.2.1 Shifters.
+% \beginsubsubsection 16.2.2. Multiplication.
+% \beginsubsubsection 16.2.3. Division.
+% \beginsubsection 16.3. FLOATING-POINT ARITHMETIC.
+% \beginsubsubsection 16.3.1. Floating-point addition.
+% \beginsubsubsection 16.3.2. Floating-point multiplication.
+% \beginsubsubsection 16.3.3. Floating-point division.
+% \beginsubsection 16.4. THE CONTROL UNIT.
+% \beginchapter CHAPTER 17: THE PROCESSOR'S ENVIRONMENT.
+% \beginsubsection 17.1. THE SRAM MEMORY.
+% \beginsubsection 17.2. PERIPHERAL INTERFACES.
+% \beginsubsubsection 17.2.1. The PS-2 interface.
+% \beginsubsubsection 17.2.2. The SPI interface.
+% \beginsubsubsection 17.2.3. The RS-232 interface.
+% \beginsubsubsection 17.2.4. The display controller.
+% \beginsubsubsection 17.2.5. The Mouse interface.
 
 \bye
