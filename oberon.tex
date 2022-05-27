@@ -1518,24 +1518,19 @@ call it \emph{command tool}:
 CommandTool = { [Comment] CommandName [ParameterList] }.
 \endtt
 
-\noindent If present, the parameter list is made available to the called command
-via fields text and pos in the global variable \code{Par} that is exported
-from module \code{Oberon\/}. Because this parameter list is interpreted
-individually by each command, its format is completely open. However,
-we postulate some conventions and rules for the purpose of a
-standardized user interface:
+\noindent If present, the parameter list is made available to the called command via fields \code{text} and \code{pos} in the global variable \code{Par} that is exported from module \code{Oberon\/}. Because this parameter list is interpreted individually by each command, its format is completely open. However, we postulate some conventions and rules for the purpose of a standardized user interface:
 
-1.) The elements of a textual parameter list are universal syntactical tokens like name, literal string, integer, real number, and special character.
+\item{1.} The elements of a textual parameter list are universal syntactical tokens like name, literal string, integer, real number, and special character.
 
-2.) An arrow ``\code{\^\/}'' in the textual parameter list refers to the current text selection for continuation. In the special case of the arrow following the command name immediately, the entire parameter list is represented by the text selection.
+\item{2.} An arrow ``\code{\^\/}'' in the textual parameter list refers to the current text selection for continuation. In the special case of the arrow following the command name immediately, the entire parameter list is represented by the text selection.
 
-3.) An asterisk ``\code{*}'' in the textual parameter list refers to the currently marked viewer. Typically, the asterisk replaces the name of a file. In such a case the contents of the viewer marked by the system pointer (star) is processed by the command interpreter instead of the contents of a file.
+\item{3.} An asterisk ``\code{*}'' in the textual parameter list refers to the currently marked viewer. Typically, the asterisk replaces the name of a file. In such a case the contents of the viewer marked by the system pointer (star) is processed by the command interpreter instead of the contents of a file.
 
-4.) An at-character ``\code{@}' in the textual parameter list indicates that the selection marks the (beginning of the) text which is taken as operand.
+\item{4.} An at-character ``\code{@}' in the textual parameter list indicates that the selection marks the (beginning of the) text which is taken as operand.
 
-5.) A terminator-character ``\code{\~{}}'' terminates the textual parameter list in case of a variable number of parameters.
+\item{5.} A terminator-character ``\code{\~{}}'' terminates the textual parameter list in case of a variable number of parameters.
 
-Because command tools are ordinary, editable texts (in contrast to
+\noindent Because command tools are ordinary, editable texts (in contrast to
 menus in conventional systems) they can be customized ``on the fly'',
 which makes the system highly flexible. We refer again to Figure 3.1
 that shows a typical Oberon screen layout consisting of two vertical

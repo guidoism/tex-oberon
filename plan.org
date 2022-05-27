@@ -13,7 +13,7 @@
 - [X] Proofread until 3.3.1. Atomic actions.
 - [X] Proofread until 3.3.2. Generic text selection.
 - [X] Proofread until 3.3.3. Generic copy viewer.
-- [ ] Proofread until 3.4. TOOLBOXES.
+- [X] Proofread until 3.4. TOOLBOXES.
 - [ ] Proofread until 4.1. THE SCREEN LAYOUT MODEL.
 - [ ] Proofread until 4.2. VIEWERS AS OBJECTS.
 - [ ] Proofread until 4.3. FRAMES AS BASIC DISPLAY ENTITIES.
