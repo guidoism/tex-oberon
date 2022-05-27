@@ -7,6 +7,12 @@
 \def\ps2{{\mc PS}-2 }
 \def\rs232{{\mc RS}-232 }
 \def\sdcard{{\mc SD}-card }
+\def\figure#1#2#3#4{\medskip\centerline{\directlua 0 {
+  a = img.new{filename = "#1", width = "#2"}
+  img.write(a)
+}}
+\centerline{\ninepoint{\bf Fig.\ #3}\enspace #4}\medskip
+}
 
 % TODO: Change raw tags to use semantic \code and \emph macros
 
@@ -359,14 +365,7 @@ compilation. The former is a \emph{command} represented by a (exported)
 procedure, the latter is a \emph{module}. Hence, a module may, and typically
 does, define several, even many commands. Such a (general) command may be invoked at any time by pointing at its name in any text visible in any viewer on the display, and by clicking the middle mouse button. The command name has the form \code{M.P}, where \code{P} is the procedure's identifier and \code{M} that of the module in which \code{P} is declared. As a consequence, any command click may cause the loading of one or several modules, if \code{M} is not already present in main store. The next invocation of \code{M.P} occurs instantaneously, since \code{M} is already loaded. A further consequence is that modules are never (automatically) removed, because a next command may well refer to the same module.
 
-\medskip
-\directlua 0 {
-  a = img.new{filename = "pdfs/image.46.rev.png", width = "4.7in"}
-  img.write(a)
-}
-
-% Taken from \caption
-\noindent {\ninepoint{\bf Fig.\ 2.1.}\enspace Oberon display with tiled viewers} \medskip
+\figure{pdfs/image.46.rev.png}{4.7in}{2.1}{Oberon display with tiled viewers}
 
 Every command has the purpose to alter the state of some
 operands. Typically, they are denoted by text following the command
@@ -656,15 +655,7 @@ source to the destination. For example, \code{Files\/} imports \code{Kernel\/}; 
 direct import is not shown, because a path from \code{Kernel\/} leads to \code{Files\/}
 via \code{FileDir\/}.
 
-\medskip
-\directlua 0 {
-  a = img.new{filename = "pdfs/fig-2.2.png", width = "1.8in"}
-  img.write(a)
-}
-
-% Taken from \caption
-\noindent {\ninepoint{\bf Fig.\ 2.2.}\enspace The structure of the Oberon core} \medskip
-
+\figure{pdfs/fig-2.2.png}{1.8in}{2.2}{The structure of the Oberon core}
 
 Module names in the plural form typically indicate the definition of
 an abstract data type in the module. The type is exported together
@@ -1571,14 +1562,14 @@ into the reasons for the central position the display system takes
 within the operating system, and for its determining influence on the
 entire system architecture. In particular, we shall show that the
 display system is a natural basis or anchor for functional
-extensibility.
+extensibility. % definintion; janus-faced: having two sharply contrasting aspects or characteristics; insincere or deceitful.
 
 \beginsubsection 4.1. THE SCREEN LAYOUT MODEL.
 
-In the early seventies, Xerox PARC in California launched the
+In the early seventies, Xerox \acro{PARC} in California launched the
 Smalltalk-project with the goal of conceiving and developing new and
 more natural ways to communicate with personal computers
-\footnote1{[Goldberg] A. Goldberg, Smalltalk-80: The Interactive Programming Environment, Addison-Wesley 1984.}. Perhaps the most conspicuous among several significant
+\footnote{{\mc[Goldberg]}}{A. Goldberg, Smalltalk-80: The Interactive Programming Environment, Addison-Wesley 1984.}. Perhaps the most conspicuous among several significant
 achievements of this endeavor is the idea of applying the desktop
 metaphor to the display screen. This metaphor comprises a desktop and
 a collection of possibly mutually overlapping pages of paper that are
@@ -1587,7 +1578,7 @@ surface of a screen we get the familiar picture of Figure 4.1 showing
 a collection of partially or totally visible rectangular areas on a
 background, so-called \emph{windows} or \emph{viewers}.
 
-TODO: Figure 4.1 Desktop showing partially overlapping viewers
+\figure{pdfs/fig-4.1.png}{2.7in}{4.1}{Desktop showing partially overlapping viewers}
 
 The desktop metaphor is used by many modern operating systems and user
 interface shells both as a natural model for the system to separate
