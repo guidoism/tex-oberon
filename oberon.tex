@@ -4932,13 +4932,74 @@ mk value state      action
 
 \beginsubsection 8.3. THE KERNEL.
 
+The kernel lies at the bottom of the module hierarchy. It contains the procedures for dynamic storage allocation and retrieval as described before. The procedures are \code{New}, \code{Mark}, and \code{Scan}.
+
+\code{Kernel} also contains the driver routines for the disk. They are used by modules \code{FileDir} and \code{Files}. The ``disk'' is actually an SD-card, a high-volume flash-RAM. It is accessed purely sequentially, byte-wise, by a standard, serial peripheral interface (SPI). Within \code{Kernel} a table called \code{SectorMap} is allocated keeping track of blocks (sectors) occupied by files. A single bit indicates, whether a sector is allocated or not. This table is accessed by the procedures \code{AllocSector}, \code{MarkSector}, and \code{FreeSector}. Reading and writing is done sector-wise by procedures \code{GetSector} and \code{PutSector}. Sector numbers are always a multiple of 29 for the purpose of redundancy checks.
+
+Furthermore, the kernel contains a timer counting milliseconds and, perhaps, a real time clock, showing date and time. Clock data are packed into a single word as follows:
+
+TODO: Figure 8.9 Encoding of date and time (year starting with 2000)
+
+\begintt
+DEFINITION Kernel; (*NW/PR 11.4.86 / 27.12.95 / 15.5.2013*) CONST SectorLength = 1024;
+TYPE Sector = ARRAY SectorLength OF BYTE;
+VAR allocated, NofSectors: INTEGER;
+heapOrg, heapLim: INTEGER;
+stackOrg, MemSize: INTEGER;
+PROCEDURE New(VAR ptr: INTEGER; tag: INTEGER); PROCEDURE Mark(pref: INTEGER);
+PROCEDURE Scan;
+PROCEDURE ResetDisk;
+PROCEDURE MarkSector(sec: INTEGER);
+PROCEDURE FreeSector(sec: INTEGER);
+PROCEDURE AllocSector(hint: INTEGER; VAR sec: INTEGER); PROCEDURE GetSector(src: INTEGER; VAR dest: Sector); PROCEDURE PutSector(dest: INTEGER; VAR src: Sector); PROCEDURE Time(): INTEGER; (*milliseconds*)
+PROCEDURE Clock(): INTEGER;
+PROCEDURE SetClock(dt: INTEGER);
+PROCEDURE Install(adr, procadr: INTEGER);
+PROCEDURE Init;
+END Kernel.
+\endtt
+
+\beginsubsection 8.4. THE STORAGE MANAGEMENT'S TOOLBOX.
+
+The user can obtain information about the system's state and resources through its toolbox, a set of commands contained in the too module \code{System}. These commands are:
+\begintt
+PROCEDURE Watch;
+PROCEDURE Collect; / n
+PROCEDURE SetClock; / year, month, day, hour, minute, second
+\endtt
+
+\noindent Command \code{Watch} shows the amount of storage occupied in the heap, the number of disk sectors allocated on the disk, and the number of tasks installed. The command \code{Collect} allows to control the frequency of garbage collections. The number \code{n} indicates how many commands are executed before the next garbage collection.
+
+\beginchapter CHAPTER 9: DEVICE DRIVERS.
+
+\beginsubsection 9.1. OVERVIEW.
+
+Device drivers are collections of procedures that constitute the immediate interface between hardware and software. They refer to those parts of the computer hardware that are usually called \emph{peripheral}. Computers typically contain a system bus which transmits data among its different parts. Processor and memory are considered as its internal parts; the remaining parts, such as disk, keyboard, display, etc, are considered as external or peripheral, notwithstanding the fact that they are often contained in the same cabinet or board.
+
+Such peripheral devices are connected to the system bus via special registers (data buffers) and transceivers (switches, buffers in the sense of digital electronics). These registers and transceivers are addressed by the processor in the same way as memory locations---they are said to be \emph{memory-mapped}--and they constitute the hardware interface between processor bus and device. References to them are typically confined to specific driver procedures which constitute the software interface.
+
+Drivers are inherently hardware specific, and the justification of their existence is precisely that they encapsulate these specifics and present to their clients an appropriate abstraction of the device. Evidently, this abstraction must still reflect the essential characteristics of the device, but not the details (such as e.g. the addresses of its interface registers).
+
+Our justification to present the drivers connecting the Oberon system with the RISC computer in detail is on the one hand the desire for completeness. But on the other hand it is also in recognition of the fact that their design represents an essential part of the engineering task in building a system. This part may look trivial from a conceptual point of view; it certainly is not so in practice.
+
+In order to reduce the number of interface types, standards have been established. The RISC computer also uses such interface standards, and we will concentrate on them in the following presentations. The following devices are presented:
+
+1. The \emph{Keyboard} is considered as a serial device delivering one byte of input data per key stroke. It is connected by a serial line according to the PS/2 and ASCII (American Standard Code for Information Interchange) standards. The software is contained in module \code{Input} (Sect. 9.2), and the hardware is explained in Sect. 17.2.1.
+
+2. The \emph{mouse} is a pointing device delivering coordinates in addition to key states. The software is also part of module \code{Input} (Sect. 9.2).
+
+3. \emph{Display}. The interface to the display is an area of memory that contains the displayed information, exactly one bit per pixel for a monochrome display. This area is called frame buffer or bitmap Here the size is of the display area is 768 lines and 1024 dots per line, representing a raster. The software is module Display, which primarily consists of operations to draw frequently occurring patterns. These operations are called raster-ops. They are explained in Section 4.5. The actual display requires a hardware interface called a display controller. The connection between the controller and the display follows the VGA-Standard (see Sect. 17.2.4).
+
+4. \emph{Disk}. Our RISC computer does not use a magnetic, rotating disk for storing non-volatile data. Instead, it uses an SD-card (flash-RAM). The driver is contained in module \code{Kernel} (Section 8.3). The hardware is discussed in Sect. 17.2.2.
+
+5. \emph{Net}. In the original text, a network was presented consisting of a bus connecting many computers, based on the RS-485 standard. It was implemented by the serial communications controller Zilog 8530, operating at a frequency of 230 Kb/s. The name SCC has been retained as a generic interface, behind which the packet transport has now been re-implemented as a simple wireless network (Nordic nRF24L01 controller) in the regulation-free 2.4GHz industrial/scientific/medical (ISM) frequency band.
+
+In all driver modules the implementation-dependent procedures \code{SYSTEM.PUT}, \code{SYSTEM.GET}, and \code{SYSTEM.BIT} are used to access the registers of the device interface. Their first parameter is the address of the register, the second an expression or variable.
+
+\beginsubsection 9.2. KEYBOARD AND MOUSE.
 
 
 
-% \beginsubsection 8.4. THE STORAGE MANAGEMENT'S TOOLBOX.
-% \beginchapter CHAPTER 9: DEVICE DRIVERS.
-% \beginsubsection 9.1. OVERVIEW.
-% \beginsubsection 9.2. KEYBOARD AND MOUSE.
 % \beginsubsection 9.3. THE SD-CARD (DISK).
 % \beginsubsection 9.4. SERIAL ASYNCHRONOUS INTERFACE (RS 232).
 % \beginsubsection 9.5. SERIAL COMMUNICATIONS CONTROLLER (SCC).
