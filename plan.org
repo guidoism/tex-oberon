@@ -14,7 +14,7 @@
 - [X] Proofread until 3.3.2. Generic text selection.
 - [X] Proofread until 3.3.3. Generic copy viewer.
 - [X] Proofread until 3.4. TOOLBOXES.
-- [ ] Proofread until 4.1. THE SCREEN LAYOUT MODEL.
+- [X] Proofread until 4.1. THE SCREEN LAYOUT MODEL.
 - [ ] Proofread until 4.2. VIEWERS AS OBJECTS.
 - [ ] Proofread until 4.3. FRAMES AS BASIC DISPLAY ENTITIES.
 - [ ] Proofread until 4.4. DISPLAY MANAGEMENT.
