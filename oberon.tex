@@ -653,31 +653,31 @@ imports and as a graph in Figure 2.2. The picture is simplified by
 omitting direct import edges if an indirect path also leads from the
 source to the destination. For example, \code{Files\/} imports \code{Kernel\/}; the
 direct import is not shown, because a path from \code{Kernel\/} leads to \code{Files\/}
-via \code{FileDir\/}.
+via \code{FileDir}.
 
 \figure{pdfs/fig-2.2.png}{1.8in}{2.2}{The structure of the Oberon core}
 
 Module names in the plural form typically indicate the definition of
 an abstract data type in the module. The type is exported together
-with the pertinent operations. Examples are \code{Files\/}, \code{  Modules\/}, \code{Fonts\/}, \code{Texts\/}, \code{Viewers\/}, \code{  MenuViewers\/}, and \code{TextFrames\/}. Modules whose names are in
+with the pertinent operations. Examples are \code{Files}, \code{Modules}, \code{Fonts}, \code{Texts}, \code{Viewers}, \code{MenuViewers}, and \code{TextFrames}. Modules whose names are in
 singular form typically denote a resource that the module manages, be
 it a global variable or a device. The variable or the device is itself
 hidden (not exported) and becomes accessible through the module's
-exported procedures. Examples are all device drivers, \code{Input\/}
-for keyboard and mouse, \code{Kernel\/} for memory and disk, and \code{  Display\/}. Exceptions are the command modules whose name is mostly
-chosen according to the activity they primarily represent, like \code{  System\/}, and \code{Edit\/}.
+exported procedures. Examples are all device drivers, \code{Input}
+for keyboard and mouse, \code{Kernel} for memory and disk, and \code{Display}. Exceptions are the command modules whose name is mostly
+chosen according to the activity they primarily represent, like \code{System}, and \code{Edit\/}.
 
-Module \code{Oberon\/} is, as already mentioned, the heart of the system
+Module \code{Oberon} is, as already mentioned, the heart of the system
 containing the central loop to which control returns after each
 command interpretation, independent of whether it terminates normally
-or abnormally. \code{Oberon\/} exports several procedures of auxiliary nature,
-but primarily also the one allowing the invocation of commands (\code{Call\/})
+or abnormally. \code{Oberon} exports several procedures of auxiliary nature,
+but primarily also the one allowing the invocation of commands (\code{Call})
 and access to the command's parameter text through variable
 \code{Oberon.Par}. Furthermore, it contains global, exported variables: the
 log text. The log text typically serves to issue prompts and short
 failure reports of commands. The text is displayed in a log viewer
-that is automatically opened when module \code{System\/} is initialized. Module
-\code{Oberon\/} furthermore contains the two markers used globally on the
+that is automatically opened when module \code{System} is initialized. Module
+\code{Oberon} furthermore contains the two markers used globally on the
 display, the \emph{mouse cursor} and the \emph{star pointer}. It exports procedures
 to draw and to erase them, and allows the installation of different
 patterns for them.
@@ -5044,9 +5044,89 @@ END SCC.
 
 Workstations are typically, but not always, connected in a local environment by a network. There exist two basically different views of the architecture of such nets. The more demanding view is that all connected stations constitute a single, unified workspace (also called address-space), in which the individual processors operate. It implies the demand that the ``thin'' connections between processors are hidden from the users. At worst they might become apparent through slower data access rates between the machines. To hide the difference between access within a computer and access between computers is regarded primarily as a challenge to implementors.
 
-% \beginsubsection 10.2. THE PROTOCOL.
-% \beginsubsection 10.3. STATION ADDRESSING.
-% \beginsubsection 10.4. THE IMPLEMENTATION.
+The second, more conservative view, assumes that individual workstations are, although connected, essentially autonomous units which exchange data infrequently. Therefore, access of data on partner stations is initiated by explicit transfer commands. Commands handling external access are not part of the basic system, but rather are implemented in modules that might be regarded as applications.
+
+In the Oberon System, we adhere to this second view, and in this chapter, we describe the module \code{Net}, which is an autonomous command module based on the network driver \code{SCC}. It can be activated on any station connected in a network, and all of them are treated as equals. Such a set of loosely coupled stations may well operate in networks with moderate transmission rates and therefore with low-cost hardware interfaces and twisted-pair wires.
+
+An obvious choice for the unit of transferred data is the file. The central theme of this chapter is therefore file transfer over a network. Some additional facilities offered by a dedicated server station will be the subject of Chapter 11. The commands to be presented here are a few only: \code{SendFiles}, \code{ReceiveFiles}, and \code{SendMsg}.
+
+As explained in Chapter 2, Oberon is a single-process system where every command monopolizes the processor until termination. When a command involves communication over a network, (at least) two processors are engaged in the action at the same time. The Oberon paradigm therefore appears to exclude such cooperation; but fortunately it does not, and the solution to the problem is quite simple.
+
+Every command is initiated by a user operating on a workstation. For the moment we call it the master (of the command under consideration). The addressed station---obviously called the server---must be in a state where it recognizes the command in order to engage in its execution. Since the command---called a request---arrives in encoded form over the network, an Oberon task represented by a handler procedure must be inserted into the event polling loop of the system. Such a handler must have the general form
+\begintt
+IF event present THEN handle event END
+\endtt
+
+\noindent The guard, in this case, must imply that a request was received from the network. We emphasize that the event is sensed by the server only after the command currently under execution, if any, has terminated. However, data arrive at the receiver immediately after they are sent by the master. Hence, any sizeable delay is inherently inadmissible, and the Oberon metaphor once again appears to fail. It does not fail, however, because the unavoidable, genuine concurrency of sender and receiver action is handled within the driver module which places the data into a buffer. The driver is activated by an interrupt, and its receiver buffer effectively decouples the partners and removes the stringent timing constraints. All this remains completely hidden within the driver module.
+
+\beginsubsection 10.2. THE PROTOCOL.
+
+If more than a single agent participates in the execution of a command, a convention must be established and obeyed. It defines the set of requests, their encoding, and the sequence of data exchanges that follow. Such a convention is called a protocol. Since in our metaphor, actions initiated by the master and the server strictly follow each other in alternation, the protocol can be defined using \acro{EBNF} (extended Backus-Naur formalism), well-known from the syntax specification of languages. Items originating from the master will be written with normal font, those originating from the server appear in italics.
+
+A simple form of the ReceiveFile request is defined as follows and will be refined subsequently:
+\begintt
+ReceiveFile = SND filename (ACK data | NAK).
+\endtt
+
+\noindent Here, the symbol \code{SND} represents the encoded request that the server send the file specified by the file name. \code{ACK} signals that the request is honoured and the requested data follow. The \code{NAK} symbol indicates that the requested file cannot be delivered. The transaction clearly consists of two parts, the request and the reply, one from each partner.
+
+This simple-minded scheme fails because of the limitation of the size of each transmitted portion imposed by the network driver. We recall that module \code{SCC} restricts the data of each packet to 512 bytes. Evidently, files must be broken up and transmitted as a sequence of packets. The reason for this restriction is transmission reliability. The break-up allows the partner to confirm correct receipt of a packet by returning a short acknowledgement. Each acknowledgement also serves as request for the next packet. An exception is the last acknowledgement following the last data portion, which is characterized by its length being less than the admitted maximum. The revised protocol is defined as
+\begintt
+ReceiveFile = SND filename (DAT data ACK {DAT data ACK} | NAK).
+\endtt
+
+\noindent We now recall that each packet as defined in Section 9.3. is characterized by a type in its header. The symbols \code{SND}, \code{DAT}, \code{ACK}, and \code{NAK} indicate this packet type. The data portions of \code{ACK} and \code{NAK} packets are empty.
+
+The revised protocol fails to cope with transmission errors. Correct transmission is checked by the driver through a cyclic redundancy check (\acro{CRC}), and an erroneous packet is simple discarded. This implies that a receiver must impose a timing constraint. If an expected packet fails to arrive within a given time period (timeout), the request must be repeated. In our case, a request is implied by an acknowledgement. Hence, the acknowledgement must specify whether the next (normal case) or the previously requested (error case) packet must be sent. The solution is to attach a sequence number to each acknowledgement and to each data packet. These numbers are taken modulo 8, although in principle modulo 2 would suffice.
+
+With the addition of a user identification and a password to every request, and of an alternate reply code \code{NPR} for ``no permission'', the protocol reaches its final form:
+\begintt
+ReceiveFile = SND username password filename (datastream | NAK | NPR).
+datastream = DAT0 data ACK1 {DATi data ACKi+1}.
+\endtt
+
+\noindent The protocol for file transmission from the master to the server is defined similarly:
+\begintt
+SendFile = REC username password filename (ACK0 datastream | NAK | NPR).
+datastream = DAT0 data ACK1 {DATi data ACKi+1}.
+\endtt
+
+\noindent The third request listed above, SendMsg, does not refer to any file, but merely transmits and displays a short message. It is included here for testing the link between two partners and perhaps for visibly acknowledging a rendered service by the message ``done'', or ``thank you''.
+\begintt
+SendMsg = MSG message ACK.
+\endtt
+
+\beginsubsection 10.3. STATION ADDRESSING.
+
+Every packet must carry a destination address as well as the sender's address. Addresses are station numbers. It would certainly be inconvenient for a user to remember the station number of a desired partner. Instead, the use of symbolic names is preferred. We have become accustomed to use the partner's initials for this purpose.
+
+The source address is inserted automatically into packet headers by the driver. It is obtained from a dip switch set when a computer is installed and connected. But where should the destination address come from? From the start we reject the solution of an address table in every workstation because of the potential inconsistencies. The concept of a centralized authority holding a name/address dictionary is equally unattractive, because of the updates required whenever a person uses a different computer. Also, we have started from the premise to keep all participants in the network equal.
+
+The most attractive solution lies in a decentralized name service. It is based on the broadcast facility, i.e. the possibility to send a packet to all connected stations, bypassing their address filters with a special destination address (-1). The broadcast is used for emitting a name request containing the desired partner's symbolic name. A station receiving the request returns a reply to the requester, if that name matches its own symbolic name. The requester then obtains the desired partner's address from the source address field of the received reply. The corresponding simple protocol is:
+\begintt
+NameRequest = NRQ partnername [NRS].
+\endtt
+
+\noindent Here, the already mentioned timeout facility is indispensible. The following summarizes the protocol developed so far:
+\begintt
+protocol = {request}.
+request = ReceiveFile | SendFile | SendMsg | NameRequest.
+\endtt
+
+\noindent The overhead incurred by name requests may be reduced by using a local address dictionary. In practice, a single entry is satisfactory. A name request is then needed whenever the partner changes.
+
+\beginsubsection 10.4. THE IMPLEMENTATION.
+
+Module \code{Net} is an implementation of the facilities outlined above. The program starts with a number of auxiliary, local procedures. They are followed by procedure Serve which is to be installed as an Oberon task, and the commands \code{SendFiles}, \code{ReceiveFiles}, and \code{SendMsg}, each of which has its counterpart within procedure \code{Serve}. At the end are the commands for starting and stopping the server facility.
+
+For a more detailed presentation we select procedure \code{ReceiveFiles}. It starts out by reading the first parameter which designates the partner station from the command line. Procedure \code{FindPartner} issues the name request, unless the partner's address has already been determined by a previous command. The global variable partner records a symbolic name (id) whose address is stored in the destination field of the global variable \code{head0}, which is used as header in every packet sent by procedure \code{SCC.SendPacket}. The variable partner may be regarded as a name cache with a single entry and with the purpose of reducing the number of issued name requests.
+
+If the partner has been identified, the next parameter is read from the command line. It is the name of the file to be transmitted. If the parameter has the form name0:name1, the file stored on the server as \code{name0.name1} is fetched and stored locally as \code{name1}. Hence, \code{name0} serves as a prefix of the file name on the server station.
+
+Thereafter, the request parameters are concatenated in the local buffer variable \code{buf}. They are the user's name and password followed by the file name. (User name and password remain unused by the server presented here). The command package is dispatched by the call \code{Send(SND, k, buf)}, where \code{k} denotes the length of the command parameter string. Then the reply packet is awaited by calling \code{ReceiveHead}. If the received packet's type is \code{DAT} with sequence number 0, a new file is established. Procedure ReadData receives the data and stores them in the new file, obeying the protocol defined in Section 10.2. This process is repeated for each file specified in the list of file names in the command line.
+
+Procedure \code{ReceiveHead(T)} receives packets and discards them until one arrives from the partner from which it is expected. The procedure represents an input filter in addition to the one provided by
+
 % \beginchapter CHAPTER 11: A DEDICATED FILE-DISTRIBUTION AND MAIL SERVER.
 % \beginsubsection 11.1 CONCEPT AND STRUCTURE.
 % \beginsubsection 11.2. ELECTRONIC MAIL SERVICE.
