@@ -171,7 +171,7 @@ led to the decision to start from a clean slate also in the domain of
 language design, and to apply the same principle to it: concentrate on
 the essential, purge the rest. The new language, which still bears
 much resemblance to Modula-2, was given the same name as the system:
-Oberon\footnote{$_1$}{N. Wirth. The programming language Oberon. Software - Practice and Experience 18, 7, (July 1988) 671-690.}\footnote{$_2$}{M. Reiser and N. Wirth. Programming in Oberon - Steps beyond Pascal and Modula. Addison- Wesley, 1992.}
+Oberon\footnote{{\mc[1]}}{N. Wirth. The programming language Oberon. Software - Practice and Experience 18, 7, (July 1988) 671-690.}\footnote{{\mc[2]}}{M. Reiser and N. Wirth. Programming in Oberon - Steps beyond Pascal and Modula. Addison- Wesley, 1992.}
 In contrast to its ancestor it is terser and, above
 all, a significant step towards expressing programs on a high level of
 abstraction without reference to machine-specific features.
@@ -193,10 +193,10 @@ target computer Ceres, together with the operability of the text
 editing facility, the umbilical cord to Lilith could be cut off. The
 Oberon System had become real, at least its draft version. This
 happened around the middle of 1987; its description was published
-thereafter\footnote{$_3$}{N. Wirth and J. Gutknecht. The Oberon System. Software - Practice and Experience, 19, 9 (Sept. 1989), 857-893.}, and a manual and guide followed in 1991\footnote{$_5$}{M. Reiser. The Oberon System - User Guide and Programmer's Manual. Addison-Wesley, 1991.}.
+thereafter\footnote{{\mc[3]}}{N. Wirth and J. Gutknecht. The Oberon System. Software - Practice and Experience, 19, 9 (Sept. 1989), 857-893.}, and a manual and guide followed in 1991\footnote{{\mc[5]}}{M. Reiser. The Oberon System - User Guide and Programmer's Manual. Addison-Wesley, 1991.}.
 
 The system's completion took another year and concentrated on
-connecting the workstations in a network for file transfer\footnote{$_4$}{N. Wirth. Ceres-Net: A low-cost computer network. Software - Practice and Experience, 20, 1 (Jan. 1990), 13-24.}, on a
+connecting the workstations in a network for file transfer\footnote{{\mc[4]}}{N. Wirth. Ceres-Net: A low-cost computer network. Software - Practice and Experience, 20, 1 (Jan. 1990), 13-24.}, on a
 central printing facility, and on maintenance tools. The goal of
 completing the system within three years had been met. The system was
 introduced in the middle of 1988 to a wider user community, and work
@@ -878,7 +878,7 @@ overall performance due to the absence of frequent task switching.
 
 Chapter 12 describes the Oberon compiler. It translates source text in
 Oberon into target code, i.e. instruction sequences of some target
-computer. Its principles and techniques are explained in [6]. Both,
+computer. Its principles and techniques are explained in \footnote{{\mc[6]}}{N. Wirth. Compiler Construction. Addison-Wesley, Reading, 1996. ISBN 0-201-40353-6}. Both,
 source language and target architecture must be understood before
 studying a compiler. Both source language and the target computer's
 \acro{RISC} architecture are presented in the Appendix.
@@ -968,20 +968,6 @@ simplicity. The processor circuit is described in the language
 Chapter 17 describes the environment in which the processor is
 embedded. This environment consists of the interfaces to main memory
 and to all external devices.
-
-References
-
-1. N. Wirth. The programming language Oberon. Software - Practice and Experience 18, 7, (July 1988) 671-690.
-
-2. M. Reiser and N. Wirth. Programming in Oberon - Steps beyond Pascal and Modula. Addison- Wesley, 1992. ISBN 0-201-56543-9
-
-3. N. Wirth and J. Gutknecht. The Oberon System. Software - Practice and Experience, 19, 9 (Sept. 1989), 857-893.
-
-4. N. Wirth. Ceres-Net: A low-cost computer network. Software - Practice and Experience, 20, 1 (Jan. 1990), 13-24.
-
-5. M. Reiser. The Oberon System - User Guide and Programmer's Manual. Addison-Wesley, 1991. ISBN 0-201-54422-9
-
-6. N. Wirth. Compiler Construction. Addison-Wesley, Reading, 1996. ISBN 0-201-40353-6
 
 \beginchapter CHAPTER 3: THE TASKING SYSTEM.
 
@@ -1569,7 +1555,7 @@ extensibility. % definintion; janus-faced: having two sharply contrasting aspect
 In the early seventies, Xerox \acro{PARC} in California launched the
 Smalltalk-project with the goal of conceiving and developing new and
 more natural ways to communicate with personal computers
-\footnote{{\mc[Goldberg]}}{A. Goldberg, Smalltalk-80: The Interactive Programming Environment, Addison-Wesley 1984.}. Perhaps the most conspicuous among several significant
+\footnote{{\mc[1]}}{A. Goldberg, Smalltalk-80: The Interactive Programming Environment, Addison-Wesley 1984.}. Perhaps the most conspicuous among several significant
 achievements of this endeavor is the idea of applying the desktop
 metaphor to the display screen. This metaphor comprises a desktop and
 a collection of possibly mutually overlapping pages of paper that are
@@ -1599,19 +1585,19 @@ newly opened viewers.
 
 Experience has shown that partial overlapping is desirable and
 beneficial in rare cases only, and so the additional complexity of its
-management \footnote1{C. Binding, User Interface Components based on a Multiple Window Package, University of Washington, Seattle, Technical Report 85-08-07.}
-\footnote2{M. Wille, Overview: Entwurf und Realisierung eines Fenstersystems für Arbeitsplatzrechner, Diss. ETH Nr. 8771, 1988.}
+management \footnote{{\mc[1]}}{C. Binding, User Interface Components based on a Multiple Window Package, University of Washington, Seattle, Technical Report 85-08-07.}
+\footnote{{\mc[2]}}{M. Wille, Overview: Entwurf und Realisierung eines Fenstersystems für Arbeitsplatzrechner, Diss. ETH Nr. 8771, 1988.}
 is hard to justify. Therefore, alternate
 strategies to structure a display screen have been looked for. An
 interesting class of established solutions can be titled as \emph{tiling}.
-There are several variants of tiling \footnote3{[Cohen] E.S. Cohen, E.T. Smith, L.A. Iverson, Constraint-Based Tiled Windows, IEEE, 1985}. Perhaps the
+There are several variants of tiling \footnote{{\mc[3]}}{E.S. Cohen, E.T. Smith, L.A. Iverson, Constraint-Based Tiled Windows, IEEE, 1985}. Perhaps the
 most obvious one (because the most unconstrained one) is based on
 iterated horizontal or vertical splitting of existing
 viewers. Starting with the full screen and successively opening
 viewers A, B, C, D, E, and F we get to a configuration as in Figure
 4.2.
 
-TODO: Figure 4.2 Viewer configuration resulting from unconstrained tiling
+\figure{pdfs/fig-4.2.png}{2.7in}{4.2}{Viewer configuration resulting from unconstrained tiling}
 
 A second variant is hierarchic tiling. Again, the hierarchy starts
 with a full screen that is now decomposed into a number of vertical
@@ -1626,8 +1612,8 @@ exists. For example, the freed area can be shared between viewers C
 and D by making them extend to their left. Clearly, no such
 complicated situations can occur in the case of hierarchic tiling.
 
-Hierarchic tiling is also used in Xerox PARC's Cedar system
-\footnote4{[Teitelman] W. Teitelman, "A tour through Cedar", IEEE Software, 1, (2), 44-73 (1984).
+Hierarchic tiling is also used in Xerox \acro{PARC}'s Cedar system
+\footnote{{\mc [4]}}{W. Teitelman, "A tour through Cedar", IEEE Software, 1, (2), 44-73 (1984).
 }. However, the Oberon variant differs from the Cedar
 variant in some respects. Firstly, Oberon supports quick temporary
 context switching by overlaying one track or any contiguous sequence
@@ -1648,7 +1634,7 @@ the largest existing viewer in a given track into two halves of equal
 size. As an advantage of this latter allocation strategy we note that
 existing contents are kept stable.
 
-TODO: Figure 4.3 Overlay of tracks and sequences of tracks
+\figure{pdfs/fig-4.3.png}{4.7in}{4.3}{Overlay of tracks and sequences of tracks}
 
 \beginsubsection 4.2. VIEWERS AS OBJECTS.
 
@@ -2468,7 +2454,7 @@ assumed tacitly that the numbers of colors per pixel in the source
 block and in the destination area are identical. It is perhaps
 informative to know that \code{CopyBlock\/} is essentially equivalent with the
 famous \code{BitBlt\/} (bit block transfer) in the SmallTalk project
-\footnote1{[Goldberg] A. Goldberg, Smalltalk-80: The Interactive Programming Environment, Addison-Wesley 1984.}. In Oberon, \code{CopyBlock\/} is used primarily for scrolling
+\footnote{{\mc[1]}}{A. Goldberg, Smalltalk-80: The Interactive Programming Environment, Addison-Wesley 1984.}. In Oberon, \code{CopyBlock\/} is used primarily for scrolling
 contents within a viewer.
 
 The remaining raster operations use a constant pattern. Patterns are
