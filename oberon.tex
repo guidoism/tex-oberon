@@ -5133,8 +5133,31 @@ The part corresponding to \code{ReceiveFiles} within procedure \code{Serve} is g
 
 Procedure \code{SendFiles} is designed analogously; its counterpart in the server is guarded by the condition \code{head1.typ} \equiv \code{ REC}. The server accepts the request only if its state is unprotected (global variable \code{protected}). Otherwise the request is negatively acknowledged with an \code{NPR} packet. We draw attention to the fact that procedures \code{SendData} and \code{ReceiveData} are both used by command procedures as well as by the server.
 
-% \beginchapter CHAPTER 11: A DEDICATED FILE-DISTRIBUTION AND MAIL SERVER.
-% \beginsubsection 11.1 CONCEPT AND STRUCTURE.
+\beginchapter CHAPTER 11: A DEDICATED FILE-DISTRIBUTION AND MAIL SERVER.
+
+\beginsubsection 11.1. CONCEPT AND STRUCTURE.
+
+In a system of loosely coupled workstations it is desirable to centralize certain services. A first example is a common file store. Even if every station is equipped with a disk for permanent data storage, a common file service is beneficial, e.g. for storing the most recent versions of system files, reference documents, reports, etc. A common repository avoids inconsistencies which are inevitable when local copies are created. We call this a file distribution service.
+
+A centralized service is also desirable if it requires equipment whose cost and service would not warrant its acquisition for every workstation, particularly if the service is infrequently used. A prime example of this case is a printing service.
+
+The third case is a communication facility in the form of electronic mail. The repository of messages must inherently be centralized. We imagine it to have the form of a set of mailboxes, one for each user in the system. A mailbox needs to be accessible at all times, i.e. also when its owner's workstation has been switched off.
+
+A last example of a centralized service is a time server. It allows a station's real time clock to be synchronized with a central clock.
+
+In passing we point out that every user has full control over his station, including the right to switch it on and off at any time. In contrast, the central server is continuously operational.
+
+In this chapter, we present a set of server modules providing all above mentioned services. They rest on the basic Oberon System without module \code{Net} (see Chapter 10). In contrast to \code{Net}, module \code{NetServer}, which handles all network communication, contains no command procedures (apart from those for starting and stopping it). This is because it never acts as a master. The counterparts of its server routines reside in other modules, including (an extended version of) \code{Net}, on the individual workstations.
+
+Routines for the file distribution service are the same as those contained in module \code{Net}, with the addition of permission checks based on the received user names and passwords. Routines for printing and mail service could in principle also be included in \code{NetServer} in the same way. But considerations of reliability and timing made this simple solution appear as unattractive. A weaker coupling in time of data transmission and data consumption is indeed highly desirable. Therefore, data received for printing or for dispatching into mailboxes are stored (by \code{NetServer}) into temporary files and thereafter ``handed over'' to the appropriate agent, i.e. the print server or the mail server.
+
+This data-centered interface between servers---in contrast to procedural inter\-faces---has the advantage that the individual servers are independent in the sense that none imports any other. Therefore, their development could proceed autonomously. Their connection is instead a module which defines a data structure and associated operators for passing temporary files from one server to another. The data structure used for this purpose is the first-in-first-out queue. We call its elements tasks, because each one carries an objective and an object, the file to be processed. The module containing the \acro{FIFO}s is called \code{Core}. The resulting structure of the involved modules is shown in Fig. 11.1.
+
+Fig. 11.1. includes yet another server, \code{LineServer}, and shows the ease with which additional servers may be inserted in this scheme. They act as further sources and/or sinks for tasks, feeding or consuming the queues contained in \code{Core}. \code{LineServer} indeed produces and consumes tasks like \code{NetServer}. Instead of the \acro{RS}-485 bus, it handles the \acro{RS}-232 line which, connected to a modem, allows access to the server over telephone lines. We refrain from describing this module in further detail, because in many ways it is a mirror of \code{NetServer}.
+
+A centralized, open server calls for certain protection measures against unauthorized use. We recall that requests always carry a user identification and a password as parameters. The server checks their validity by examining a table of users. The respective routines and the table are contained in module \code{Core} (see Sect. 11.5).
+
+
 % \beginsubsection 11.2. ELECTRONIC MAIL SERVICE.
 % \beginsubsection 11.3. PRINTING SERVICE.
 % \beginsubsection 11.4. MISCELLANEOUS SERVICES.
