@@ -5360,6 +5360,69 @@ TODO: Figure 12.1 Compiler's module structure
 
 \beginsubsection 12.2. CODE PATTERNS.
 
+Before it is possible to understand how code is generated, one needs to know which code is generated. In other words, we need to know the goal before we find the way leading to the goal. A fairly concise description of this goal is possible due to the structure of the language. As explained before, semantics are attached to each individual syntactic construct, independent of its context. Therefore, it suffices to list the expected code---instead of an abstract semantic rule---for each syntactic construct.
+
+As a prerequisite to understanding the resulting instructions and in particular their parameters, we need to know where declared variables are stored, i.e. which are their addresses. This compiler uses the straight-forward scheme of sequential allocation of consecutively declared variables. An address is a pair consisting of a base address (in a register) and an offset. Global variables are allocated in the module's data section and the respective base address register is \code{SB} (Static Base, see Chapter 6). Local variables are allocated in a procedure activation record on the stack; the respective base register is \code{SP} (Stack Pointer). Offsets are positive integers.
+
+The amount of storage needed for a variable (called its size) is determined by the variable's type. The sizes of basic types are prescribed by the target computer's data representation. The following holds for the \acro{RISC} processor:
+
+TODO: table
+Type
+BYTE, CHAR, BOOLEAN
+INTEGER, REAL, SET, POINTER, PROCEDURE
+No. of bytes
+1 4
+
+\noindent The size of an array is the size of the element type multiplied by the number of elements. The size of a record is the sum of the sizes of its fields.
+
+A complication arises due to so-called alignment. By alignment is meant the adjustment of an address to a multiple of the variable's size. Alignment is performed for variable addresses as well as for record field offsets. The motivation for alignment is the avoidance of double memory references for variables being ``distributed'' over two adjacent words. Proper alignment enhances processing speed quite significantly. Variable allocation using alignment is shown by the example in Fig. 12.2.
+\begintt
+VAR b0: BYTE; int0: INTEGER; b1: BYTE; int1: INTEGER;
+\endtt
+
+TODO: Figure 12.2. Alignment of variables
+
+\noindent We note in passing that a reordering of the four variables lessens the number of unused bytes, as shown in Fig. 12.3.
+\begintt
+VAR int0, int1: INTEGER; b0, b1: BYTE;
+\endtt
+
+TODO: Figure 12.3. Improved order of variables
+
+Memory instructions compute the address as the sum of a register (base) and an offset constant. Local variables use the stack pointer \code{SP} (\code{R14}) as base, global variables the static base \code{SB} (\code{R13}) Every module has its own \code{SB} value, and therefore access to global (and imported) variables requires two instructions, one for fetching the base value, and one for loading or storing data. If the compiler can determine, whether the correct base value has already been loaded into the \code{SB} register, the former instruction is omitted.
+
+The first 7 sample patterns contain global variables only, and their base \code{SB} is assumed to hold the appropriate value. Parameters of branch instructions denote jump distances from the instruction's own location (\code{PC}-relative).
+
+{\bf Pattern 1:} \emph{Assignment of constants}. We begin with a simple example of assigning constants to variables. The variables used in this example are global; their base register is \code{SB}. Each assignment results in a single instruction. The constant is embedded within the instruction as a literal operand.
+\begintt
+MODULE Pattern1;
+  VAR ch: CHAR;                 0
+    k: INTEGER;                 4
+    x: REAL;                    8
+    s: SET;                     12
+BEGIN                                     module entry code
+  ch := "0";                    40000030  MOV  R0 R0 30H
+                                B0D00000  STR  R0 SB 0
+  k := 10;                      4000000A  MOV  R0 R0 10
+                                A0D00004  STR  R0 SB 4
+  x := 1.0;                     60003F80  MOV' R0 R0 3F800000H
+                                A0D00008  STR  R0 SB 8
+  s := {0, 4, 8}                40000111  MOV  R0 R0 111H
+                                A0D0000C  STR  R0 SB 12
+END Pattern1.                             module exit code
+\endtt
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 % \beginsubsection 12.3. INTERNAL DATA STRUCTURES AND MODULE INTERFACES.
@@ -5431,5 +5494,7 @@ TODO: Figure 12.1 Compiler's module structure
 % \beginsubsubsection 17.2.3. The RS-232 interface.
 % \beginsubsubsection 17.2.4. The display controller.
 % \beginsubsubsection 17.2.5. The Mouse interface.
+
+% \input src
 
 \bye
