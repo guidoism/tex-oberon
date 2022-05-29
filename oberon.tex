@@ -5412,6 +5412,9 @@ BEGIN                                     module entry code
 END Pattern1.                             module exit code
 \endtt
 
+Pattern 2: Simple expressions: The result of an expression containing operators is always stored in a register before it is assigned to a variable or used in another operation.
+
+Registers for intermediate results are allocated sequentially in ascending order $R0, R1, ... , R11$. Integer multiplication and division by powers of 2 are represented by shifts (\code{LSL}, \code{ASR}). Similarly, the modulus by a power of 2 is obtained by masking off leading bits. The operations of set union, difference, and intersection are represented by logical operations (\code{OR}, \code{AND}).
 
 
 
