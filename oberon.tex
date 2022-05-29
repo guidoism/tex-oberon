@@ -5515,6 +5515,33 @@ END Pattern3.
 \endtt
 
 \noindent \pattern{4} Record fields and pointers: Fields of records are accessed by computing the sum of the record's (base) address and the field's offset. If the record variable is statically declared, the sum is computed by the compiler.
+\begintt
+MODULE Pattern4;
+  TYPE Ptr = POINTER TO Node;
+    Node = RECORD num: INTEGER;  0
+      name: ARRAY 8 OF CHAR;     4
+      next: Ptr                  12
+    END ;                        
+  VAR p, q: Ptr;                 12, 16
+    r: Node;                     20
+BEGIN    
+  r.num := 10;                   MOV R0 R0 10
+                                 STR R0 SB 20
+  p.num := 6                     LDR R0 SB 12 (p)
+                                 MOV R1 R0 6
+                                 STR R1 R0 0
+  p.name[7] := "0";              LDR R0 SB 12
+                                 MOV R1 R0 30H
+                                 STR R1 R0 11 (4+7)
+  p.next := q;                   LDR R0 SB 12
+                                 LDR R1 SB 16
+                                 STR R1 R0 12
+  p.next.next := NIL             LDR R0 SB 12 (p)
+                                 LDR R0 R0 12 (p.next)
+                                 MOV R1 R0 0  (NIL)
+                                 STR R1 R0 12 (p.next.next)
+END Pattern4.
+\endtt
 
 
 
