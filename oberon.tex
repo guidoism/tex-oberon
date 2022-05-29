@@ -5413,7 +5413,7 @@ BEGIN                                     module entry code
 END Pattern1.                             module exit code
 \endtt
 
-\noindent \pattern{2} Simple expressions: The result of an expression containing operators is always stored in a register before it is assigned to a variable or used in another operation.
+\noindent \pattern{2} \emph{Simple expressions}: The result of an expression containing operators is always stored in a register before it is assigned to a variable or used in another operation.
 
 Registers for intermediate results are allocated sequentially in ascending order $R0, R1, ... , R11$. Integer multiplication and division by powers of 2 are represented by shifts (\code{LSL}, \code{ASR}). Similarly, the modulus by a power of 2 is obtained by masking off leading bits. The operations of set union, difference, and intersection are represented by logical operations (\code{OR}, \code{AND}).
 \begintt
@@ -5457,11 +5457,64 @@ BEGIN
 END Pattern2.
 \endtt
 
+\noindent \pattern{3} \emph{Indexed variables}: References to elements of arrays make use of the possibility to add an index value to an offset. The index must be present in a register and be multiplied by the size of the array elements. (For integers with size 4 this is done by a shift of 2 bits). Then this index is checked whether it lies within the bounds specified in the array's declaration. This is achieved by a comparison, actually a subtraction, and a subsequent branch instruction causing a trap, if the index is either negative or beyond the upper bound.
 
+If the reference is to an element of a multi-dimensional array (matrix), its address computation involves several multiplications and additions. The address of an element $A[ik-1, ... , i1, i0]$ of a $k$-dimensional array $A$ with lengths $nk-1, ... , n1, n0$ is
 
+$$adr(A)+((...((ik-1 *nk-2)+ik-2)*nk-3 +...)*n1 +i1)*n0 +i0$$
 
+Note that for index checks \code{CMP} is written instead of \code{SUB} to mark that the subtraction is merely a comparison, that the result remains unused and only the condition flag registers hold the result.
+\begintt
+MODULE Pattern3;
+  VAR i, j, k, n: INTEGER;           0, 4, 8, 12
+    a: ARRAY 10 OF INTEGER;          16
+    x: ARRAY 10, 10 OF INTEGER;      56
+    y: ARRAY 10, 10, 10 OF INTEGER;  456
+BEGIN
+  k := a[i];                         LDR  R0 SB 0
+                                     CMP  R1 R0 10
+                                     BLHI R12
+                                     LSL  R0 R0 2
+                                     ADD  R0 SB R0
+                                     LDR  R0 R0 16
+                                     STR  R0 SB 8
+  n := a[5];                         LDR  R0 SB 36
+                                     STR  R0 SB 12
+  x[i, j] := 2;                      LDR  R0 SB 0
+                                     CMP  R1 R0 10
+                                     BLHI R12
+                                     MUL  R0 R0 40
+                                     ADD  R0 SB R0
+                                     LDR  R1 SB 4
+                                     CMP  R2 R1 10
+                                     BLHI R12
+                                     LSL  R1 R1 2
+                                     ADD  R0 R0 R1
+                                     MOV  R1 R0 2
+                                     STR  R1 R0 56
+  y[i,j,k]:=3;                       LDR  R0 SB 0
+                                     CMP  R1 R0 10
+                                     BLHI R12
+                                     MUL  R0 R0 400
+                                     ADD  R0 SB R0
+                                     LDR  R1SB 4
+                                     CMP  R2 R1 10
+                                     BLHI R12
+                                     MUL  R1 R1 40
+                                     ADD  R0 R0 R1
+                                     LDR  R1 SB 8
+                                     CMP  R2 R1 10
+                                     BLHI R12
+                                     LSL  R1 R1 2
+                                     ADD  R0 R0 R1
+                                     MOV  R1 R0 3
+                                     STR  R1 R0 456
+  y[3, 4, 5] := 6                    MOV  R0 R0 6
+                                     STR  R0 SB 1836
+END Pattern3.
+\endtt
 
-
+\noindent \pattern{4} Record fields and pointers: Fields of records are accessed by computing the sum of the record's (base) address and the field's offset. If the record variable is statically declared, the sum is computed by the compiler.
 
 
 
