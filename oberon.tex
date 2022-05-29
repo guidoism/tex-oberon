@@ -5330,9 +5330,38 @@ We have resisted the temptation to introduce additional complexity. Instead, we 
 
 \beginsubsection 12.1. INTRODUCTION.
 
+The compiler is the primary tool of the system builder. It therefore plays a prominent role in the Oberon System, although it is not part of the basic system. Instead, it constitutes a tool module---an application---with a single command: \code{Compile}. It translates program texts into machine code. Therefore, it is as a program inherently machine-dependent; it acts as the interface between source language and target computer.
+
+In order to understand the process of compilation, the reader needs to be familiar with the source language Oberon defined in Appendix 1, and with the target computer \acro{RISC}, defined in Appendix 2.
+
+The language is defined as an infinite set of sequences of symbols taken from the language's vocabulary. It is described by a set of equations called syntax. Each equation defines a syntactic construct, or more precisely, the set of sequences of symbols belonging to that construct. It specifies how that construct is composed of other syntactic constructs. The meaning of programs is defined in terms of semantic rules governing each such construct.
+
+Compilation of a program text proceeds by analyzing the text and thereby decomposing it recursively into its constructs according to the syntax. When a construct is identified, code is generated according to the semantic rule associated with the construct. The components of the identified construct supply parameters for the generated code.
+
+It follows that we distinguish between two kinds of actions: analyzing steps and code generating steps. In a rough approximation we may say that the former are source language dependent and target computer independent, whereas the latter are source language independent and target computer dependent. Although reality is somewhat more complex, the module structure of this compiler clearly reflects this division. The main module of the compiler is \code{ORP} (for Oberon to \acro{RISC} Parser) It is primarily dedicated to syntactic analysis, parsing. Upon recognition of a syntactic construct, an appropriate procedure is called the code generator module \code{ORG} (for Oberon to \acro{RISC} Generator). Apart from parsing, \code{ORP} checks for type consistency of operands, and it computes the attributes of objects identified in declarations.
+
+Whereas \code{ORP} mirrors the source language and is independent of a target computer, \code{ORG} reflects the target computer, but is independent of the source language.
+
+Oberon program texts are regarded as sequences of symbols rather than sequences of characters. Symbols themselves, however, are sequences of characters. We refrain from explaining the reasons for this distinction, but mention that apart from special characters and pairs such as \code{+}, \code{\&}, \code{<=}, also identifiers, numbers, and strings are classified as symbols. Furthermore, certain capital letter sequences are symbols, such as \code{IF}, \code{END}, etc. Each time the syntax analyzer (parser) proceeds to read the next symbol, it does this by calling procedure \code{Get}, which constitutes the so-called scanner residing in module \code{ORS} (for Oberon to \acro{RISC} Scanner). It reads from the source text as many characters as are needed to recognize the next symbol.
+
+In passing we note that the scanner alone reflects the definition of symbols in terms of characters, whereas the parser is based on the notion of symbols only. The scanner implements the abstraction of symbols. The recognition of symbols within a character sequence is called lexical analysis.
+
+Ideally the recognition of any syntactic construct, say A, consisting of subconstructs, say B1, B2, ... , Bn, leads to the generation of code that depends only on (1) the semantic rules associated with A, and (2) on (attributes of) B1, B2, ... , Bn. If this condition is satisfied, the construct is said to be context-free, and if all constructs of a language are context-free, then also the language is context-free. Syntax and semantics of Oberon adhere to this rule, although with a significant exception. This exception is embodied by the notion of declarations. The declaration of an identifier, say \code{x}, attaches permanent properties to \code{x}, such as the fact that \code{x} denotes a variable and that its type is \code{T}. These properties are ``invisible'' when parsing a statement containing \code{x}, because the declaration of \code{x} is not also part of the statement. The ``meaning'' of identifiers is thus inherently context-dependent.
+
+Context-dependence due to declarations is the immediate reason for the use of a global data structure which represents the declared identifiers and their properties (attributes). Since this concept stems from early assemblers where identifiers (then called symbols) were registered in a linear table, the term symbol table tends to persist for this structure, although in this compiler it is considerably more complex than an array. Basically, it grows during the processing of declarations, and it is searched while expressions and statements are processed. Procedures for building and for searching are contained in module ORB.
+
+A complication arises from the notion of exports and imports in Oberon. Its consequence is that the declaration of an identifier \code{x} may be in a module, say \code{M}, different from where \code{x} is referenced. If \code{x} is exported, the compiler includes \code{x} together with its attributes in the symbol file of the compiled module \code{M}. When compiling another module which imports \code{M}, that symbol file is read and its data are incorporated into the symbol table. Procedures for reading and writing symbol files are contained in module \code{ORB}, and no other module relies on information about the structure of symbol files.
+
+The syntax is precisely and rigorously defined by a small set of syntactic equations. As a result, the parser is a reasonably perspicuous and short program. In spite of the high degree of regularity of the target computer, the process of code generation is more complicated, as shown by module \code{ORG}.
+
+The resulting module structure of the compiler is shown in Fig. 12.1 in a slightly simplified manner. In reality \code{OCS} is imported by all other modules due to their need for procedure \code{OCS.Mark}. This, however, will be explained later.
+
+TODO: Figure 12.1 Compiler's module structure
+
+\beginsubsection 12.2. CODE PATTERNS.
 
 
-% \beginsubsection 12.2. CODE PATTERNS.
+
 % \beginsubsection 12.3. INTERNAL DATA STRUCTURES AND MODULE INTERFACES.
 % \beginsubsubsection 12.3.1. Data structures.
 % \beginsubsubsection 12.3.2. Module interfaces.
