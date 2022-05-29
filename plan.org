@@ -16,9 +16,9 @@
 - [X] Proofread until 3.4. TOOLBOXES.
 - [X] Proofread until 4.1. THE SCREEN LAYOUT MODEL.
 - [X] Proofread until 4.2. VIEWERS AS OBJECTS.
-- [ ] Proofread until 4.3. FRAMES AS BASIC DISPLAY ENTITIES.
+- [X] Proofread until 4.3. FRAMES AS BASIC DISPLAY ENTITIES.
 - [ ] Proofread until 4.4. DISPLAY MANAGEMENT.
-- [ ] Proofread until 4.4.1. Viewers.
+- [X] Proofread until 4.4.1. Viewers.
 - [ ] Proofread until 4.4.2. Menu Viewers.
 - [ ] Proofread until 4.4.3. Cursor Management.
 - [ ] Proofread until 4.5. RASTER OPERATIONS.

@@ -1713,16 +1713,7 @@ Here is a preliminary overview of some archetypal kinds of message:
 
 \beginsubsection 4.3. FRAMES AS BASIC DISPLAY ENTITIES.
 
-When we introduced viewers in Chapter 3 and in the previous section,
-we simplified with the aim of abstraction. We know already that
-viewers appear as elements of second order in the tiling
-hierarchy. Having treated them as black boxes so far we have not
-revealed anything about the continuation of the hierarchy. As a matter
-of fact, viewers are neither elementary display entities nor
-atoms. They are just a special case of so-called \emph{display frames}. Display frames or frames in short are arbitrary rectangles
-displaying a collection of objects or an excerpt of a document. In
-particular, frames may recursively contain other frames, a capability
-that makes them an extremely powerful tool for any display organizer.
+When we introduced viewers in Chapter 3 and in the previous section, we simplified with the aim of abstraction. We know already that viewers appear as elements of second order in the tiling hierarchy. Having treated them as black boxes so far we have not revealed anything about the continuation of the hierarchy. As a matter of fact, viewers are neither elementary display entities nor atoms. They are just a special case of so-called \emph{display frames}. Display frames or frames in short are arbitrary rectangles displaying a collection of objects or an excerpt of a document. In particular, frames may recursively contain other frames, a capability that makes them an extremely powerful tool for any display organizer.
 
 The type \code{Frame\/} is declared as
 \begintt
@@ -1734,18 +1725,12 @@ FrameDesc = RECORD
 END;
 \endtt
 
-\noindent The components \code{next\/} and \code{dsc\/} are connections to further frames. Their
-names suggest a multi-level recursive hierarchical structure: \code{next\/}
-points to the next frame on the same level, while \code{dsc\/} points to the
-(first) descendant, i.e. to the next lower level of the hierarchy of
-nested frames. \code{X\/}, \code{Y\/}, \code{W\/}, \code{H\/}, and the handler handle serve the original
-purpose to that we introduced them. In particular, the handler allows
-frames to react individually on the receipt of messages. Its type is
+\noindent The components \code{next\/} and \code{dsc\/} are connections to further frames. Their names suggest a multi-level recursive hierarchical structure: \code{next\/} points to the next frame on the same level, while \code{dsc\/} points to the (first) descendant, i.e. to the next lower level of the hierarchy of nested frames. \code{X\/}, \code{Y\/}, \code{W\/}, \code{H\/}, and the handler handle serve the original purpose to that we introduced them. In particular, the handler allows frames to react individually on the receipt of messages. Its type is
 \begintt
 Handler = PROCEDURE (F: Frame; VAR M: FrameMsg);
 \endtt
 
-\noindent where FrameMsg represents the root of a potentially unlimited tree hierarchy of possible messages to frames:
+\noindent where \code{FrameMsg} represents the root of a potentially unlimited tree hierarchy of possible messages to frames:
 \begintt
 FrameMsg = RECORD END;
 \endtt
@@ -1777,7 +1762,7 @@ screen. A menu viewer consists of a thin rectangular boundary line and
 an interior area being vertically decomposed into a menu region at the
 top and a contents region at the bottom (see Figure 4.4).
 
-TODO: Figure 4.4 The compositional structure of a menu viewer
+\figure{pdfs/fig-4.4.png}{4.7in}{4.4}{The compositional structure of a menu viewer}
 
 In terms of data structures, the class of menu viewers is defined as a
 type extension of \code{Viewer\/} with an additional component \code{menuH\/}
@@ -1824,31 +1809,20 @@ routines.
 The following is an overview of the subsystem viewer
 management. Modules on upper lines import modules on lower lines and
 types on upper lines extend types on lower lines.
+\medskip
+\halign{#\hfil\quad&#\hfil\quad&#\hfil\cr
+Module&Type&Service\cr
+\noalign{\smallskip\hrule}\cr
+MenuViewer & Viewer & Message handling for menu viewers \cr
+Viewers    & Viewer & Tiling viewer management          \cr
+Display    & Frame  & Block-oriented raster operations  \cr
+}
+\medskip
+Inspecting the column titled \emph{Type} we recognize precisely our familiar types \code{Frame\/}, \code{Viewer\/}, and \code{MenuViewer\/} respectively, where the latter is an abbreviation of \code{MenuViewers.Viewer\/}.
 
-TODO: table
-Module
-MenuViewer Viewers Display
-Type
-Viewer Viewer Frame
-Service
-Message handling for menu viewers Tiling viewer management Block-oriented raster operations
+In addition to the core modules of the display system a section in module \code{Oberon\/} provides a specialized application programming interface (\acro{API}) that simplifies the use of the viewer management package by applications in the case of standard Oberon display configurations. We shall come back to this topic in Section 4.6.
 
-Inspecting the column titled Type we recognize precisely our familiar
-types \code{Frame\/}, \code{Viewer\/}, and \code{MenuViewer\/} respectively, where the latter is
-an abbreviation of \code{MenuViewers.Viewer\/}.
-
-In addition to the core modules of the display system a section in
-module \code{Oberon\/} provides a specialized application programming interface
-(API) that simplifies the use of the viewer management package by
-applications in the case of standard Oberon display configurations. We
-shall come back to this topic in Section 4.6.
-
-For the moment let us concentrate on the core of the viewer management
-and in particular on the modules \code{Viewers\/} and \code{MenuViewers\/}, saving the
-discussion of the module \code{Display\/} for the next section. Typically, we
-start the presentation of a module by listing and commenting its
-definition, and we refer to subsequent listings for its
-implementation.
+For the moment let us concentrate on the core of the viewer management and in particular on the modules \code{Viewers\/} and \code{MenuViewers\/}, saving the discussion of the module \code{Display\/} for the next section. Typically, we start the presentation of a module by listing and commenting its definition, and we refer to subsequent listings for its implementation.
 
 \beginsubsubsection 4.4.1. Viewers.
 
@@ -1897,14 +1871,7 @@ DEFINITION Viewers;
 END Viewers.
 \endtt
 
-\noindent Some comments: A first group of procedures consisting of \code{InitTrack\/}, \code{OpenTrack\/}, and \code{CloseTrack\/} supports the
-track structure of the display area. \code{InitTrack\/} creates a new track of
-width \code{W\/} and height \code{H\/} by partitioning off a vertical strip of width \code{W\/}
-from the display area. In addition, \code{InitTrack\/} initializes the newly
-created track with a filler viewer that is supplied as a
-parameter. The filler viewer essentially serves as background filling
-up the track at its top end. It reduces to height 0 if the track is
-covered completely by productive viewers.
+\noindent Some comments: A first group of procedures consisting of \code{InitTrack}, \code{OpenTrack}, and \code{CloseTrack} supports the track structure of the display area. \code{InitTrack} creates a new track of width \code{W} and height \code{H} by partitioning off a vertical strip of width \code{W} from the display area. In addition, \code{InitTrack} initializes the newly created track with a \emph{filler viewer} that is supplied as a parameter. The filler viewer essentially serves as background filling up the track at its top end. It reduces to height 0 if the track is covered completely by productive viewers.
 
 Configuring the display area is part of system initialization after
 startup. It amounts to executing a sequence of steps of the form
@@ -1940,7 +1907,7 @@ viewer \code{V\/} by moving its upper boundary line to a new location \code{Y\/}
 the limits of its neighbors). Procedure \code{Close\/} removes the given viewer
 \code{V\/} from the display area. Figure 4.5 makes these operations clear.
 
-TODO: Figure 4.5 Basic operations on viewers
+\figure{pdfs/fig-4.5.png}{4.7in}{4.5}{Basic operations on viewers}
 
 The last group of procedures provides miscellaneous
 services. Procedure \code{This\/} identifies the viewer displayed at \code{(X, Y)\/}.
@@ -1973,7 +1940,7 @@ anchors. Additionally, each track points to a (possibly empty) list of
 tracks lying underneath. These frames are invisible on the display,
 and shaded in Figure 4.6.
 
-TODO: Figure 4.6 A snapshot of the internal data structure corresponding to Figure 4.3
+\figure{pdfs/fig-4.6.png}{4in}{4.6}{A snapshot of the internal data structure corresponding to Figure 4.3}
 
 Technically, the track descriptor type \code{TrackDesc\/} is a private
 extension of the viewer descriptor type \code{ViewerDesc\/}. Repeating the
@@ -1995,12 +1962,7 @@ FrameDesc = RECORD
 END;
 \endtt
 
-\noindent It is noteworthy that the data structure of the viewer
-manager is heterogeneous with \code{Frame\/} as base type. It provides
-a nice example of a nested hierarchy of frames with the additional
-property that the first two levels correspond to the first two levels
-in the type hierarchy defined by \code{Track\/}, \code{Viewer\/}, and \code{Frame\/}.
-
+\noindent It is noteworthy that the data structure of the viewer manager is \emph{heterogeneous} with \code{Frame} as base type. It provides a nice example of a nested hierarchy of frames with the additional property that the first two levels correspond to the first two levels in the type hierarchy defined by \code{Track}, \code{Viewer}, and \code{Frame}.
 
 In an object-oriented environment objects are autonomous entities in
 principle. However, they may be bound to some higher instance (other
@@ -2008,51 +1970,41 @@ than the system) temporarily. For example, we can look at the objects
 belonging to a module's private data structure as bound to this
 module. Deciding if an object is currently bound is then a fundamental
 problem. In the case of viewers, this information is contained in an
-extra instance variable called \code{state\/}.
+extra instance variable called \code{state}.
 
-As a system invariant, we have for every viewer \code{V\/}
-
-\code{V\/} is bound to module \code{Viewers\/} \Leftrightarrow \code{V.state} \neq 0
-
+As a system invariant, we have for every viewer \code{V}
+$$\code{V}\ is\ bound\ to\ module\ \code{Viewers} \Longleftrightarrow\ \code{V.state} \neq\ 0$$
 If we call visible any displayed viewer and suspended any viewer that
 is covered by an overlaying track we can refine this invariant to
-
-(\code{V\/} is visible \Leftrightarrow $\code{V.state\/} > 0$) and ( \code{V\/} is suspended \Leftrightarrow $\code{V.state\/} < 0$)
-
-TODO: Clean this math shit up
-
-In addition, more detailed information about the kind of viewer \code{V\/} is given by the magnitude
-TODO: absolute value $\code{V.state\/}$ :
-
-TODO: table
-V.state kind of viewer
-0 closed
-1 filler
--1 productive
-
-The magnitude $ \vert V.state \vert $ is kept invariant by module \code{Viewers\/}. It could
+$$(\code{V}\ is\ visible\ \Longleftrightarrow\ \code{v.state} > 0) \land (\code{V}\ is\ suspended\ \Longleftrightarrow\ \code{v.state} < 0)$$
+In addition, more detailed information about the kind of viewer \code{V} is given by the magnitude
+$\mid\code{V.state}\mid$:
+\medskip
+\halign{#\hfil\quad&#\hfil\quad&#\hfil\cr
+\code{V.state}&Kind of viewer\cr
+\noalign{\smallskip\hrule}\cr
+0  & closed \cr
+1  & filler \cr
+-1 & productive \cr
+}
+\medskip
+The magnitude $\mid\code{V.state}\mid$ is kept invariant by module \code{Viewers}. It could
 be used, for example, to distinguish different levels of importance or
 preference with the aim of supporting a smarter algorithm for
 heuristic allocation of new viewers. The variable state is treated as
 read-only by every module other than \code{Viewers\/}.
 
 We are now sufficiently prepared to understand how the exported
-procedures of module \code{Viewers\/} work behind the scenes. All of them
+procedures of module \code{Viewers} work behind the scenes. All of them
 operate on the internal dynamic data structure just explained. Some
 use the structure as a reference only or operate on individual
-elements (procedures \code{This\/}, \code{Next\/}, \code{Locate\/}, \code{Change\/}), others add new
-elements to the structure (procedures \code{InitTrack\/}, \code{OpenTrack\/}, \code{Open\/}), and
-even others remove elements (procedures \code{CloseTrack\/}, \code{Close\/}). Most
+elements (procedures \code{This}, \code{Next}, \code{Locate}, \code{Change}), others add new
+elements to the structure (procedures \code{InitTrack}, \code{OpenTrack}, \code{Open}), and
+even others remove elements (procedures \code{CloseTrack}, \code{Close}). Most
 procedures have side-effects on the size or state of existing
 elements.
 
-Let us now change perspective and look at module \code{Viewers\/} as a general
-low-level manager of viewers whose exact contents are unknown to it
-(and whose controlling software might have been developed years
-later). In short, let us look at module \code{Viewers\/} as a manager of black
-boxes. Such an abstraction immediately makes it impossible for the
-implementation to call fixed procedures for, say, changing a viewer's
-size or state. The facility needed is a message-oriented interface.
+Let us now change perspective and look at module \code{Viewers} as a general low-level manager of viewers whose exact contents are unknown to it (and whose controlling software might have been developed years later). In short, let us look at module \code{Viewers} as a manager of \emph{black boxes}. Such an abstraction immediately makes it impossible for the implementation to call fixed procedures for, say, changing a viewer's size or state. The facility needed is a message-oriented interface.
 \begintt
 TYPE ViewerMsg = RECORD (Display.FrameMsg)
   id: INTEGER;
@@ -2068,17 +2020,17 @@ additional components of the message inform about the desired new
 location, size, and state.
 
 The following table lists senders, messages, and recipients of viewer messages.
-
-TODO: table
-Originator
-OpenTrack CloseTrack Open Change Close
-Message
-Suspend temporarily Suspend permanently Modify or suspend Modify
-Suspend permanently
-Recipients
-Viewers covered by opening track Viewers in closing track
-Upper neighbor of opening viewer Upper neighbor of changing viewer Closing viewer
-
+\medskip
+\halign{#\hfil\quad&#\hfil\quad&#\hfil\cr
+Originator & Message & Recipients \cr
+\noalign{\smallskip\hrule}\cr
+\code{OpenTrack}  & Suspend temporarily & Viewers covered by opening track \cr
+\code{CloseTrack} & Suspend permanently & Viewers in closing track         \cr
+\code{Open}       & Modify or suspend   & Upper neighbor of opening viewer \cr
+\code{Change}     & Modify              & Upper neighbor of changing viewer\cr
+\code{Close}      & Suspend permanently & Closing viewer                   \cr
+}
+\medskip
 \beginsubsubsection 4.4.2. Menu Viewers.
 
 So far, we have treated viewers abstractly as black boxes. Our next
@@ -2268,7 +2220,7 @@ menu viewers could be implemented effectively by reusing menu viewer's
 standard handler. After having handled all new or differing cases
 first it would simply (super-)call the standard handler subsequently.
 
-TODO: Figure 4.7 The modify frame operation
+\figure{pdfs/fig-4.7.png}{4.7in}{4.7}{The modify frame operation}
 
 \beginsubsubsection 4.4.3. Cursor Management.
 
@@ -2466,7 +2418,7 @@ from bottom to top. Each line takes an integral number of
 bytes. Hence, the number of data bytes is $((w+7) \div 8) \times h$. An
 example is shown in Figure 4.8.
 
-TODO: Figure 4.8 A pattern and its encoding as an array of bytes (in hex)
+\figure{pdfs/fig-4.8.png}{4.7in}{4.8}{A pattern and its encoding as an array of bytes (in hex)}
 
 Some standard patterns are included in module \code{Display\/} and exported as
 global variables. Among them are patterns arrow, hook, and star
@@ -2519,7 +2471,7 @@ black-and-white monitors are allocated to the left of all cells
 hosting color monitors. Figure 4.9 gives an impression of such a
 configuration.
 
-TODO: Figure 4.9 General, regular cell structure of display area
+\figure{pdfs/fig-4.9.png}{4.7in}{4.9}{General, regular cell structure of display area}
 
 Under these restrictions any concrete configuration can be
 parameterized by the variables of the definition above. \code{Unit\/}, \code{Width\/},
