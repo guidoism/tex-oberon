@@ -13,6 +13,7 @@
 }}
 \centerline{\ninepoint{\bf Fig.\ #3}\enspace #4}\medskip
 }
+\def\pattern#1{{\bf Pattern #1:}}
 
 % TODO: Change raw tags to use semantic \code and \emph macros
 
@@ -5393,7 +5394,7 @@ Memory instructions compute the address as the sum of a register (base) and an o
 
 The first 7 sample patterns contain global variables only, and their base \code{SB} is assumed to hold the appropriate value. Parameters of branch instructions denote jump distances from the instruction's own location (\code{PC}-relative).
 
-{\bf Pattern 1:} \emph{Assignment of constants}. We begin with a simple example of assigning constants to variables. The variables used in this example are global; their base register is \code{SB}. Each assignment results in a single instruction. The constant is embedded within the instruction as a literal operand.
+\pattern{1} \emph{Assignment of constants}. We begin with a simple example of assigning constants to variables. The variables used in this example are global; their base register is \code{SB}. Each assignment results in a single instruction. The constant is embedded within the instruction as a literal operand.
 \begintt
 MODULE Pattern1;
   VAR ch: CHAR;                 0
@@ -5412,13 +5413,49 @@ BEGIN                                     module entry code
 END Pattern1.                             module exit code
 \endtt
 
-Pattern 2: Simple expressions: The result of an expression containing operators is always stored in a register before it is assigned to a variable or used in another operation.
+\noindent \pattern{2} Simple expressions: The result of an expression containing operators is always stored in a register before it is assigned to a variable or used in another operation.
 
 Registers for intermediate results are allocated sequentially in ascending order $R0, R1, ... , R11$. Integer multiplication and division by powers of 2 are represented by shifts (\code{LSL}, \code{ASR}). Similarly, the modulus by a power of 2 is obtained by masking off leading bits. The operations of set union, difference, and intersection are represented by logical operations (\code{OR}, \code{AND}).
-
-
-
-
+\begintt
+MODULE Pattern2;
+  VAR i, j, k, n: INTEGER;      0, 4, 8, 12
+    x, y: REAL;                 16, 20
+    s, t, u: SET;               24, 28, 32
+BEGIN
+  i := (i + 1) * (i - 1);       LDR  R0 SB 0
+                                ADD  R0 R0 1
+                                LDR  R1 SB 0
+                                SUB  R1 R1 1
+                                MUL  R0 R0 R1
+                                STR  R0 SB 0
+  k := k DIV 17;                LDR  R0 SB 8
+                                DIV  R0 R0 17
+                                STR  R0 SB 8
+  k := 8*n;                     LDR  R0 SB 12
+                                LSL  R0 R0 3
+                                STR  R0 SB 8
+  k := n DIV 2;                 LDR  R0 SB 12
+                                ASR  R0 R0 1
+                                STR  R0 SB 8
+  k := n MOD 16;                LDR  R0 SB 12
+                                AND  R0 R0 15
+                                STR  r0 SB 8
+  x := -y / (x - 1.0);          LDR  R0 SB 16
+                                MOV' R1 R0 3F80H
+                                FSB  R0 R0 R1
+                                LDR  R1 SB 20
+                                FDV  R0 R1 R0
+                                MOV  R1 R0 0
+                                FSB  R0 R1 R0
+                                STR  R0 SB 16
+  s := s + t * u                LDR  R0 SB 28
+                                LDR  R1 SB 32
+                                AND  R0 R0 R1
+                                LDR  R1 SB 24
+                                OR   R0 R1 R0
+                                STR  R0 SB 24
+END Pattern2.
+\endtt
 
 
 
