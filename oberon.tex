@@ -5157,11 +5157,176 @@ Fig. 11.1. includes yet another server, \code{LineServer}, and shows the ease wi
 
 A centralized, open server calls for certain protection measures against unauthorized use. We recall that requests always carry a user identification and a password as parameters. The server checks their validity by examining a table of users. The respective routines and the table are contained in module \code{Core} (see Sect. 11.5).
 
+TODO: Figure 11.1 Module structure of server systems
 
-% \beginsubsection 11.2. ELECTRONIC MAIL SERVICE.
-% \beginsubsection 11.3. PRINTING SERVICE.
-% \beginsubsection 11.4. MISCELLANEOUS SERVICES.
-% \beginsubsection 11.5. USER ADMINISTRATION.
+\beginsubsection 11.2. ELECTRONIC MAIL SERVICE.
+
+The heart of an e-mail service is the set of mailboxes stored on the dedicated, central server. Each registered user owns a mailbox. The evidently necessary operations are the insertion of a message and its retrieval. In contrast to customary letter boxes, however, a retrieved message need not necessarily be removed from the box; its retrieval produces a copy. The box thereby automatically becomes a repository, and messages can be retrieved many times. This scheme calls for an additional command which removes a message from the box. Also, a command is needed for delivering a table of contents, in which presumably each message is represented by an indication of its sender and time of arrival.
+
+The mail scheme suggested above results in the following commands:
+
+\code{Net.Mailbox ServerName}. This command fetches a table of contents of the current user's mailbox from the specified server and displays it in a new viewer. The user's name and password must have been registered previously by the command System.SetUser.
+
+\code{Net.SendMail ServerName}. The text in the marked viewer is sent to the specified server. In order to be accepted, the text must begin with at least one line beginning with ``\code{To:}'' and containing at least one recipient.
+
+\code{Net.ReceiveMail}. This command is contained in the title bar (menu) of the viewer obtained when requesting the table of contents. Prior to issuing the command, the message to be read must have been specified by selecting a line in the table of contents in this viewer.
+
+\code{Net.DeleteMail}. This command is also contained in the mailbox viewer's title bar. The message to be deleted must be selected before issuing the command.
+
+The mail system presented here is primarily intended to serve as an exchange for short messages which are typically sent, received, read, and discarded. Mailboxes are not intended to serve as long term archives for a large and ever growing number of long pieces of text. This restrictiveness of purpose allows to choose a reasonably simple implementation and results in an efficient, practically instantaneous access to messages when the server is idle.
+
+The Oberon mail server used at \acro{ETH} also provides communication with external correspondents. It connects to an external mail server which is treated as a source and a sink for messages (almost) like other customers. Additionally, messages sent to that server need to be encoded into a standardized format, and those received need to be decoded accordingly. The parts of module MailServer for encoding and decoding are not described in this book. We merely divulge the fact that its design and implementation took a multiple of the time spent on the fast, local message exchange, to which we confine this presentation.
+
+From the structures explained in Section 11.1. it follows that three agents are involved in the transfer of messages from the user into a mailbox. Therefore, additions to the server system distribute over three modules. New commands are added to module \code{Net} (see Section 10.4.); these procedures will be listed below. Their counterparts reside in module \code{NetServer} on the dedicated computer. The third agent is module \code{MailServer}; both are listed below in this Section. The latter handles the insertion of arriving messages into mailboxes. The path which a message traverses for insertion and retrieval is shown in Fig. 11.2. Rectangles with bold edges mark storage.
+
+TODO: Figure 11.2 Path of messages to and from mailbox
+
+Communication between the master station and the dedicated server runs over the network and therefore calls for an extension of its protocol (see Sect. 10.2.). The additions directly correspond to the four commands given above.
+\begintt
+MailBox = MDIR username password (datastream | NAK | NPR).
+SendMail = RML username password (ACK datastream | NAK | NPR).
+ReceiveMail = SML username password msgno (datastream | NAK | NPR).
+DeleteMail = DML username password msgno (ACK | NAK | NPR).
+\endtt
+
+\noindent  The message number is taken from the selected line in the mailbox viewer. The data transmitted are taken as (unformatted) texts. This is in contrast to file transfers, where they are taken as any sequence of bytes. The four command procedures listed below belong in module \code{Net}; they are listed together with the auxiliary procedures \code{SendText} and \code{ReceiveText} which closely correspond to \code{SendData} and \code{ReceiveData} (see Sect. 10.4).
+
+We now turn our attention to the command procedures' counterparts in module NetServer listed in this Section. In order to explain these routines, a description of their interface with the mail server and a definition of the structure of mailboxes must precede. We begin with the simplest case, the counterpart of SendMail. It is the part of procedure \code{NetServer.Serve} which is guarded by the condition \code{typ = RML}, indicating a request to receive mail. As in all other services, the parameters username and password are read and the admissibility of the request is checked. The check is performed by procedure Core.UserNo which yields a negative number if service is to be refused. In the affirmative case, procedure ReceiveData obtains the message and stores it on a file, which is thereafter inserted into the mail queue as a task to be handled by the mail server at a later time. This may involve distribution of the message into several mailboxes.
+
+Module \code{Core} is listed in Sect. 11.5. As mentioned before, it serves as link between the various server modules, defining the data types of the linking queues and also of mailboxes. Task queues are represented as \acro{FIFO}-lists. The descriptor of type Queue contains a pointer to the first list element used for retrieval, and a pointer to the last element used for insertion (see Fig. 11.3). These pointers are not exported; instead, the next task is obtained by calling procedure \code{Core.GetTask}, and it is deleted by \code{Core.RemoveTask}. There exist two exported variables of type \code{Queue}: \code{MailQueue} consumed by \code{MailServer}, and \code{PrintQueue} consumed by \code{PrintServer} (see Sect. 11.3.). (In fact, we use a third queue: \code{LineQueue} consumed by \code{LineServer}). Elements of queues are of type \code{TaskDesc} which specifies the file representing the data to be consumed. Additionally, it specifies the user number and identification of the task's originator. Three procedures are provided by module \code{Core} for handling task queues:
+\begintt
+PROCEDURE InsertTask(VAR q: Queue; F: Files.File; VAR id: ARRAY OF CHAR; uno: INTEGER);
+PROCEDURE GetTask(VAR q: Queue; VAR F: Files.File; VAR id: ARRAY OF CHAR; VAR uno: INTEGER);
+PROCEDURE RemoveTask(VAR q: Queue);
+\endtt
+
+\noindent The server's counterparts of the remaining mail commands access mailboxes directly. The simplicity of the required actions---a result of a carefully chosen mailbox representation---and considerations of efficiency do not warrant a detour via task queue and mail server.
+
+TODO: Figure 11.3 Structure of task queue
+
+Every mailbox is represented as a file. This solution has the tremendous advantage that no special administration has to be introduced to handle a reserved partition of disk store for mail purposes. A mailbox file is partitioned into three parts: the block reservation part, the directory part, and the message part. Each part is quickly locatable, because the first two have a fixed length ($32 and 31 \times 32 = 992 bytes$). The message part is regarded as a sequence of blocks (of 256 bytes), and each message occupies an integral number of adjacent blocks. Corresponding to each block, the block reservation part contains a single bit indicating whether or not the block is occupied by a message. Since the block reservation part is 32 bytes long, the message part contains at most 256 blocks, i.e. 64K bytes. The block length was chosen after an analysis of messages which revealed that the average message is less than 500 bytes long.
+
+The directory part consists of an array of 31 elements of type \code{MailEntry}, a record with the following fields: \code{pos} and \code{len} indicate the index of the message's first block and the message's number of bytes; \code{time} and \code{date} indicate the message's time of insertion, and originator indicates the message's source. The entries are linked (field \code{next}) in chronological order of their arrival, and entry 0 serves as the list's header. It follows that a mailbox contains at most 30 messages. An example of a mailbox state is shown in Fig. 11.4.
+\begintt
+MailEntry =
+MResTab = MailDir =
+RECORD
+pos, next: INTEGER;
+len: LONGINT;
+time, date: INTEGER; originator: ARRAY 20 OF CHAR
+END ;
+ARRAY 8 OF SET; ARRAY 31 OF MailEntry;
+\endtt
+
+\noindent We are now in a position to inspect the handler for requests for message retrieval. It is guarded by the condition \code{typ = SML}. After a validity check, the respective requestor's mailbox file is opened. The last mailbox opened is retained by the global variable \code{MF} which acts as a single entry cache. The associated user number is given by the global variable \code{mailuno}. Since typically several requests involving the same mailbox follow, this measure avoids the repeated reopening of the same file. Thereafter, a rider is directly positioned at the respective directory entry for reading the message's length and position in the message part. The rider is repositioned accordingly, and transmission of the message is handled by procedure \code{SendMail}.
+
+TODO: Figure 11.4 State of mailbox file
+
+Requests for the mailbox directory are handled by the routine guarded by the condition \code{typ = MDIR}. The directory part must be read and converted into a text. This task is supported by various auxiliary procedures (\code{Append}) which concatenate supplied data in a buffer for latter transmission. We emphasize that this request does not require the reading of any other part of the file, and therefore is very swift.
+
+The last of the four mail service requests (\code{DML}) deletes a specified message. Removal from the directory requires a relinking of the entries. Unused entries are marked by their \code{len} field having value 0. Also, the blocks occupied by the message become free. The block reservation part must be updated accordingly.
+
+In passing we note that the use of files for representing mailboxes, in combination with the file distribution services residing on the same server station, allows anyone to access (and inspect) any mailbox. Although we do not claim that this system provides secure protection against snooping, a minimal effort for protection was undertaken by a simple encoding of messages in mailbox files. This encoding is not shown in the program listings contained in this book.
+
+One operation remains to be explained in more detail: the processing of tasks inserted into the mail queue. It consists of the insertion of the message represented by the task's file into one or several mailboxes. It involves the interpretation of the message's header, i.e. lines containing addresses, and the construction of a new header containing the name of the originator and the date of insertion into the mailbox. These actions are performed by procedures in module \code{MailServer}. Its procedure \code{Serve} is installed as an Oberon Task, and it is guarded by the condition \code{Core.MailQueue.n > 0}, indicating that at least one message needs to be dispatched.
+
+The originator's name is obtained from \code{Core.GetUserName(uno)}, where uno is the user number obtained from the queue entry. The actual time is obtained from \code{Oberon.GetClock}. The form of the new header is shown by the following example:
+\begintt
+From: Gutknecht
+At: 12.08.91 09:34:15
+\endtt
+
+\noindent The received message's header is then searched for recipients. Their names are listed in header lines starting with ``\code{To}'' (or ``\code{cc}''). After a name has been read, the corresponding user number is obtained by calling \code{Core.UserNum}. Then the message is inserted into the designated mailbox by procedure \code{Dispatch}. The search for recipients continues, until a line is encountered that does not begin with ``\code{To}'' (or ``\code{cc}''). A negative user number indicates that the given name is not registered. In this case, the message is returned to the sender, i.e. inserted into the mailbox of the sender. An exception is the recipient ``all'' which indicates a broadcast to all registered users.
+
+Procedure \code{Dispatch} first opens the mailbox file of the user specified by the recipient number \code{rno}. If a mailbox exists, its block reservation part (\code{mrtab}) and its directory part (mdir) are read. Otherwise a new, empty box is created. Then follows the search for a free slot in the directory and, if found, the search for a sufficient number of free, adjacent blocks in the message part. The number of required blocks is given by the message length. If either no free slot exists, or there is no large enough free space for the message part, the message is returned to the sender (identified by \code{sno}). If also this attempt fails, the message is redirected to the postmaster (with user number 0). The postmaster is expected to inspect his mailbox sufficiently often so that no overflow occurs. If the postmaster's mailbox also overflows, the message is lost.
+
+Only if all conditions for a successful completion are satisfied, is insertion begun. It starts with the marking of blocks in the reservation table and with the insertion of the new directory information. Table and directory are then updated on the file. Thereafter, the message with the constructed new header is written into the message part.
+
+Perhaps it may seem to the reader that the addition of a separate module \code{MailServer}, together with a new Oberon \code{Task} and the machinery of the mail queue is not warranted by the relative simplicity of the insertion operation, and that it could have been incorporated into module \code{NetServer} just as well as message extraction. The picture changes, however, if handling of external mail is to be added, and if access to mailboxes via other channels, such as the \acro{RS}-232 line, is to be provided. The presented solution is based on a modular structure that facilitates such extensions without change of existing parts. External mail routines inevitably have to cope with message formats imposed by standards. Format transformations, encoding before sending to an external server and decoding before dispatching become necessary. Indeed, these operations have inflated module \code{MailServer} in a surprising degree. And lastly, the queuing machinery supports the easy insertion of additional message sources and provides a welcome decoupling and relaxation of timing constraints, particularly in the case of low-speed transmission media such as telephone lines.
+
+\beginsubsection 11.3. PRINTING SERVICE.
+
+TODO: Where the hell is this text?
+
+\beginsubsection 11.4. MISCELLANEOUS SERVICES.
+
+There exist a few additional services that are quite desirable under the presence of a central facility, and at the same time easy to include. They are briefly described in this section.
+
+The set of commands of the file distribution service is augmented by \code{Net.DeleteFiles} and \code{Net.Directory}, allowing the remote deletion of files and inspection of the server's directory. The command procedures are listed below and must be regarded as part of module \code{Net} (Sect. 10.4). They communicate with their counterparts in module \code{NetServer} (Sect. 11.2.) according to the following protocol:
+\begintt
+DeleteFile = DEL username password filename (ACK | NAK | NPR).
+Directory = FDIR username password prefix (datastream | NAK | NPR).
+\endtt
+
+\noindent The directory request carries a prefix; it uses procedure \code{FileDir.Enumerate} to obtain all file names starting with the specified prefix. Thereby the search can be limited to the relevant section of the directory.
+
+Since requests to the server are always guarded by a password, a facility is necessary to set and change the password stored by the server. The respective command is \code{Net.SetPassword}, and its handler in the server is guarded by the condition \code{typ = NPW}. The corresponding protocol is
+\begintt
+NewPassword = NPW username oldpassword
+(ACK DAT newpassword (ACK | NAK) | NAK | NPR).
+\endtt
+
+\noindent Finally, procedure \code{Net.GetTime} allows the workstation's real time clock to be adjusted to that of the central server. The protocol is
+\begintt
+GetTime = TRQ TIM time date.
+\endtt
+
+\noindent In concluding we summarize the entire protocol specification below. The combined server facility, comprising file distribution, electronic mail, printing, and time services is operating on a Ceres-1 computer (1 Mips) with a 2 MByte store, of which half is used by the printer's bitmap.
+
+Summary of Protocol:
+\begintt
+protocol = request =
+ReceiveFile = datastream = SendFile = datastream = DeleteFile = Directory = MailBox = SendMail = ReceiveMail = DeleteMail = PrintStream = SendMsg = NameRequest = NewPassword =
+GetTime =
+{request}.
+ReceiveFile | SendFile | DeleteFile | Directory |
+MailBox | SendMail | ReceiveMail | DeleteMail |
+PrintStream | SendMsg | NameRequest | NewPassword | GetTime. SND username password filename (datastream | NAK | NPR).
+DAT0 data ACK1 {DATi data ACKi+1}.
+REC username password filename (ACK0 datastream | NAK | NPR). DAT0 data ACK1 {DATi data ACKi+1}.
+DEL username password filename (ACK | NAK | NPR).
+FDIR username password prefix (datastream | NAK | NPR).
+MDIR username password (datastream | NAK | NPR).
+RML username password (ACK datastream | NAK | NPR).
+SML username password msgno (datastream | NAK | NPR).
+DML username password msgno (ACK | NAK | NPR).
+PRT username password (ACK datastream | NAK | NPR).
+MSG message ACK.
+NRQ partnername [NRS].
+NPW username oldpassword
+(ACK DAT newpassword (ACK | NAK) | NAK | NPR).
+TRQ TIM time date.
+\endtt
+
+\beginsubsection 11.5. USER ADMINISTRATION.
+
+It appears to be a universal law that centralization inevitably calls for an administration. The centralized mail and printing services make no exception. The typical duties of an administration are accounting and protection against misuse. It has to ensure that rendered services are counted and that no unauthorized user is taking advantage of the server. An additional duty is often the gathering of statistical data. In our case, accounting plays a very minor role, and the reason for the existence of the administration presented here is primarily protection.
+
+We distinguish between two kinds of protection. The first is protection of the server's resources in general, the second is that of individual users' resources from being accessed by others. Whereas in the first case some validation of a user's identification might suffice, the second case requires the association of personal resources with user names. In any case, the central server must store data for each member of the set of registered users. Specifically, it must be able to check the admissibility of a user's request on the basis of stored information.
+
+Evidently, a protection administration is similar in purpose and function to a lock. Quite regularly, locks are subjected to attempts of breaking them, and locksmiths are subjected to attempts of being outwitted. The race between techniques of breaking locks and that of better countermeasures is well known, and we do not even try to make a contribution to it. Our design is based on the premise that the Oberon Server operates in a harmonious environment. Nevertheless, a minimal amount of protection machinery was included. It raises the amount of effort required for breaking protection to a level which is not reached when curiosity alone is the motivation.
+
+The data about users is held in a table in module \code{Core}. As was mentioned earlier, \code{Core} acts as connector between the various servers by means of task queues. Its second purpose is to provide the necessary access to user data via appropriate procedures.
+
+In the simplest solution, each table entry would contain a user name only. For each request, the administration would merely test for the presence of the request's user name in the table. A significant step towards safe protection is the introduction of a password in addition to the user name. In order that a request be honoured, not only must the name be registered, but the delivered and the stored password must match. Evidently, abusive attempts would aim at recovering the stored passwords. Our solution lies in storing an encoded password. The command \code{System.SetUser}, which asks for a user identification and a password, immediately encodes the password, and the original is stored nowhere. The encoding algorithm is such that it is difficult to construct a corresponding decoder.
+
+The mail service requires a third attribute in addition to identification and encoded password: the user's name as it is used for addressing messages. Identification typically consists of the user's initials; for the name we suggest the full last name of the user and discourage cryptic abbreviations.
+
+The printing service makes an accounting facility desirable. A fourth field in each user table entry serves as a count for the number of printed pages. As a result, there are four fields: \code{id}, \code{name}, \code{password}, and \code{count}. The table is not exported, but only accessible via procedures. \code{Core} is a good example of a resource hiding module. The program is listed below, and a few additional comments follow here.
+
+Procedures \code{UserNo(id)} and \code{UserNum(name)} yield the table index of the identified user; it is called user number and is used as a short encoding for recipients and senders within the mail server. In other servers, the number is merely used to check a request's validity.
+
+The user information must certainly survive any intermission of server operation, be it due to software, hardware, or power failure. This requires that a copy of the user information is held on backup store (disk). The simplest solution would be to use a file for this purpose. But this would indeed make protection too vulnerable: files can be accessed easily, and we have refrained from introducing a file protection facility. Instead, the backup of the user information is held on a few permanently reserved sectors on the server machine, which are inaccessible to the file system.
+
+Apart from procedures and variables constituting the queuing mechanism for tasks, the procedures exported from module \code{Core} all belong to the administration, and they can be divided into two categories. The first category contains the procedures used by the three servers presented in this Chapter, and they are \code{UserNo}, \code{UserNum}, \code{IncPageCount}, \code{SetPassword}, \code{GetUserName} and \code{GetFileName}. The second category consists of the procedures \code{NofUsers} and \code{GetUser} for inspecting table entries, and \code{InsertUser}, \code{DeleteUser}, \code{ClearPassword}, \code{ClearCounts}, and \code{Init} for making changes to the table.
+
+The client of the latter category is a module \code{Users} which is needed by the human administrator of the server facility.
+
+The reader may at this point wonder why a more advanced concept of administration has not been chosen, which would allow the human administrator to operate the server remotely. A quick analysis of the consequences of this widely used approach reveals that a substantial amount of additions to our system would be required. The issue of security and protection would become inflated into dimensions that are hardly justified for our local system. The first consequence would be a differentiation among levels of protection. The administrator would become a so-called super-user with extra privileges, such as changing the user table. And so the game of trying to break the protection measures starts to become an interesting challenge.
+
+We have resisted the temptation to introduce additional complexity. Instead, we assume that physical access to the server station is reserved to the administrator. Naturally, module \code{Users} and in particular the symbol file of \code{Core} do not belong to the public domain. In concluding, we may point out that the impossibility of activating users' programs on the server station significantly reduces the possibilities for inflicting damage from the exterior.
+
+
 % \beginchapter CHAPTER 12: THE COMPILER.
 % \beginsubsection 12.1. INTRODUCTION.
 % \beginsubsection 12.2. CODE PATTERNS.
