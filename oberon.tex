@@ -1614,7 +1614,7 @@ and D by making them extend to their left. Clearly, no such
 complicated situations can occur in the case of hierarchic tiling.
 
 Hierarchic tiling is also used in Xerox \acro{PARC}'s Cedar system
-\footnote{{\mc [4]}}{W. Teitelman, "A tour through Cedar", IEEE Software, 1, (2), 44-73 (1984).
+\footnote{{\mc [4]}}{W. Teitelman, ``A tour through Cedar'', IEEE Software, 1, (2), 44-73 (1984).
 }. However, the Oberon variant differs from the Cedar
 variant in some respects. Firstly, Oberon supports quick temporary
 context switching by overlaying one track or any contiguous sequence
@@ -1669,7 +1669,7 @@ together with the corresponding topics and message dispatchers:
 \medskip
 \halign{#\hfil\quad&#\hfil\quad&#\hfil\cr
 Dispatcher&Topic&Message\cr
-\noalign{\hrule}\cr
+\noalign{\smallskip\hrule}\cr
 Task scheduler      & dispatching of task     & reports user interaction \cr
 Command interpreter & processing of command   & defines generic operation \cr
 Viewer manager      & organizing display area & change of location or size \cr
@@ -1685,32 +1685,31 @@ sensitive editing area.
 Shifting emphasis a little and regarding the various message
 dispatchers as subsystems, we recognize immediately the role of
 viewers as integrators of the different subsystems via message-based
-interfaces. In this light type Viewer appears as a common
+interfaces. In this light type \code{Viewer} appears as a common
 object-oriented basis of Oberon's subsystems.
 
 The topics listed above constitute some kind of backbone of the
 contents of the Chapters 3, 4 and 5. Task scheduling and command
 interpreting are already familiar to us from Sections 3.2 and
 3.3. Viewer management and text management will be the topics of
-Sections 4.4 and 5.2 respectively. Thereby, the built-in type Text
+Sections 4.4 and 5.2 respectively. Thereby, the built-in type \code{Text}
 will serve as a prime example of a document type.
 
 The activities that a viewer performs are basically controlled by
-events or, more precisely, by messages representing \emph{event notices}. We
+\emph{events} or, more precisely, by messages representing \emph{event notices}. We
 shall explain this in detail in Sections 4.4 and 5.3 in the cases of
 an abstract class of standard viewers and a class of viewers
 displaying standard text respectively.
 
 Here is a preliminary overview of some archetypal kinds of message:
 
-TODO: List bullets
-• After each key stroke a keyboard message containing the typed character is sent to the current focus viewer and after each mouse click a mouse message reporting the new state of the mouse is sent to the viewer containing the current mouse position.
+\item\bullet After each key stroke a \emph{keyboard message} containing the typed character is sent to the current \emph{focus viewer} and after each mouse click a \emph{mouse message} reporting the new state of the mouse is sent to the viewer containing the current mouse position.
 
-• A message often represents some generic operation that is expected to be interpreted individually by its recipients. Obvious examples in our context are ``return current textual selection'', ``copy-over stretch of text'', and ``produce a copy (clone)''. Notice that generic operations are the key to extensibility.
+\item\bullet A message often represents some \emph{generic operation} that is expected to be interpreted individually by its recipients. Obvious examples in our context are ``return current textual selection'', ``copy-over stretch of text'', and ``produce a copy (clone)''. Notice that generic operations are the key to extensibility.
 
-• In a tiling viewer environment, every opening of a new viewer and every change of size or location of an existing viewer has an obvious effect on adjacent viewers. The viewer manager therefore issues a message for every affected viewer requesting it to adjust its size appropriately.
+\item\bullet In a tiling viewer environment, every opening of a new viewer and every change of size or location of an existing viewer has an obvious effect on adjacent viewers. The viewer manager therefore issues a message for every affected viewer requesting it to adjust its size appropriately.
 
-• Whenever the contents or the format of a document has changed, a message notifying all visible viewers of the change is broadcast. Notice that broadcasting messages by a model (document) to the entirety of its potential views (viewers) is an interesting implementation of the famous MVC (model-view-controller) pattern that dispenses models from ``knowing'' (registering) their views.
+\item\bullet Whenever the contents or the format of a document has changed, a message notifying all visible viewers of the change is broadcast. Notice that broadcasting messages by a \emph{model} (document) to the entirety of its potential views (viewers) is an interesting implementation of the famous \acro{MVC} (\emph{model-view-controller}) pattern that dispenses models from ``knowing'' (registering) their views.
 
 \beginsubsection 4.3. FRAMES AS BASIC DISPLAY ENTITIES.
 
@@ -5514,7 +5513,7 @@ BEGIN
 END Pattern3.
 \endtt
 
-\noindent \pattern{4} Record fields and pointers: Fields of records are accessed by computing the sum of the record's (base) address and the field's offset. If the record variable is statically declared, the sum is computed by the compiler.
+\noindent \pattern{4} \emph{Record fields and pointers}: Fields of records are accessed by computing the sum of the record's (base) address and the field's offset. If the record variable is statically declared, the sum is computed by the compiler.
 \begintt
 MODULE Pattern4;
   TYPE Ptr = POINTER TO Node;
@@ -5543,6 +5542,68 @@ BEGIN
 END Pattern4.
 \endtt
 
+\noindent \pattern{5} \emph{Boolean expressions, If statements}: Conditional statements imply that parts of them are skipped. This is done by the use of branch instructions whose operand specifies the distance of the branch. The instructions refer to the condition-register as an implicit operand. Its value is determined by a preceding instruction, typically a compare or a bit-test instruction.
+
+The Boolean operators \code{\&} and \code{OR} are purposely not defined as total functions, but rather by the equations
+\begintt
+  p & q  = if p then q else FALSE
+  p OR q = if p then TRUE else q
+\endtt
+
+\noindent Consequently, Boolean operators must be translated into branches too. Evidently, branches stemming from if statements and branches stemming from Boolean operators should be merged, if possible. The resulting code therefore does not necessarily mirror the structure of the if statement directly, as can be seen from the code in \code{Pattern5}. We must conclude that code generation for Boolean expressions differs in some aspects from that for arithmetic expressions.
+
+The example of \code{Pattern5} is also used to exhibit the code resulting from the standard procedures \code{INC}, \code{DEC}, \code{INCL}, and \code{EXCL}. These procedures provide an opportunity to use shorter code in those cases where a single two-operand instruction suffices, i.e. when one of the arguments is identical with the destination.
+\begintt
+LDRR0SB0
+CMPR0R0 0
+BNE 3
+LDRR0SB0
+ADDR0R0 1
+STRR0SB 0
+LDR SB R0 ...
+LDRR0SB0 (n)
+CMPR0R0 0
+BLT 6
+LDRR0SB 0
+CMP R0 R0 100
+BGE 3
+LDRR0SB0
+SUBR0R0 1
+STRR0R0 0
+LDR SB R0 ...
+LDRR0SB0 (n)
+ANDR0R0 1
+BNE 5
+LDRR0SB4 (s)
+LDRR1SB 0
+ADDR1R1 1
+ROR R0 R0 R1
+BPL 2
+MOV R0 R0 -1000
+STRR0SB 0
+LDR SB R0 ...
+LDRR0SB 0
+CMPR0R0 0
+BGE 3
+MOV R0 R0 0 {}
+STRR0SB 4
+B 17
+LDR SB R0 ...
+LDRR0SB 0
+CMPR0R0 10
+BGE 3 MOVR0R01
+STR R0SB 4
+B 10
+LDR SB R0 ...
+LDRR0SB 0
+CMP R0 R0 100
+BGE 3
+MOVR0R02
+STRR0SB 4 B3
+MOVR0R04
+LDR SB R0 ...
+STRR0SB 4
+\endtt
 
 
 % \beginsubsection 12.3. INTERNAL DATA STRUCTURES AND MODULE INTERFACES.
@@ -5615,6 +5676,6 @@ END Pattern4.
 % \beginsubsubsection 17.2.4. The display controller.
 % \beginsubsubsection 17.2.5. The Mouse interface.
 
-% \input src
+% \eject \input src
 
 \bye
