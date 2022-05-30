@@ -2059,18 +2059,18 @@ DEFINITION MenuViewers;
     ModifyMsg = RECORD (Display.FrameMsg)
       id: INTEGER;
       dY, Y, H: INTEGER
-   END;
-   PROCEDURE Handle (V: Display.Frame; VAR M: Display.FrameMsg);
-   PROCEDURE New (Menu, Main: Display.Frame;
-                  menuH, X, Y: INTEGER): Viewer;
+    END;
+  PROCEDURE Handle (V: Display.Frame; VAR M: Display.FrameMsg);
+  PROCEDURE New (Menu, Main: Display.Frame;
+                 menuH, X, Y: INTEGER): Viewer;
 END MenuViewers.
 \endtt
 
-The interface represented by this definition is conspicuously
+\noindent The interface represented by this definition is conspicuously
 narrow. There are just two procedures: A generator procedure \code{New} and a
 standard message handler \code{Handle}. The generator returns a newly created
 menu viewer displaying the two (arbitrary) frames passed as
-parameters. The message handler implements the entire ``behavior'' of an
+parameters. The message handler implements the entire ``\emph{behavior}'' of an
 object and in particular the above mentioned message dispatching
 functionality.
 
@@ -2083,11 +2083,9 @@ instance could change its behavior during its lifetime. Our object
 model is therefore instance-centered.
 
 Conceptually, the creation of an object is an atomic action consisting
-of three basic steps:
+of three basic steps: 1. Allocate memory block; 2. Install message handler; 3. Initialize state variables.
 
-allocate memory block; install message handler; initialize state variables
-
-\noindent In the case of a standard menu viewer \code{V} this can be expressed as
+In the case of a standard menu viewer \code{V} this can be expressed as
 \begintt
 NEW(V);
 V.handle := Handle;
@@ -2249,7 +2247,8 @@ DEFINITION Oberon;
       Mouse, Pointer: Cursor;
   PROCEDURE OpenCursor (VAR c: Cursor);
   PROCEDURE FadeCursor (VAR c: Cursor);
-  PROCEDURE DrawCursor (VAR c: Cursor; VAR m: Marker; X, Y: INTEGER);
+  PROCEDURE DrawCursor (VAR c: Cursor; VAR m: Marker;
+                        X, Y: INTEGER);
   PROCEDURE MarkedViewer (): Viewers.Viewer;
   PROCEDURE RemoveMarks (X, Y, W, H: INTEGER);
   ...
@@ -2257,18 +2256,18 @@ END Oberon.
 \endtt
 
 \noindent The state of a cursor is given by its mode of visibility (on), its
-position (X, Y) in the display area, and the current marker. \code{Marker\/} is
+position (\code{X}, \code{Y}) in the display area, and the current marker. \code{Marker} is
 an abstract data type with an interface consisting of two operations
-\code{Fade\/} and \code{Draw\/}. The main benefit we can draw from this abstraction is
+\code{Fade} and \code{Draw}. The main benefit we can draw from this abstraction is
 once more conceptual independence of the underlying hardware. For
-example, \code{Fade\/} and \code{Draw\/} can adapt to a given monitor hardware with
+example, \code{Fade} and \code{Draw} can adapt to a given monitor hardware with
 built-in cursor support or, in case of absence of such support, can
 simply be implemented as identical procedures (an involution) drawing
 the marker pattern in inverse video mode.
 
 The functional interface to cursors consists of three operations:
-\code{OpenCursor\/} to open a new cursor, \code{FadeCursor\/} to switch off the marker
-of an open cursor, and \code{DrawCursor\/} to extend the path of a cursor to a
+\code{OpenCursor} to open a new cursor, \code{FadeCursor} to switch off the marker
+of an open cursor, and \code{DrawCursor} to extend the path of a cursor to a
 new position and mark it with the given marker. We emphasize that the
 marker representing a given cursor can change its shape dynamically on
 the fly.
@@ -2291,15 +2290,15 @@ caller.
 
 Summary of the essential points and characteristics of Oberon's concept of cursor handling:
 
-1.) By virtue of the use of abstract markers and of the logical display area, any potential hardware dependence is encapsulated in system modules and is therefore hidden from the application programmer. Cursors are moving uniformly within the whole display area, even across screen boundaries.
+\item{1.} By virtue of the use of abstract markers and of the logical display area, any potential hardware dependence is encapsulated in system modules and is therefore hidden from the application programmer. Cursors are moving uniformly within the whole display area, even across screen boundaries.
 
-2.) Cursor handling is decentralized by delegating it to the individual handlers that are installed in viewers. Typically, a handler reacts on the receipt of a mouse tracking message by drawing the mouse cursor at the indicated new position. The benefit of such individualized handling is flexibility. For example, a smart local handler might choose the shape of the visualizing marker depending on the exact location, or it might force the cursor onto a grid point.
+\item{2.} Cursor handling is decentralized by delegating it to the individual handlers that are installed in viewers. Typically, a handler reacts on the receipt of a mouse tracking message by drawing the mouse cursor at the indicated new position. The benefit of such individualized handling is flexibility. For example, a smart local handler might choose the shape of the visualizing marker depending on the exact location, or it might force the cursor onto a grid point.
 
-3.) Even though cursor handling is decentralized, there is some intrinsic support for cursor drawing built into the declaration of type \code{Cursor\/}. Cursors are objects of full value and, as such, can ``memorize'' their current state. Consequently, the interface operations \code{FadeCursor\/} and \code{DrawCursor\/} need to refer to the desired future state only.
+\item{3.} Even though cursor handling is decentralized, there is some intrinsic support for cursor drawing built into the declaration of type \code{Cursor\/}. Cursors are objects of full value and, as such, can ``memorize'' their current state. Consequently, the interface operations \code{FadeCursor\/} and \code{DrawCursor\/} need to refer to the desired future state only.
 
-4.) Looking at the viewer manager as one user of the display area, the cursor handler is a second (and logically concurrent) user of the same resource. If there is just one physical plane implementing the display area, any region must be locked by a current user before destructive painting. Therefore, markers are usually painted non-destructively in inverse-video mode.
+\item{4.} Looking at the viewer manager as one user of the display area, the cursor handler is a second (and logically concurrent) user of the same resource. If there is just one physical plane implementing the display area, any region must be locked by a current user before destructive painting. Therefore, markers are usually painted non-destructively in inverse-video mode.
 
-Let us now recapitulate the entire Section. The central resource
+\noindent Let us now recapitulate the entire Section. The central resource
 managed by the display subsystem is the logical display area whose
 purpose is abstraction from the underlying display monitor
 hardware. The display area is primarily used by the viewer manager for
@@ -2313,7 +2312,7 @@ message-based interfaces connecting the display subsystem with other
 subsystems like the task scheduler and the various document
 managers. Finally, the display area is also the living room of
 cursors. In Oberon, a cursor is a marked path. Two standard cursors
-Mouse and Pointer are predefined.
+\code{Mouse} and \code{Pointer} are predefined.
 
 \beginsubsection 4.5. RASTER OPERATIONS.
 
@@ -2340,10 +2339,10 @@ more important role in practice. By a block we mean a rectangular area
 of pixels whose bounding lines are parallel to the axes of the
 coordinate system.
 
-Raster operations are based on a common principle: A block of width \code{SW\/}
-and height \code{SH\/} of source pixels is placed at a given point of
-destination \code{(DX, DY)\/} in the display area. In the simplest case, the
-destination block \code{(DX, DY, SW, SH)\/} is plainly overwritten by the
+Raster operations are based on a common principle: A block of width \code{SW}
+and height \code{SH} of source pixels is placed at a given point of
+destination \code{(DX, DY)} in the display area. In the simplest case, the
+destination block \code{(DX, DY, SW, SH)} is plainly overwritten by the
 source block. In general, the new value of a pixel in the destination
 block is a combination of its old value and the value of the
 corresponding source pixel:
@@ -2352,7 +2351,7 @@ $d := F(s, d)$
 
 \emph{F} is sometimes called the \emph{mode} of combination of the
 raster operation. The raster is stored as an array of values of type
-\code{SET\/}, each set representing 32 black/white pixels. The modes of
+\code{SET}, each set representing 32 black/white pixels. The modes of
 combining source and destination is implemented by the following set
 operations:
 
@@ -2363,20 +2362,20 @@ operation
 s
 s + d (or) s / d (xor)
 
-Note that invert is equivalent with inverse video mode if \code{s\/} is \code{TRUE\/}
+Note that invert is equivalent with inverse video mode if \code{s} is \code{TRUE}
 for all pixels.
 
 There are many different variants of raster operations. Some refer to
 a source block in the display area, others specify a constant pattern
 to be taken as source block. Some variants require replication of the
-source block within a given destination block \code{(DX, DY, DW, DH)\/} rather
+source block within a given destination block \code{(DX, DY, DW, DH)} rather
 than simple placement.
 
 The challenge when designing a raster interface is finding a unified,
 small and complete set of raster operations that covers all needs, in
 particular including the need of placing character glyphs. The
 amazingly compact resulting set of Oberon raster operations is
-exported by module \code{Display\/}:
+exported by module \code{Display}:
 \begintt
 DEFINITION Display;
   CONST black = 0; white = 1; (*colors*)
@@ -2389,14 +2388,14 @@ DEFINITION Display;
 END Display.
 \endtt
 
-\noindent In the parameter lists of the above raster operations, \code{mode\/} is the
-mode of combination (replace, paint, or invert). \code{ CopyBlock\/} copies the
-source block \code{(sx, sy, w, h)\/} to position \code{(dx, dy)\/} and uses mode to
-combine new contents in the destination block \code{(dx, dy, w, h)\/}. It is
+\noindent In the parameter lists of the above raster operations, \code{mode} is the
+mode of combination (replace, paint, or invert). \code{ CopyBlock} copies the
+source block \code{(sx, sy, w, h)} to position \code{(dx, dy)} and uses mode to
+combine new contents in the destination block \code{(dx, dy, w, h)}. It is
 assumed tacitly that the numbers of colors per pixel in the source
 block and in the destination area are identical. It is perhaps
-informative to know that \code{CopyBlock\/} is essentially equivalent with the
-famous \code{BitBlt\/} (bit block transfer) in the SmallTalk project
+informative to know that \code{CopyBlock} is essentially equivalent with the
+famous \code{BitBlt} (bit block transfer) in the SmallTalk project
 \footnote{{\mc[1]}}{A. Goldberg, Smalltalk-80: The Interactive Programming Environment, Addison-Wesley 1984.}. In Oberon, \code{CopyBlock\/} is used primarily for scrolling
 contents within a viewer.
 

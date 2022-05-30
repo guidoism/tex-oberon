@@ -19,8 +19,8 @@
 - [X] Proofread until 4.3. FRAMES AS BASIC DISPLAY ENTITIES.
 - [ ] Proofread until 4.4. DISPLAY MANAGEMENT.
 - [X] Proofread until 4.4.1. Viewers.
-- [ ] Proofread until 4.4.2. Menu Viewers.
-- [ ] Proofread until 4.4.3. Cursor Management.
+- [X] Proofread until 4.4.2. Menu Viewers.
+- [X] Proofread until 4.4.3. Cursor Management.
 - [ ] Proofread until 4.5. RASTER OPERATIONS.
 - [ ] Proofread until 4.6. STANDARD DISPLAY CONFIGURATIONS AND TOOLBOX.
 - [ ] Proofread until 5.1. TEXT AS AN ABSTRACT DATA TYPE.

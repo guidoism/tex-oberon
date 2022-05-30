@@ -18,7 +18,7 @@ MODULE Viewers; (*JG 14.9.90 / NW 15.9.2013*)
     Track = POINTER TO TrackDesc;
     TrackDesc = RECORD (ViewerDesc) under: Display.Frame END;
 
-  VAR curW*, minH*, DH: INTEGER;
+  VAR curW*, minH*, DH: INTEGER; (* TODO: Confirm that DH is display height *)
     FillerTrack: Track; FillerViewer,
     backup: Viewer; (*last closed viewer*)
 
@@ -26,12 +26,12 @@ MODULE Viewers; (*JG 14.9.90 / NW 15.9.2013*)
     VAR T, u, v: Display.Frame;
     M: ViewerMsg;
   BEGIN
-    IF (V.state = 0) & (X < inf) THEN (* if closed *)
-      IF Y > DH THEN Y := DH END;
-      T := FillerTrack.next;
-      WHILE X >= T.X + T.W DO T := T.next END;
-      u := T.dsc; v := u.next;
-      WHILE Y > v.Y + v.H DO u := v; v := u.next END;
+    IF (V.state = 0) & (X < inf) THEN (* only open if V is already closed *)
+      IF Y > DH THEN Y := DH END; (* clip Y to display height *)
+      T := FillerTrack.next; (* start looking through the tracks *)
+      WHILE X >= T.X + T.W DO T := T.next END; (* stop at one that is large enough *)
+      u := T.dsc; v := u.next; (* make u the descendant and v is the next (and first one we care about) *)
+      WHILE Y > v.Y + v.H DO u := v; v := u.next END; (* stop when we find one that's large enough *)
       IF Y < v.Y + minH THEN Y := v.Y + minH END;
       IF (v.next.Y # 0) & (Y > v.Y + v.H - minH) THEN
         V.X := T.X; V.W := T.W; V.Y := v.Y; V.H := v.H;
@@ -198,7 +198,8 @@ MODULE Viewers; (*JG 14.9.90 / NW 15.9.2013*)
     END
   END Broadcast;
 
-BEGIN backup := NIL; curW := 0; minH := 1; DH := Display.Height;
+BEGIN
+  backup := NIL; curW := 0; minH := 1; DH := Display.Height;
   NEW(FillerViewer); FillerViewer.X := 0; FillerViewer.W := inf; FillerViewer.Y := 0; FillerViewer.H := DH;
   FillerViewer.next := FillerViewer;
   NEW(FillerTrack);
