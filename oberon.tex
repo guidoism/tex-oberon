@@ -1898,31 +1898,31 @@ sequence of tracks).
 
 The next three procedures are used to organize viewers within
 individual tracks. Procedure \code{Open\/} allocates a given viewer at a given
-position. More precisely, \code{Open\/} locates the viewer containing the point
-\code{(X, Y)\/}, splits it horizontally at height \code{Y\/}, and opens the viewer \code{V\/} in
-the lower part of the area. In the special case of \code{Y\/} coinciding with
+position. More precisely, \code{Open} locates the viewer containing the point
+\code{(X, Y)}, splits it horizontally at height \code{Y}, and opens the viewer \code{V} in
+the lower part of the area. In the special case of \code{Y} coinciding with
 the upper boundary line of the located viewer this is closed
-automatically. Procedure \code{Change\/} allows to change the height of a given
-viewer \code{V\/} by moving its upper boundary line to a new location \code{Y\/} (within
-the limits of its neighbors). Procedure \code{Close\/} removes the given viewer
-\code{V\/} from the display area. Figure 4.5 makes these operations clear.
+automatically. Procedure \code{Change} allows to change the height of a given
+viewer \code{V} by moving its upper boundary line to a new location \code{Y\/} (within
+the limits of its neighbors). Procedure \code{Close} removes the given viewer
+\code{V} from the display area. Figure 4.5 makes these operations clear.
 
 \figure{pdfs/fig-4.5.png}{4.7in}{4.5}{Basic operations on viewers}
 
 The last group of procedures provides miscellaneous
-services. Procedure \code{This\/} identifies the viewer displayed at \code{(X, Y)\/}.
-Procedure \code{Next\/} returns the next upper neighbor of a given
-displayed viewer \code{V\/}. Procedure \code{Recall\/} allows recalling and restoring
-the most recently closed viewer. \code{Locate\/} is a procedure that assists
+services. Procedure \code{This} identifies the viewer displayed at \code{(X, Y)}.
+Procedure \code{Next} returns the next upper neighbor of a given
+displayed viewer \code{V\/}. Procedure \code{Recall} allows recalling and restoring
+the most recently closed viewer. \code{Locate} is a procedure that assists
 heuristic allocation of new viewers. For any given track and desired
-minimum height, procedure \code{Locate\/} offers a choice of some distinguished
+minimum height, procedure \code{Locate} offers a choice of some distinguished
 viewers in the track: the filler viewer, the viewer at the bottom, an
 alternative choice, and the viewer of maximum height. Finally,
-procedure \code{Broadcast\/} broadcasts a message to the display area, that is,
+procedure \code{Broadcast} broadcasts a message to the display area, that is,
 sends the given message to all viewers that are currently displayed.
 
 It is now a good time to throw a glance behind the scenes. Let us
-start with revealing module \code{Viewer\/}’s internal data structure. Remember
+start with revealing module \code{Viewer}'s internal data structure. Remember
 that according to the principle of information hiding an internal data
 structure is fully private to the containing module and accessible
 through the module’s procedural interface only. Figure 4.6 shows a
@@ -1942,8 +1942,8 @@ and shaded in Figure 4.6.
 
 \figure{pdfs/fig-4.6.png}{4in}{4.6}{A snapshot of the internal data structure corresponding to Figure 4.3}
 
-Technically, the track descriptor type \code{TrackDesc\/} is a private
-extension of the viewer descriptor type \code{ViewerDesc\/}. Repeating the
+Technically, the track descriptor type \code{TrackDesc} is a private
+extension of the viewer descriptor type \code{ViewerDesc}. Repeating the
 declarations of viewer descriptors and frame descriptors, we get to
 this hierarchy of types:
 \begintt
@@ -1992,7 +1992,7 @@ The magnitude $\mid\code{V.state}\mid$ is kept invariant by module \code{Viewers
 be used, for example, to distinguish different levels of importance or
 preference with the aim of supporting a smarter algorithm for
 heuristic allocation of new viewers. The variable state is treated as
-read-only by every module other than \code{Viewers\/}.
+read-only by every module other than \code{Viewers}.
 
 We are now sufficiently prepared to understand how the exported
 procedures of module \code{Viewers} work behind the scenes. All of them
@@ -2013,8 +2013,8 @@ TYPE ViewerMsg = RECORD (Display.FrameMsg)
 END;
 \endtt
 
-\noindent There exist three variants of \code{Viewer\/} messages, discriminated by the
-field \code{id\/}: Restore contents, modify height (extend or reduce at
+\noindent There exist three variants of \code{Viewer} messages, discriminated by the
+field \code{id}: Restore contents, modify height (extend or reduce at
 bottom), and suspend (close temporarily or permanently). The
 additional components of the message inform about the desired new
 location, size, and state.
@@ -2067,8 +2067,8 @@ END MenuViewers.
 \endtt
 
 The interface represented by this definition is conspicuously
-narrow. There are just two procedures: A generator procedure \code{New\/} and a
-standard message handler \code{Handle\/}. The generator returns a newly created
+narrow. There are just two procedures: A generator procedure \code{New} and a
+standard message handler \code{Handle}. The generator returns a newly created
 menu viewer displaying the two (arbitrary) frames passed as
 parameters. The message handler implements the entire ``behavior'' of an
 object and in particular the above mentioned message dispatching
@@ -2087,7 +2087,7 @@ of three basic steps:
 
 allocate memory block; install message handler; initialize state variables
 
-\noindent In the case of a standard menu viewer \code{V\/} this can be expressed as
+\noindent In the case of a standard menu viewer \code{V} this can be expressed as
 \begintt
 NEW(V);
 V.handle := Handle;
@@ -2096,14 +2096,14 @@ V.dsc.next := Main;
 V.menuH := menuH
 \endtt
 
-\noindent With that, calling \code{New\/} is equivalent with
+\noindent With that, calling \code{New} is equivalent with
 \begintt
 create V; open V at X, Y
 \endtt
 
-\noindent where opening \code{V\/} needs assistance by module \code{Viewers\/}.
+\noindent where opening \code{V} needs assistance by module \code{Viewers}.
 
-The implementation of procedure \code{Handle\/} embodies the standard strategy of message handling by
+The implementation of procedure \code{Handle} embodies the standard strategy of message handling by
 menu viewers. The following code is a coarse-grained view of it.
 \begintt
 Message handler for menu viewers
@@ -2200,21 +2200,12 @@ ModifyMsg = RECORD (Display.FrameMsg)
 END;
 \endtt
 
-\noindent The field \code{id\/} specifies one of two variants: \code{extend\/} or \code{reduce\/}. The
-first variant of the message requests the receiving frame to move by
-the vertical translation vector \code{dY\/} and then to extend to height \code{H\/} at
-bottom. The second variant requests the frame to reduce to height \code{H\/} at
-bottom and then to move by \code{dY\/}. In both cases \code{Y\/} indicates the
-Y-coordinate of the new lower-left corner. Figure 4.7 summarizes this
-graphically.
+\noindent The field \code{id} specifies one of two variants: \code{extend} or \code{reduce}. The first variant of the message requests the receiving frame to move by the vertical translation vector \code{dY\/} and then to extend to height \code{H} at bottom. The second variant requests the frame to reduce to height \code{H} at bottom and then to move by \code{dY}. In both cases \code{Y} indicates the Y-coordinate of the new lower-left corner. Figure 4.7 summarizes this graphically.
 
-Messages arriving from the viewer manager and requesting the receiving
-viewer to extend or reduce at its bottom are also mapped into messages
-of type \code{ModifyMsg\/}. Of course, no translation is needed in these cases,
-and \code{dY\/} is 0.
+Messages arriving from the viewer manager and requesting the receiving viewer to extend or reduce at its bottom are also mapped into messages of type \code{ModifyMsg}. Of course, no translation is needed in these cases, and \code{dY} is 0.
 
 The attentive reader might perhaps have asked why the standard handler
-is exported by module \code{MenuViewers\/} at all. The thought behind is
+is exported by module \code{MenuViewers} at all. The thought behind is
 reusability of code. For example, a message handler for a subclass of
 menu viewers could be implemented effectively by reusing menu viewer's
 standard handler. After having handled all new or differing cases

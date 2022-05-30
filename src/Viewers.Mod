@@ -23,9 +23,10 @@ MODULE Viewers; (*JG 14.9.90 / NW 15.9.2013*)
     backup: Viewer; (*last closed viewer*)
 
   PROCEDURE Open* (V: Viewer; X, Y: INTEGER);
-    VAR T, u, v: Display.Frame; M: ViewerMsg;
+    VAR T, u, v: Display.Frame;
+    M: ViewerMsg;
   BEGIN
-    IF (V.state = 0) & (X < inf) THEN
+    IF (V.state = 0) & (X < inf) THEN (* if closed *)
       IF Y > DH THEN Y := DH END;
       T := FillerTrack.next;
       WHILE X >= T.X + T.W DO T := T.next END;
