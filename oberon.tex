@@ -2955,7 +2955,7 @@ file. Finally, requirement 7 is met simply because the operations do
 not affect file representations at all.
 
 In Oberon we adapted the piece list technique to texts with looks
-(``rich texts''). Formally, we first define a run as a stretch of text
+(``rich texts''). Formally, we first define a \emph{run} as a stretch of text
 whose characters show identical looks. Now, we require the piece list
 to subordinate itself to the run structure. This obviously means that
 every piece needs to be contained within a single run. Figure 5.4
@@ -2978,9 +2978,9 @@ Initially, the pieces are identical with runs, and the number of elements in the
 
 We conclude that the new aspects do not invalidate the positive rating given above to the piece technique with regard to requirements 1, 2, 3, 4, 6, and 7 in our wish list. However, the requirement of efficient direct positioning remains. The problem is the necessity to scan through the piece list sequentially in order to locate the piece that contains the desired position. We investigated different solutions of this efficiency problem. They are based on different data structures connecting the piece descriptors, among them a piece tree and a variant of the piece list featuring an additional long-distance link like in a skip-list.
 
-Eventually, we decided in favor of a simpler solution that we can easily justify by pointing out that the typical editing scenario is zooming into a local region of text, i.e. positioning at an arbitrary location once and subsequently positioning at locations in its immediate neighborhood many times. Therefore, an appropriate solution is caching the most recently calculated values (pos, piece) of the translation map. Of course, this does not solve the problem of cache misses. Notice, however, that this problem is acute only in the case of extremely long piece lists that do not occur in ordinary texts and editing sessions.
+Eventually, we decided in favor of a simpler solution that we can easily justify by pointing out that the typical editing scenario is zooming into a local region of text, i.e. positioning at an arbitrary location once and subsequently positioning at locations in its immediate neighborhood many times. Therefore, an appropriate solution is caching the most recently calculated values (\code{pos}, \code{piece}) of the translation map. Of course, this does not solve the problem of cache misses. Notice, however, that this problem is acute only in the case of extremely long piece lists that do not occur in ordinary texts and editing sessions.
 
-We shall now illustrate the piece technique in detail at the example of two important but basic operations: Insert and read. Let us start with an overview of the data types involved. Apart from some auxiliary private variables marked with an arrow, the types \code{Text\/}, \code{Buffer\/}, and \code{Reader\/} are already familiar to us from the previous Section. Type \code{Piece\/} is completely private and hidden from the clients.
+We shall now illustrate the piece technique in detail at the example of two important but basic operations: \code{Insert} and \code{read}. Let us start with an overview of the data types involved. Apart from some auxiliary private variables marked with an arrow, the types \code{Text}, \code{Buffer}, and \code{Reader} are already familiar to us from the previous Section. Type \code{Piece} is completely private and hidden from the clients.
 \begintt
 Text = POINTER TO TextDesc;
 
@@ -2989,28 +2989,28 @@ Notifier = PROCEDURE (T: Text; op, beg, end: INTEGER);
 TextDesc = RECORD
   len: INTEGER;
   notify: Notifier;
-  → trailer: Piece;
-  → org: INTEGER;
-  → pce: Piece
+|triangleright trailer: Piece;
+|triangleright org: INTEGER;
+|triangleright pce: Piece
 END;
 
 Buffer = POINTER TO BufDesc;
 BufDesc = RECORD
   len: INTEGER;
-  → header, last: Piece
+|triangleright header, last: Piece
 END;
 
 Reader = RECORD
   eot: BOOLEAN;
   fnt: Fonts.Font;
   col, voff: INTEGER;
-  → ref: Piece;
-  → org, off: INTEGER;
+|triangleright ref: Piece;
+|triangleright org, off: INTEGER;
   rider: Files.Rider
 END;
 
-→ Piece = POINTER TO PieceDesc;
-→ PieceDesc = RECORD
+|triangleright Piece = POINTER TO PieceDesc;
+|triangleright PieceDesc = RECORD
   f: Files.File;
   off, len: INTEGER;
   fnt: Fonts.Font;
@@ -3040,28 +3040,27 @@ PROCEDURE FindPiece (T: Text; pos: INTEGER;
 BEGIN
   p := T.pce;
   porg := T.org;
-1:IF pos >= porg THEN
+|eightit 1|tt IF pos >= porg THEN
     WHILE pos >= porg + p.len DO INC(porg, p.len); p := p.next END
-2:ELSE p := p.prev; DEC(porg, p.len);
+|eightit 2|tt ELSE p := p.prev; DEC(porg, p.len);
     WHILE p < porg DO p := p.prev; DEC(porg, p.len) END
   END;
-3:T.pce := p; R.org := porg; (*update cache*)
+|eightit 3|tt T.pce := p; R.org := porg; (*update cache*)
   pce := p; org := porg
 END FindPiece;
 \endtt
 
 \noindent Explanations (referring to the line numbers in the above code excerpt)
 
-1) search to the right (next)
+\item{1} search to the right (next)
+\item{2} search to the left (prev)
+\item{3} update cache if more than 50 pieces traversed
 
-2) search to the left (prev)
-
-3) update cache if more than 50 pieces traversed
 \begintt
-1: PROCEDURE SplitPiece (p: Piece; off: INTEGER; VAR pr: Piece);
+|eightit 1|tt PROCEDURE SplitPiece (p: Piece; off: INTEGER; VAR pr: Piece);
 VAR q: Piece;
 BEGIN
-2: IF off > 0 THEN
+|eightit 2|tt IF off > 0 THEN
      NEW(q);
      q.fnt := p.fnt;
      q.col := p.col;
@@ -3070,8 +3069,8 @@ BEGIN
      q.f := p.f;
      q.off := p.off + off;
      p.len := off;
-  3: q.next := p.next; p.next := q;
-  4: q.prev := p; q.next.prev := q;
+|eightit 3|tt   q.next := p.next; p.next := q;
+|eightit 4|tt   q.prev := p; q.next.prev := q;
      pr := q
    ELSE pr := p
    END
@@ -3079,99 +3078,75 @@ END SplitPiece;
 \endtt
 \noindent Explanations:
 
-1) return right part piece pr after split
+\item{1} return right part piece pr after split
+\item{2} generate new piece only if remaining length > 0
+\item{3} insert new piece in forward chain
+\item{4} insert new piece in backward chain
 
-2) generate new piece only if remaining length > 0
-
-3) insert new piece in forward chain
-
-4) insert new piece in backward chain
-
-\noindent Procedure Insert handles text insertion. It operates on a buffer that contains the stretch of text to be inserted:
-
-Procedure \code{Insert} handles text insertion. It operates on a buffer that contains the stretch of text to be inserted:
+\noindent Procedure \code{Insert} handles text insertion. It operates on a buffer that contains the stretch of text to be inserted:
 \begintt
 PROCEDURE Insert (T: Text; pos: INTEGER; B: Buffer);
   VAR pl, pr, p, qb, qe: Piece;
   org, end: INTEGER;
 BEGIN
-  FindPiece(T, pos, org, p);
-  SplitPiece(p, pos - org, pr);
-  IF T.org >= org THEN
+|eightit 1|tt FindPiece(T, pos, org, p); SplitPiece(p, pos - org, pr);
+|eightit 2|tt IF T.org >= org THEN
     T.org := org - p.prev.len;
     T.pce := p.prev
   END;
   pl := pr.prev;
   qb := B.header.next;
-  IF (qb # NIL) & (qb.f = pl.f) & (qb.off = pl.off + pl.len)
+|eightit 3|tt IF (qb # NIL) & (qb.f = pl.f) & (qb.off = pl.off + pl.len)
       & (qb.fnt = pl.fnt) & (qb.col = pl.col) & (qb.voff = pl.voff) THEN
     pl.len := pl.len + qb.len; qb := qb.next
   END;
   IF qb # NIL THEN
     qe := B.last;
-    qb.prev := pl; pl.next := qb; qe.next := pr; pr.prev := qe
+|eightit 4|tt qb.prev := pl; pl.next := qb; qe.next := pr; pr.prev := qe
   END;
-  T.len := T.len + B.len; end := pos + B.len;
-  B.last := B.header; B.last.next := NIL; B.len := 0;
-  T.notify(T, insert, pos, end)
+|eightit 5|tt T.len := T.len + B.len; end := pos + B.len;
+|eightit 6|tt B.last := B.header; B.last.next := NIL; B.len := 0;
+|eightit 7|tt T.notify(T, insert, pos, end)
 END Insert;
 \endtt
 
-TODO: explaination numbers in the code
+\noindent Explanations:
 
-Explanations:
-
-1) split piece to isolate point of insertion
-
-2) adjust cache if necessary
-
-3) merge pieces if possible
-
-4) insert buffer
-
-5) update text length
-
-6) empty buffer
-
-7) notify
+\item{1} split piece to isolate point of insertion
+\item{2} adjust cache if necessary
+\item{3} merge pieces if possible
+\item{4} insert buffer
+\item{5} update text length
+\item{6} empty buffer
+\item{7} notify
 
 \noindent Procedure \code{Read} implements sequential reading of characters in texts. It operates on a text reader:
 \begintt
 PROCEDURE Read (VAR R: Reader; VAR ch: CHAR);
 BEGIN
-  Files.Read(R.rider, ch);
+|eightit 1|tt Files.Read(R.rider, ch);
   R.fnt := R.ref.fnt;
   R.col := R.ref.col;
   R.voff := R.ref.voff;
   INC(R.off);
-  IF R.off = R.ref.len THEN
-    IF R.ref.f = WFile THEN R.eot := TRUE END;
+|eightit 2|tt IF R.off = R.ref.len THEN
+|eightit 3|tt   IF R.ref.f = WFile THEN R.eot := TRUE END;
     R.org := R.org + R.off; R.off := 0;
-    R.ref := R.ref.next; R.org := R.org + R.off; R.off := 0;
-    Files.Set(R.rider, R.ref.f, R.ref.off)
+|eightit 4|tt   R.ref := R.ref.next; R.org := R.org + R.off; R.off := 0;
+|eightit 5|tt   Files.Set(R.rider, R.ref.f, R.ref.off)
   END
 END Read;
 \endtt
 
-TODO: add line number thingies
-Explanations:
+\noindent Explanations:
 
-1) read character from file and update looks in reader
-2) if piece boundary reached
-3) check if sentinel piece reached
-4) move reader to next piece
-5) position file rider
+\item{1} read character from file and update looks in reader
+\item{2} if piece boundary reached
+\item{3} check if sentinel piece reached
+\item{4} move reader to next piece
+\item{5} position file rider
 
-Procedure \code{Read} is typically used as a primitive by text
-scanners and in particular by the built-in scanner \code{Scan} for the
-recognition of universal tokens, as they were defined in the previous
-section. Scanning is a rather complex operation that, for example,
-includes the conversion of a sequence of digits into an internal
-floating-point representation and vice-versa. Scanning a real number
-involves recognizing $m$ and $d$, and computing $x = m \times 10^d$.
-This is done using procedure \code{Ten(d)} computing $10^d$ by
-repeated multiplication maintaining the invariant
-$t \times p^n = 10^{n_0}$, where $n_0$ is the initial value of $n$.
+\noindent Procedure \code{Read} is typically used as a primitive by text scanners and in particular by the built-in scanner \code{Scan} for the recognition of universal tokens, as they were defined in the previous section. Scanning is a rather complex operation that, for example, includes the conversion of a sequence of digits into an internal floating-point representation and vice-versa. Scanning a real number involves recognizing $m$ and $d$, and computing $x = m \times 10^d$. This is done using procedure \code{Ten(d)} computing $10^d$ by repeated multiplication maintaining the invariant $t \times p^n = 10^{n_0}$, where $n_0$ is the initial value of $n$.
 \begintt
 PROCEDURE Ten(n: INTEGER): REAL;
   VAR t, p: REAL;
@@ -3190,7 +3165,7 @@ END Ten;
 \noindent Writing a real number in decimal form is more complicated. It involves the computation of $m$ and $d$ from $x = n \times 2^e$ so that $x = m \times 10^d$ with $1.0 \le m < 10.0$. First, $e$ is obtained with the standard function \code{UNPK(x, e)}, then $d$ is computed (from the relationship
 $10^k = 2^{k*log(10)}$) as $d = e \div log_2(10)$.
 In order to avoid a real division for obtaining $d$,
-we use the approximation $1.0 \div log_2(10) $~\equiv~\code{77 DIV 256},
+we use the approximation $1.0 \div log_2(10) $~\approx~\code{77 DIV 256},
 and then compute
 \code{x := x / Ten(e)} or \code{x := x * Ten(-e)}.
 Further details are to be taken from the listings of \code{WriteReal} and \code{WriteRealFix}.
@@ -3203,39 +3178,32 @@ And finally, typed characters that are supposed to be inserted into a text need 
 
 As a consequence, the following qualities of the underlying file system are mandatory for the piece technique to work properly:
 
-1. Once a file page is allocated it must not be reused (until system restart).
+\item{1.} Once a file page is allocated it must not be reused (until system restart).
+\item{2.} A versatile file buffering mechanism supporting multiple buffers per file is required.
+\item{3.} Files must be allowed to be open in read mode and in write mode simultaneously.
 
-2. A versatile file buffering mechanism supporting multiple buffers per file is required.
-
-3. Files must be allowed to be open in read mode and in write mode simultaneously.
-
-\noindent The format of text sections in files obeys a set of syntactical rules (productions) that can easily be specified in EBNF-notation:
+\noindent The format of text sections in files obeys a set of syntactical rules (productions) that can easily be specified in \acro{EBNF}-notation:
 \begintt
 TextSection = ident header {char}.
 header = type offset run {run} null length.
 run = font [name] color offset length.
 \endtt
 
-\noindent In the \code{TextSection} production ident is an identifier for text blocks. In the header production \code{type} is a type-discriminator, \code{offset}
-is the offset to the character part, \code{run} is a run-descriptor, \code{null} is
-a null-character, and \code{length} is the length of the character
-sequence. In the \code{run} production \code{font}, \code{color}, and \code{offset} are
-specifications of looks, and \code{length} is the run-length. In order to
-save space, font names are coded as ordinal numbers within a text
-section. If and only if a font appears for the first time in a text
-block it is followed by the actual font name.
+\noindent In the \code{TextSection} production \code{ident} is an identifier for text blocks. In the header production \code{type} is a type-discriminator, \code{offset} is the offset to the character part, \code{run} is a run-descriptor, \code{null} is a null-character, and \code{length} is the length of the character sequence. In the \code{run} production \code{font}, \code{color}, and \code{offset} are specifications of looks, and \code{length} is the run-length. In order to save space, font names are coded as ordinal numbers within a text section. If and only if a font appears for the first time in a text block it is followed by the actual font name.
 
 Let us conclude this Section with two side-remarks and a summary.
 
 \noindent Remarks:
 
-TODO: indent these two lines
+{ \narrower
 
-For compatibility reasons, plain ASCII-files are accepted as text files as well. They are mapped to texts consisting of a single run with standard looks.
+For compatibility reasons, plain \acro{ASCII}-files are accepted as text files as well. They are mapped to texts consisting of a single run with standard looks.
 
 Internalizing a text section from a file is extremely efficient because it is obviously sufficient to read the header and translate it into the initial state of the piece list.
 
-Summary: The mechanism used for the implementation of the abstract data type \code{Text} is completely hidden from clients. It is a generalized version of the original piece list technique, adapted to texts with looks. The piece list technique in turn is based on the principle of indirection: Operations operate on descriptors of texts rather than on texts themselves. The benefits are efficiency and non-destructive operations. However, the technique works properly only in combination with an efficient (and reliable) garbage collector and a suitable file system.
+}
+
+\noindent Summary: The mechanism used for the implementation of the abstract data type \code{Text} is completely hidden from clients. It is a generalized version of the original piece list technique, adapted to texts with looks. The piece list technique in turn is based on the principle of indirection: Operations operate on descriptors of texts rather than on texts themselves. The benefits are efficiency and non-destructive operations. However, the technique works properly only in combination with an efficient (and reliable) garbage collector and a suitable file system.
 
 \beginsubsection 5.3. TEXT FRAMES.
 
