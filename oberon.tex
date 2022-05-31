@@ -2874,42 +2874,29 @@ preserving consistency between text models and their views.
 
 \beginsubsection 5.2. TEXT MANAGEMENT.
 
-The art and challenge of modularization lie in finding an effective
-decomposition of a topic into modules with relatively thin interfaces
-or, in other words, into modules with a great potential for
-information hiding. Text systems provide a welcome opportunity of an
-exercise. A closer analysis immediately leads to the following
-separate concerns corresponding to the components \code{Model\/}, \code{View\/} and
-\code{Controller\/} of the MVC scheme: Text management, text rendering, and
-text editing. If we combine \code{View\/} and \code{Controller\/} and add an auxiliary
-font handling module \code{Fonts\/}, we arrive at the following three-module
-import hierarchy:
-
-TODO: table
-Module
-TextFrames Texts
-Fonts
-Object type
-Frame Text Font
-Service
-Text rendering and editing Text management
-Font management
-
+The art and challenge of modularization lie in finding an effective decomposition of a topic into modules with relatively thin interfaces or, in other words, into modules with a great potential for information hiding. Text systems provide a welcome opportunity of an exercise. A closer analysis immediately leads to the following separate concerns corresponding to the components \code{Model}, \code{View} and \code{Controller} of the \acro{MVC} scheme: Text management, text rendering, and text editing. If we combine \code{View} and \code{Controller} and add an auxiliary font handling module \code{Fonts}, we arrive at the following three-module import hierarchy:
+\medskip
+\halign{#\hfil\quad&#\hfil\quad&#\hfil\cr
+Module & Object type & Service\cr
+\noalign{\smallskip\hrule}\cr
+\code{TextFrames} & Frame & Text rendering and editing \cr
+\code{Texts} & Text & Text management \cr
+\code{Fonts} & Font & Font management \cr
+}\medskip
 Note that, in contrast to the display-subsystem, the associated object
 types are not connected hierarchically here.
 
-Separate Sections 5.3 and 5.4 will be devoted to modules \code{TextFrames\/}
-and \code{Fonts\/} respectively. In the current Section
-we focus on module \code{Texts\/}. Regarding it as a model of the
-abstract data type Text presented in the previous Section, its
+Separate Sections 5.3 and 5.4 will be devoted to modules \code{TextFrames}
+and \code{Fonts} respectively. In the current Section
+we focus on module \code{Texts}. Regarding it as a model of the
+abstract data type \code{Text} presented in the previous Section, its
 definition is congruent with the specification of the abstract data
 type itself, and we need not repeat it here.
 
 The main topics of this Section are internal representation and file
 representation of texts. We first emphasize that the internal
 representation of a text is a completely private matter of module
-\code{Texts\/} that is encapsulated and hidden from clients. In particular, the
-representation could be changed at any time without invalidating any
+\code{Texts} that is encapsulated and hidden from clients. In particular, the representation could be changed at any time without invalidating any
 single client. In principle, the same is true for the file
 representation. However, stability is of paramount importance here
 because files serve the additional purposes of backing up text on
@@ -2917,41 +2904,28 @@ external media and of porting text to other environments.
 
 Our choice of an internal representation of text was determined by a catalogue of requirements and desired properties. The wish list looks like this:
 
-1.) lean data structure
+\item{1.} lean data structure
+\item{2.} closed under editing operations
+\item{3.} efficient editing operations
+\item{4.} efficient sequential reading
+\item{5.} efficient direct positioning
+\item{6.} super efficient internalizing
+\item{7.} preserving file representations
 
-2.) closed under editing operations 3.) efficient editing operations
-
-4.) efficient sequential reading
-
-5.) efficient direct positioning
-
-6.) super efficient internalizing
-
-7.) preserving file representations
-
-\noindent With the exception of 5.), we found these requirements met
+\noindent With the exception of 5., we found these requirements met
 perfectly by an adequately generalized variant of the piece list
-technique that was originally used for Xerox PARC's Bravo text editor
-and also for ETH's former document editors Dyna and Lara
-[Gutknecht]. The original piece list is able to describe a vanilla
-text without looks. It is based on two principles:
+technique that was originally used for Xerox \acro{PARC}'s Bravo text editor
+and also for \acro{ETH}'s former document editors Dyna and Lara \footnote{{\mc[1]}}{J. Gutknecht, "Concept of the Text Editor Lara", Communications of the ACM, Sept. 1985, Vol.28, No. 9.}. The original piece list is able to describe a vanilla text without looks. It is based on two principles:
 
+\item{1.} A text is regarded as a sequence of \emph{pieces}, where a piece is a section of a text file consisting of a sequence of contiguous characters.
 
-1.) A text is regarded as a sequence of pieces, where a piece is a
-section of a text file consisting of a sequence of contiguous
-characters.
+\item{2.} Every piece is represented by a descriptor \code{(f, pos, len)\/}, where the components designate a file, a starting position, and a length respectively. The whole text is represented as a list of piece descriptors (in short: piece list). The editing operations operate on the piece list rather than on the pieces themselves.
 
-2.) Every piece is represented by a descriptor \code{(f, pos, len)\/}, where
-the components designate a file, a starting position, and a length
-respectively. The whole text is represented as a list of piece
-descriptors (in short: piece list). The editing operations operate on
-the piece list rather than on the pieces themselves.
-
-TODO: Figure 5.1 Piece chain representing a text
+\figure{pdfs/fig-5.1.png}{4.7in}{5.1}{Piece chain representing a text}
 
 Figure 5.1 shows a typical piece list representing (the current state
 of) a text. Investigating the effects of the basic editing operations
-delete and insert on the piece list, we end up with these algorithms:
+\code{delete} and \code{insert} on the piece list, we end up with these algorithms:
 \begintt
 delete stretch [beg, end) of text = BEGIN
   split pieces at beg and at end;
@@ -2966,11 +2940,11 @@ END
 
 \noindent Of course, splitting is superfluous if the desired splitting point
 happens to coincide with the beginning of a piece. Figures 5.3 and 5.4
-show the resulting piece list after a delete and an insert-operation
+show the resulting piece list after a \code{delete} and an \code{insert}-operation
 respectively.
 
-TODO: Figure 5.2 Piece chain after delete operation
-TODO: Figure 5.3 Piece chain after insert operation
+\figure{pdfs/fig-5.1.png}{4.7in}{5.2}{Piece chain after delete operation}
+\figure{pdfs/fig-5.1.png}{4.7in}{5.3}{Piece chain after insert operation}
 
 Checking our wish list of above we immediately recognize the
 requirements 1.), 2.), and 3.) as met. Requirement 4.) is also met
@@ -3901,10 +3875,6 @@ END Edit.
 \endtt
 
 \noindent The first group of commands in \code{Edit} is used to display, locate, and store texts or parts of texts. In turn they open a text file and display it, open a program text and show the declaration of a given object, locate a given position in a displayed text (main application: locating an error found by the compiler), search a pattern, and store the current state of a displayed text. Commands in the next group are related with editing. They allow restoring of the previously deleted part of text, copying a font attribute to the current text selection, and change attributes of the current text selection. Note that the commands \code{CopyFont}, \code{ChangeFont}, \code{ChangeColor}, and \code{ChangeOffset} are extrinsic variations of the intrinsic copy-look operation. The implementations of the toolbox commands are given in the Appendix.
-
-References
-
-[Gutknecht] J. Gutknecht, "Concept of the Text Editor Lara", Communications of the ACM, Sept. 1985, Vol.28, No. 9.
 
 \beginchapter CHAPTER 6: THE MODULE LOADER.
 

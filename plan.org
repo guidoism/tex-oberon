@@ -17,17 +17,17 @@
 - [X] Proofread until 4.1. THE SCREEN LAYOUT MODEL.
 - [X] Proofread until 4.2. VIEWERS AS OBJECTS.
 - [X] Proofread until 4.3. FRAMES AS BASIC DISPLAY ENTITIES.
-- [ ] Proofread until 4.4. DISPLAY MANAGEMENT.
+- [X] Proofread until 4.4. DISPLAY MANAGEMENT.
 - [X] Proofread until 4.4.1. Viewers.
 - [X] Proofread until 4.4.2. Menu Viewers.
 - [X] Proofread until 4.4.3. Cursor Management.
 - [X] Proofread until 4.5. RASTER OPERATIONS.
 - [X] Proofread until 4.6. STANDARD DISPLAY CONFIGURATIONS AND TOOLBOX.
-- [ ] Proofread until 5.1. TEXT AS AN ABSTRACT DATA TYPE.
+- [X] Proofread until 5.1. TEXT AS AN ABSTRACT DATA TYPE.
 - [X] Proofread until 5.1.1. Loading and Storing Text.
 - [X] Proofread until 5.1.2. Editing Text.
 - [X] Proofread until 5.1.3. Accessing Text.
-- [ ] Proofread until 5.2. TEXT MANAGEMENT.
+- [ ] Proofread until 5.2. TEXT MANAGEMENT. (GUIDO: Got to Figure 5.3)
 - [ ] Proofread until 5.3. TEXT FRAMES.
 - [ ] Proofread until 5.4. THE FONT MACHINERY.
 - [ ] Proofread until 5.5. THE EDIT TOOLBOX.
