@@ -2943,15 +2943,15 @@ happens to coincide with the beginning of a piece. Figures 5.3 and 5.4
 show the resulting piece list after a \code{delete} and an \code{insert}-operation
 respectively.
 
-\figure{pdfs/fig-5.1.png}{4.7in}{5.2}{Piece chain after delete operation}
-\figure{pdfs/fig-5.1.png}{4.7in}{5.3}{Piece chain after insert operation}
+\figure{pdfs/fig-5.2.png}{4.7in}{5.2}{Piece chain after delete operation}
+\figure{pdfs/fig-5.3.png}{4.7in}{5.3}{Piece chain after insert operation}
 
 Checking our wish list of above we immediately recognize the
-requirements 1.), 2.), and 3.) as met. Requirement 4.) is also met
+requirements 1, 2, and 3 as met. Requirement 4 is also met
 under the assumption of an efficient mechanism for direct positioning
-in files. Requirement 6.) can be checked off because the piece list
+in files. Requirement 6 can be checked off because the piece list
 initially consists of a single piece spanning the entire text
-file. Finally, requirement 7.) is met simply because the operations do
+file. Finally, requirement 7 is met simply because the operations do
 not affect file representations at all.
 
 In Oberon we adapted the piece list technique to texts with looks
@@ -2970,13 +2970,13 @@ change looks in a stretch [beg, end) of text = BEGIN
 END
 \endtt
 
-\noindent This shows that requirements 2.) and 3.) in the wish list are still satisfied.
+\noindent This shows that requirements 2 and 3 in the wish list are still satisfied.
 
-TODO: Figure 5.4 Generalized piece chain representing a text with looks
+\figure{pdfs/fig-5.4.png}{4.7in}{5.4}{Generalized piece chain representing a text with looks}
 
-Initially, the pieces are identical with runs, and the number of elements in the piece list is equal to the number of runs. Because this number is typically small in comparison with the total number of characters in a text requirement 6.) is still met.
+Initially, the pieces are identical with runs, and the number of elements in the piece list is equal to the number of runs. Because this number is typically small in comparison with the total number of characters in a text requirement 6 is still met.
 
-We conclude that the new aspects do not invalidate the positive rating given above to the piece technique with regard to requirements 1.), 2.), 3.), 4.), 6.), and 7.) in our wish list. However, the requirement of efficient direct positioning remains. The problem is the necessity to scan through the piece list sequentially in order to locate the piece that contains the desired position. We investigated different solutions of this efficiency problem. They are based on different data structures connecting the piece descriptors, among them a piece tree and a variant of the piece list featuring an additional long-distance link like in a skip-list.
+We conclude that the new aspects do not invalidate the positive rating given above to the piece technique with regard to requirements 1, 2, 3, 4, 6, and 7 in our wish list. However, the requirement of efficient direct positioning remains. The problem is the necessity to scan through the piece list sequentially in order to locate the piece that contains the desired position. We investigated different solutions of this efficiency problem. They are based on different data structures connecting the piece descriptors, among them a piece tree and a variant of the piece list featuring an additional long-distance link like in a skip-list.
 
 Eventually, we decided in favor of a simpler solution that we can easily justify by pointing out that the typical editing scenario is zooming into a local region of text, i.e. positioning at an arbitrary location once and subsequently positioning at locations in its immediate neighborhood many times. Therefore, an appropriate solution is caching the most recently calculated values (pos, piece) of the translation map. Of course, this does not solve the problem of cache misses. Notice, however, that this problem is acute only in the case of extremely long piece lists that do not occur in ordinary texts and editing sessions.
 
