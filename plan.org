@@ -27,7 +27,7 @@
 - [X] Proofread until 5.1.1. Loading and Storing Text.
 - [X] Proofread until 5.1.2. Editing Text.
 - [X] Proofread until 5.1.3. Accessing Text.
-- [ ] Proofread until 5.2. TEXT MANAGEMENT. (GUIDO: Got to Figure 5.3)
+- [X] Proofread until 5.2. TEXT MANAGEMENT.
 - [ ] Proofread until 5.3. TEXT FRAMES.
 - [ ] Proofread until 5.4. THE FONT MACHINERY.
 - [ ] Proofread until 5.5. THE EDIT TOOLBOX.
