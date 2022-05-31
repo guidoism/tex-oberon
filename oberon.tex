@@ -3453,42 +3453,40 @@ END Edit;
 
 \noindent We see that the editing operation is determined by the first key pressed (primary key) and can then be varied by ``interclicking'' that is, by clicking a secondary key while holding down the primary key. As a convention, (inter)clicking all keys means cancelling the operation. Mouse clicks and subsequent actions can now be summarized as follows:
 \medskip
-1. In the scroll bar
+\noindent 1. In the scroll bar
 \medskip
-
 \halign{#\hfil\quad&#\hfil\quad&#\hfil\cr
 primary key&secondary key&action\cr
-\noalign{\hrule}\cr
-ML&-&scroll designated line to the top\cr
-MM&-&scroll proportional to mouse position\cr
-MM&ML&scroll to the end of the text\cr
-MM&MR&scroll to the beginning of the text\cr
+\noalign{\smallskip\hrule}\cr
+\acro{ML} & -         &scroll designated line to the top\cr
+\acro{MM} & -         &scroll proportional to mouse position\cr
+\acro{MM} & \acro{ML} &scroll to the end of the text\cr
+\acro{MM} & \acro{MR} &scroll to the beginning of the text\cr
 }
-
-2. In the text area
+\medskip\noindent 2. In the text area
 \medskip
-
 \halign{#\hfil\quad&#\hfil\quad&#\hfil\cr
 primary key&secondary key&action\cr
-\noalign{\hrule}\cr
-ML &-  & set caret\cr
-ML &MM & copy selection to caret\cr
-ML &MT & copy looks\cr
-MM &-  & call selected procedure\cr
-MR &-  & select\cr
-MR &ML & delete selection\cr
-MR &MM & copy selection to caret\cr
+\noalign{\smallskip\hrule}\cr
+\acro{ML} &-  & set caret\cr
+\acro{ML} &\acro{MM} & copy selection to caret\cr
+\acro{ML} &\acro{MT} & copy looks\cr
+\acro{MM} &-  & call selected procedure\cr
+\acro{MR} &-  & select\cr
+\acro{MR} &\acro{ML} & delete selection\cr
+\acro{MR} &\acro{MM} & copy selection to caret\cr
 }
 
-In the text area the keys are interpreted according to their generic semantics:
-
+\medskip
+\noindent In the text area the keys are interpreted according to their generic semantics:
+\medskip
 \halign{#\hfil&#\hfil\cr
 left key   & \equiv \quad point key   \cr
 middle key & \equiv \quad execute key \cr
 right key  & \equiv \quad select key  \cr
 }
-
-Let us ``zoom into'' one of the editing operations,
+\medskip
+\noindent Let us ``zoom into'' one of the editing operations,
 for example into \code{TrackCaret}.
 \begintt
 PROCEDURE TrackCaret (F: Frame; X, Y: INTEGER; VAR keysum: SET);

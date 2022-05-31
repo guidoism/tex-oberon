@@ -1,757 +1,758 @@
 \input taocpmac
 
+\def\INTEGER{{\bf integer}}
+\def\LONGINT{{\bf longint}}
+\def\BOOLEAN{{\bf boolean}}
+\def\REAL{{\bf real}}
+\def\BYTE{{\bf byte}}
+\def\CHAR{{\bf char}}
+\def\SET{{\bf set}}
+\def\VAR{{\bf var }}
+\def\ARRAYOF{{\bf array of }}
+\def\ORB{{\mc ORB}}
+\def\ORG{{\mc ORG}}
+\def\ORS{{\mc ORS}}
+\def\ORP{{\mc ORP}}
+
 \beginsubsection 18.1. Curves.
 
-:15:  PROCEDURE Dot(f: GraphicFrames.Frame; col, x, y: INTEGER);
-:20:  PROCEDURE mark(f: GraphicFrames.Frame; col, x, y: INTEGER);
-:29:  PROCEDURE line(f: GraphicFrames.Frame; col: INTEGER; x, y, w, h, d: LONGINT);
-:48:  PROCEDURE circle(f: GraphicFrames.Frame; col: INTEGER; x0, y0, r: LONGINT);
-:65:  PROCEDURE ellipse(f: GraphicFrames.Frame; col: INTEGER; x0, y0, a, b: LONGINT);
-:90:  PROCEDURE New*;
-:95:  PROCEDURE Copy(src, dst: Graphics.Object);
-:100:  PROCEDURE Draw(obj: Graphics.Object; VAR M: Graphics.Msg);
-:146:  PROCEDURE Selectable(obj: Graphics.Object; x, y: INTEGER): BOOLEAN;
-:160:  PROCEDURE Change(obj: Graphics.Object; VAR M: Graphics.Msg);
-:165:  PROCEDURE Read(obj: Graphics.Object; VAR R: Files.Rider; VAR C: Graphics.Context);
-:171:  PROCEDURE Write(obj: Graphics.Object; cno: INTEGER; VAR W: Files.Rider; VAR C: Graphics.Context);
-:176:  PROCEDURE MakeLine*;  (*command*)
-:197:  PROCEDURE MakeCircle*;  (*command*)
-:215:  PROCEDURE MakeEllipse*;  (*command*)
+\item{\it 15:} Dot(f: GraphicFrames.Frame; col, x, y: \INTEGER);
+\item{\it 20:} mark(f: GraphicFrames.Frame; col, x, y: \INTEGER);
+\item{\it 29:} line(f: GraphicFrames.Frame; col: \INTEGER; x, y, w, h, d: \LONGINT);
+\item{\it 48:} circle(f: GraphicFrames.Frame; col: \INTEGER; x0, y0, r: \LONGINT);
+\item{\it 65:} ellipse(f: GraphicFrames.Frame; col: \INTEGER; x0, y0, a, b: \LONGINT);
+\item{\it 90:} New*;
+\item{\it 95:} Copy(src, dst: Graphics.Object);
+\item{\it 100:} Draw(obj: Graphics.Object; \VAR M: Graphics.Msg);
+\item{\it 146:} Selectable(obj: Graphics.Object; x, y: \INTEGER): \BOOLEAN;
+\item{\it 160:} Change(obj: Graphics.Object; \VAR M: Graphics.Msg);
+\item{\it 165:} Read(obj: Graphics.Object; \VAR R: Files.Rider; \VAR C: Graphics.Context);
+\item{\it 171:} Write(obj: Graphics.Object; cno: \INTEGER; \VAR W: Files.Rider; \VAR C: Graphics.Context);
+\item{\it 176:} MakeLine*;  (*command*)
+\item{\it 197:} MakeCircle*;  (*command*)
+\item{\it 215:} MakeEllipse*;  (*command*)
 
 \beginsubsection 18.2. Display.
 
-:10:    Handler* = PROCEDURE (F: Frame; VAR M: FrameMsg);
-:20:  PROCEDURE Handle*(F: Frame; VAR M: FrameMsg);
-:27:  PROCEDURE Dot*(col, x, y, mode: INTEGER);
-:38:  PROCEDURE ReplConst*(col, x, y, w, h, mode: INTEGER);
-:73:  PROCEDURE CopyPattern*(col, patadr, x, y, mode: INTEGER);  (*only for modes = paint, invert*)
-:99:  PROCEDURE CopyBlock*(sx, sy, w, h, dx, dy, mode: INTEGER); (*only for mode = replace*)
-:155:  PROCEDURE ReplPattern*(col, patadr, x, y, w, h, mode: INTEGER);
+\item{\it 20:} Handle*(F: Frame; \VAR M: FrameMsg);
+\item{\it 27:} Dot*(col, x, y, mode: \INTEGER);
+\item{\it 38:} ReplConst*(col, x, y, w, h, mode: \INTEGER);
+\item{\it 73:} CopyPattern*(col, patadr, x, y, mode: \INTEGER);  (*only for modes = paint, invert*)
+\item{\it 99:} CopyBlock*(sx, sy, w, h, dx, dy, mode: \INTEGER); (*only for mode = replace*)
+\item{\it 155:} ReplPattern*(col, patadr, x, y, w, h, mode: \INTEGER);
 
 \beginsubsection 18.3. Draw.
 
-:15:  PROCEDURE Open*;
-:36:  PROCEDURE Delete*;
-:45:  PROCEDURE GetArg(VAR S: Texts.Scanner);
-:54:  PROCEDURE SetWidth*;
-:60:  PROCEDURE ChangeColor*;
-:68:  PROCEDURE ChangeWidth*;
-:76:  PROCEDURE ChangeFont*;
-:85:  PROCEDURE Redraw(Q: BOOLEAN);
-:96:  PROCEDURE Ticks*;
-:100:  PROCEDURE Restore*;
-:104:  PROCEDURE Backup (VAR name: ARRAY OF CHAR);
-:115:  PROCEDURE Store*;
-:142:  PROCEDURE Macro*;
+\item{\it 15:} Open*;
+\item{\it 36:} Delete*;
+\item{\it 45:} GetArg(\VAR S: Texts.Scanner);
+\item{\it 54:} SetWidth*;
+\item{\it 60:} ChangeColor*;
+\item{\it 68:} ChangeWidth*;
+\item{\it 76:} ChangeFont*;
+\item{\it 85:} Redraw(Q: \BOOLEAN);
+\item{\it 96:} Ticks*;
+\item{\it 100:} Restore*;
+\item{\it 104:} Backup (\VAR name: \ARRAYOF\CHAR);
+\item{\it 115:} Store*;
+\item{\it 142:} Macro*;
 
 \beginsubsection 18.4. Edit.
 
-:13:  PROCEDURE Max(i, j: LONGINT): LONGINT;
-:19:  PROCEDURE Open*;
-:39:  PROCEDURE Store*;
-:47:    PROCEDURE Backup (VAR name: ARRAY OF CHAR);
-:73:  PROCEDURE CopyLooks*;
-:90:  PROCEDURE ChangeFont*;
-:102:  PROCEDURE ChangeColor*;
-:114:  PROCEDURE ChangeOffset*;
-:126:  PROCEDURE Search*;  (*uses global variables M, pat, d for Boyer-Moore search*)
-:134:    PROCEDURE Forward(n: INTEGER; VAR R: Texts.Reader; VAR buf: ARRAY OF CHAR);
-:175:  PROCEDURE Locate*;
-:200:  PROCEDURE Recall*;
+\item{\it 13:} Max(i, j: \LONGINT): \LONGINT;
+\item{\it 19:} Open*;
+\item{\it 39:} Store*;
+\item{\it 47:} Backup (\VAR name: \ARRAYOF\CHAR);
+\item{\it 73:} CopyLooks*;
+\item{\it 90:} ChangeFont*;
+\item{\it 102:} ChangeColor*;
+\item{\it 114:} ChangeOffset*;
+\item{\it 126:} Search*;  (*uses global variables M, pat, d for Boyer-Moore search*)
+\item{\it 134:} Forward(n: \INTEGER; \VAR R: Texts.Reader; \VAR buf: \ARRAYOF\CHAR);
+\item{\it 175:} Locate*;
+\item{\it 200:} Recall*;
 
 \beginsubsection 18.5. FileDir.
 
-:24:    EntryHandler*   = PROCEDURE (name: FileName; sec: DiskAdr; VAR continue: BOOLEAN);
-:57:  PROCEDURE Search*(name: FileName; VAR A: DiskAdr);
-:74:  PROCEDURE insert(name: FileName;
-:134:  PROCEDURE Insert*(name: FileName; fad: DiskAdr);
-:149:  PROCEDURE underflow(VAR c: DirPage;  (*ancestor page*)
-:198:  PROCEDURE delete(name: FileName;
-:209:    PROCEDURE del(VAR a: DirPage; R: INTEGER; dpg1: DiskAdr; VAR h: BOOLEAN);
-:244:  PROCEDURE Delete*(name: FileName; VAR fad: DiskAdr);
-:258:  PROCEDURE enumerate(prefix:   ARRAY OF CHAR;
-:284:  PROCEDURE Enumerate*(prefix: ARRAY OF CHAR; proc: EntryHandler);
-:291:PROCEDURE Init*;
-:295:    PROCEDURE MarkSectors(VAR A: ARRAY OF DiskAdr; k: INTEGER);
-:300:      PROCEDURE sift(VAR A: ARRAY OF DiskAdr; L, R: INTEGER);
-:334:    PROCEDURE TraverseDir(VAR A: ARRAY OF DiskAdr; VAR k: INTEGER; dpg: DiskAdr);
+\item{\it 57:} Search*(name: FileName; \VAR A: DiskAdr);
+\item{\it 74:} insert(name: FileName;
+\item{\it 134:} Insert*(name: FileName; fad: DiskAdr);
+\item{\it 149:} underflow(\VAR c: DirPage;  (*ancestor page*)
+\item{\it 198:} delete(name: FileName;
+\item{\it 209:} del(\VAR a: DirPage; R: \INTEGER; dpg1: DiskAdr; \VAR h: \BOOLEAN);
+\item{\it 244:} Delete*(name: FileName; \VAR fad: DiskAdr);
+\item{\it 258:} enumerate(prefix:   \ARRAYOF\CHAR;
+\item{\it 284:} Enumerate*(prefix: \ARRAYOF\CHAR; proc: EntryHandler);
+\item{\it 291:} Init*;
+\item{\it 295:} MarkSectors(\VAR A: \ARRAYOF DiskAdr; k: \INTEGER);
+\item{\it 300:} sift(\VAR A: \ARRAYOF DiskAdr; L, R: \INTEGER);
+\item{\it 334:} TraverseDir(\VAR A: \ARRAYOF DiskAdr; \VAR k: \INTEGER; dpg: DiskAdr);
 
 \beginsubsection 18.6. Files.
 
-:61:  PROCEDURE Check(s: ARRAY OF CHAR;
-:79:  PROCEDURE Old*(name: ARRAY OF CHAR): File;
-:114:  PROCEDURE New*(name: ARRAY OF CHAR): File;
-:138:  PROCEDURE UpdateHeader(f: File; VAR F: FileDir.FileHeader);
-:145:  PROCEDURE ReadBuf(f: File; buf: Buffer; pos: INTEGER);
-:156:  PROCEDURE WriteBuf(f: File; buf: Buffer);
-:182:  PROCEDURE Buf(f: File; pos: INTEGER): Buffer;
-:190:  PROCEDURE GetBuf(f: File; pos: INTEGER): Buffer;
-:205:  PROCEDURE Unbuffer(f: File);
-:231:  PROCEDURE Register*(f: File);
-:241:  PROCEDURE Close*(f: File);
-:246:  PROCEDURE Purge*(f: File);
-:263:  PROCEDURE Delete*(name: ARRAY OF CHAR; VAR res: INTEGER);
-:273:  PROCEDURE Rename*(old, new: ARRAY OF CHAR; VAR res: INTEGER);
-:291:  PROCEDURE Length*(f: File): INTEGER;
-:295:  PROCEDURE Date*(f: File): INTEGER;
-:301:  PROCEDURE Set*(VAR r: Rider; f: File; pos: INTEGER);
-:315:  PROCEDURE Pos*(VAR r: Rider): INTEGER;
-:319:  PROCEDURE Base*(VAR r: Rider): File;
-:323:  PROCEDURE ReadByte*(VAR r: Rider; VAR x: BYTE);
-:340:  PROCEDURE ReadBytes*(VAR r: Rider; VAR x: ARRAY OF BYTE; n: INTEGER);
-:346:  PROCEDURE Read*(VAR r: Rider; VAR ch: CHAR);
-:363:  PROCEDURE ReadInt*(VAR R: Rider; VAR x: INTEGER);
-:369:  PROCEDURE ReadSet*(VAR R: Rider; VAR s: SET);
-:374:  PROCEDURE ReadReal*(VAR R: Rider; VAR x: REAL);
-:379:  PROCEDURE ReadString*(VAR R: Rider; VAR x: ARRAY OF CHAR);
-:389:  PROCEDURE ReadNum*(VAR R: Rider; VAR x: INTEGER);
-:398:  PROCEDURE NewExt(f: File);
-:405:  PROCEDURE WriteByte*(VAR r: Rider; x: BYTE);
-:426:  PROCEDURE WriteBytes*(VAR r: Rider; x: ARRAY OF BYTE; n: INTEGER);
-:432:  PROCEDURE Write*(VAR r: Rider; ch: CHAR);
-:453:  PROCEDURE WriteInt*(VAR R: Rider; x: INTEGER);
-:460:  PROCEDURE WriteSet*(VAR R: Rider; s: SET);
-:464:  PROCEDURE WriteReal*(VAR R: Rider; x: REAL);
-:468:  PROCEDURE WriteString*(VAR R: Rider; x: ARRAY OF CHAR);
-:474:  PROCEDURE WriteNum*(VAR R: Rider; x: INTEGER);
-:482:  PROCEDURE Init*;
-:486:  PROCEDURE RestoreList*; (*after mark phase of garbage collection*)
-:489:    PROCEDURE mark(f: INTEGER): INTEGER;
+\item{\it 61:} Check(s: \ARRAYOF\CHAR;
+\item{\it 79:} Old*(name: \ARRAYOF\CHAR): File;
+\item{\it 114:} New*(name: \ARRAYOF\CHAR): File;
+\item{\it 138:} UpdateHeader(f: File; \VAR F: FileDir.FileHeader);
+\item{\it 145:} ReadBuf(f: File; buf: Buffer; pos: \INTEGER);
+\item{\it 156:} WriteBuf(f: File; buf: Buffer);
+\item{\it 182:} Buf(f: File; pos: \INTEGER): Buffer;
+\item{\it 190:} GetBuf(f: File; pos: \INTEGER): Buffer;
+\item{\it 205:} Unbuffer(f: File);
+\item{\it 231:} Register*(f: File);
+\item{\it 241:} Close*(f: File);
+\item{\it 246:} Purge*(f: File);
+\item{\it 263:} Delete*(name: \ARRAYOF\CHAR; \VAR res: \INTEGER);
+\item{\it 273:} Rename*(old, new: \ARRAYOF\CHAR; \VAR res: \INTEGER);
+\item{\it 291:} Length*(f: File): \INTEGER;
+\item{\it 295:} Date*(f: File): \INTEGER;
+\item{\it 301:} Set*(\VAR r: Rider; f: File; pos: \INTEGER);
+\item{\it 315:} Pos*(\VAR r: Rider): \INTEGER;
+\item{\it 319:} Base*(\VAR r: Rider): File;
+\item{\it 323:} ReadByte*(\VAR r: Rider; \VAR x: \BYTE);
+\item{\it 340:} ReadBytes*(\VAR r: Rider; \VAR x: \ARRAYOF \BYTE; n: \INTEGER);
+\item{\it 346:} Read*(\VAR r: Rider; \VAR ch: \CHAR);
+\item{\it 363:} ReadInt*(\VAR R: Rider; \VAR x: \INTEGER);
+\item{\it 369:} ReadSet*(\VAR R: Rider; \VAR s: \SET);
+\item{\it 374:} ReadReal*(\VAR R: Rider; \VAR x: \REAL);
+\item{\it 379:} ReadString*(\VAR R: Rider; \VAR x: \ARRAYOF\CHAR);
+\item{\it 389:} ReadNum*(\VAR R: Rider; \VAR x: \INTEGER);
+\item{\it 398:} NewExt(f: File);
+\item{\it 405:} WriteByte*(\VAR r: Rider; x: \BYTE);
+\item{\it 426:} WriteBytes*(\VAR r: Rider; x: \ARRAYOF \BYTE; n: \INTEGER);
+\item{\it 432:} Write*(\VAR r: Rider; ch: \CHAR);
+\item{\it 453:} WriteInt*(\VAR R: Rider; x: \INTEGER);
+\item{\it 460:} WriteSet*(\VAR R: Rider; s: \SET);
+\item{\it 464:} WriteReal*(\VAR R: Rider; x: \REAL);
+\item{\it 468:} WriteString*(\VAR R: Rider; x: \ARRAYOF\CHAR);
+\item{\it 474:} WriteNum*(\VAR R: Rider; x: \INTEGER);
+\item{\it 482:} Init*;
+\item{\it 486:} RestoreList*; (*after mark phase of garbage collection*)
+\item{\it 489:} mark(f: \INTEGER): \INTEGER;
 
 \beginsubsection 18.7. Fonts.
 
-:23:PROCEDURE GetPat*(fnt: Font; ch: CHAR; VAR dx, x, y, w, h, patadr: INTEGER);
-:31:PROCEDURE This*(name: ARRAY OF CHAR): Font;
-:47:  PROCEDURE RdInt16(VAR R: Files.Rider; VAR b0: BYTE);
-:107:PROCEDURE Free*;  (*remove all but first two from font list*)
+\item{\it 23:} GetPat*(fnt: Font; ch: \CHAR; \VAR dx, x, y, w, h, patadr: \INTEGER);
+\item{\it 31:} This*(name: \ARRAYOF\CHAR): Font;
+\item{\it 47:} RdInt16(\VAR R: Files.Rider; \VAR b0: \BYTE);
+\item{\it 107:} Free*;  (*remove all but first two from font list*)
 
 \beginsubsection 18.8. GraphTool.
 
-:7:  PROCEDURE DecGraph*;
-:57:  PROCEDURE DecGraph1*;
-:108:  PROCEDURE DecLibrary1*;
-:162:  PROCEDURE ConvertFontname(VAR x: ARRAY OF CHAR);
-:169:  PROCEDURE ConvertLibrary*;
+\item{\it 7:} DecGraph*;
+\item{\it 57:} DecGraph1*;
+\item{\it 108:} DecLibrary1*;
+\item{\it 162:} ConvertFontname(\VAR x: \ARRAYOF\CHAR);
+\item{\it 169:} ConvertLibrary*;
 
 \beginsubsection 18.9. GraphicFrames.
 
-:74:  PROCEDURE SetChangeMark(F: Frame; col: INTEGER); (*set mark in corner of frame*)
-:83:  PROCEDURE Restore*(F: Frame);
-:100:  PROCEDURE FlipCross(X, Y: INTEGER);
-:111:  PROCEDURE Focus*(): Frame;
-:116:  PROCEDURE Selected*(): Frame;
-:121:  PROCEDURE This*(x, y: INTEGER): Frame;
-:126:  PROCEDURE Mark(F: Frame; mode: INTEGER);
-:131:  PROCEDURE Draw*(F: Frame);
-:136:  PROCEDURE DrawNorm(F: Frame);
-:141:  PROCEDURE Erase*(F: Frame);
-:146:  PROCEDURE DrawObj*(F: Frame; obj: Graphics.Object);
-:151:  PROCEDURE EraseObj*(F: Frame; obj: Graphics.Object);
-:156:  PROCEDURE Change*(F: Frame; VAR msg: Graphics.Msg);
-:161:  PROCEDURE FlipMark(x, y: INTEGER);
-:167:  PROCEDURE Defocus*(F: Frame);
-:177:  PROCEDURE Deselect*(F: Frame);
-:186:  PROCEDURE Macro*(Lname, Mname: ARRAY OF CHAR);
-:209:  PROCEDURE CaptionCopy(F: Frame;
-:230:  PROCEDURE NewLine(F: Frame; G: Graphics.Graph; x, y, w, h: INTEGER);
-:237:  PROCEDURE Edit(F: Frame; x0, y0: INTEGER; k0: SET);
-:322:  PROCEDURE NewCaption(F: Frame; col: INTEGER; font: Fonts.Font);
-:330:  PROCEDURE InsertChar(F: Frame; ch: CHAR);
-:340:  PROCEDURE DeleteChar(F: Frame);
-:355:  PROCEDURE GetSelection(F: Frame; VAR text: Texts.Text; VAR beg, end, time: LONGINT);
-:365:  PROCEDURE Handle*(G: Display.Frame; VAR M: Display.FrameMsg);
-:423:  PROCEDURE Store*(F: Frame; name: ARRAY OF CHAR);
-:429:  PROCEDURE ReplConst*(F: Frame; col, x, y, w, h, mode: INTEGER);
-:438:  PROCEDURE ReplPattern*(F: Frame; col, patadr, x, y, w, h, mode: INTEGER);
-:447:  PROCEDURE DrawLine(obj: Graphics.Object; VAR M: Graphics.Msg);
-:467:  PROCEDURE DrawCaption(obj: Graphics.Object; VAR M: Graphics.Msg);
-:496:  PROCEDURE DrawMacro(obj: Graphics.Object; VAR M: Graphics.Msg);
-:516:  PROCEDURE Open*(G: Frame; graph: Graphics.Graph); 
+\item{\it 74:} SetChangeMark(F: Frame; col: \INTEGER); (*set mark in corner of frame*)
+\item{\it 83:} Restore*(F: Frame);
+\item{\it 100:} FlipCross(X, Y: \INTEGER);
+\item{\it 111:} Focus*(): Frame;
+\item{\it 116:} Selected*(): Frame;
+\item{\it 121:} This*(x, y: \INTEGER): Frame;
+\item{\it 126:} Mark(F: Frame; mode: \INTEGER);
+\item{\it 131:} Draw*(F: Frame);
+\item{\it 136:} DrawNorm(F: Frame);
+\item{\it 141:} Erase*(F: Frame);
+\item{\it 146:} DrawObj*(F: Frame; obj: Graphics.Object);
+\item{\it 151:} EraseObj*(F: Frame; obj: Graphics.Object);
+\item{\it 156:} Change*(F: Frame; \VAR msg: Graphics.Msg);
+\item{\it 161:} FlipMark(x, y: \INTEGER);
+\item{\it 167:} Defocus*(F: Frame);
+\item{\it 177:} Deselect*(F: Frame);
+\item{\it 186:} Macro*(Lname, Mname: \ARRAYOF\CHAR);
+\item{\it 209:} CaptionCopy(F: Frame;
+\item{\it 230:} NewLine(F: Frame; G: Graphics.Graph; x, y, w, h: \INTEGER);
+\item{\it 237:} Edit(F: Frame; x0, y0: \INTEGER; k0: \SET);
+\item{\it 322:} NewCaption(F: Frame; col: \INTEGER; font: Fonts.Font);
+\item{\it 330:} InsertChar(F: Frame; ch: \CHAR);
+\item{\it 340:} DeleteChar(F: Frame);
+\item{\it 355:} GetSelection(F: Frame; \VAR text: Texts.Text; \VAR beg, end, time: \LONGINT);
+\item{\it 365:} Handle*(G: Display.Frame; \VAR M: Display.FrameMsg);
+\item{\it 423:} Store*(F: Frame; name: \ARRAYOF\CHAR);
+\item{\it 429:} ReplConst*(F: Frame; col, x, y, w, h, mode: \INTEGER);
+\item{\it 438:} ReplPattern*(F: Frame; col, patadr, x, y, w, h, mode: \INTEGER);
+\item{\it 447:} DrawLine(obj: Graphics.Object; \VAR M: Graphics.Msg);
+\item{\it 467:} DrawCaption(obj: Graphics.Object; \VAR M: Graphics.Msg);
+\item{\it 496:} DrawMacro(obj: Graphics.Object; \VAR M: Graphics.Msg);
+\item{\it 516:} Open*(G: Frame; graph: Graphics.Graph); 
 
 \beginsubsection 18.10. Graphics.
 
-:66:        copy*: PROCEDURE (from, to: Object);
-:67:        draw*, change*: PROCEDURE (obj: Object; VAR msg: Msg);
-:68:        selectable*: PROCEDURE (obj: Object; x, y: INTEGER): BOOLEAN;
-:69:        read*: PROCEDURE (obj: Object; VAR R: Files.Rider; VAR C: Context);
-:70:        write*: PROCEDURE (obj: Object; cno: INTEGER; VAR R: Files.Rider; VAR C: Context);
-:71:        print*: PROCEDURE (obj: Object; x, y: INTEGER)
-:90:    GetLib0: PROCEDURE (name: ARRAY OF CHAR; replace: BOOLEAN; VAR Lib: Library);
-:95:  PROCEDURE New*(obj: Object);
-:99:  PROCEDURE Add*(G: Graph; obj: Object);
-:104:  PROCEDURE ThisObj*(G: Graph; x, y: INTEGER): Object;
-:111:  PROCEDURE SelectObj*(G: Graph; obj: Object);
-:116:  PROCEDURE SelectArea*(G: Graph; x0, y0, x1, y1: INTEGER);
-:130:  PROCEDURE Draw*(G: Graph; VAR M: Msg);
-:136:  PROCEDURE List*(G: Graph);
-:150:  PROCEDURE Deselect*(G: Graph);
-:156:  PROCEDURE DrawSel*(G: Graph; VAR M: Msg);
-:165:  PROCEDURE Change*(G: Graph; VAR M: Msg);
-:174:  PROCEDURE Move*(G: Graph; dx, dy: INTEGER);
-:215:  PROCEDURE Copy*(Gs, Gd: Graph; dx, dy: INTEGER);
-:228:  PROCEDURE Delete*(G: Graph);
-:244:  PROCEDURE WMsg(s0, s1: ARRAY OF CHAR);
-:249:  PROCEDURE InitContext(VAR C: Context);
-:254:  PROCEDURE FontNo*(VAR W: Files.Rider; VAR C: Context; fnt: Fonts.Font): INTEGER;
-:265:  PROCEDURE StoreElems(VAR W: Files.Rider; VAR C: Context; obj: Object);
-:281:  PROCEDURE Store*(G: Graph; VAR W: Files.Rider);
-:286:  PROCEDURE WriteObj*(VAR W: Files.Rider; cno: INTEGER; obj: Object);
-:291:  PROCEDURE WriteFile*(G: Graph; name: ARRAY OF CHAR);
-:297:  PROCEDURE Print*(G: Graph; x0, y0: INTEGER);
-:305:  PROCEDURE GetClass*(module, allocator: ARRAY OF CHAR; VAR com: Modules.Command);
-:315:  PROCEDURE Font*(VAR R: Files.Rider; VAR C: Context): Fonts.Font;
-:320:  PROCEDURE ReadObj(VAR R: Files.Rider; obj: Object);
-:327:  PROCEDURE LoadElems(VAR R: Files.Rider; VAR C: Context; VAR fobj: Object);
-:352:  PROCEDURE Load*(G: Graph; VAR R: Files.Rider);
-:357:  PROCEDURE Open*(G: Graph; name: ARRAY OF CHAR);
-:368:  PROCEDURE SetWidth*(w: INTEGER);
-:374:  PROCEDURE GetLib*(name: ARRAY OF CHAR; replace: BOOLEAN; VAR Lib: Library);
-:406:  PROCEDURE NewLib*(Lname: ARRAY OF CHAR): Library;
-:412:  PROCEDURE StoreLib*(L: Library; Fname: ARRAY OF CHAR);
-:435:  PROCEDURE RemoveLibraries*;
-:439:  PROCEDURE ThisMac*(L: Library; Mname: ARRAY OF CHAR): MacHead;
-:446:  PROCEDURE DrawMac*(mh: MacHead; VAR M: Msg);
-:454:  PROCEDURE OpenMac*(mh: MacHead; G: Graph; x, y: INTEGER);
-:464:  PROCEDURE MakeMac*(G: Graph; VAR head: MacHead);
-:487:  PROCEDURE InsertMac*(mh: MacHead; L: Library; VAR new: BOOLEAN);
-:500:  PROCEDURE NewLine;
-:505:  PROCEDURE CopyLine(src, dst: Object);
-:509:  PROCEDURE ChangeLine(obj: Object; VAR M: Msg);
-:521:  PROCEDURE LineSelectable(obj: Object; x, y: INTEGER): BOOLEAN;
-:526:  PROCEDURE ReadLine(obj: Object; VAR R: Files.Rider; VAR C: Context);
-:530:  PROCEDURE WriteLine(obj: Object; cno: INTEGER; VAR W: Files.Rider; VAR C: Context);
-:534:(*PROCEDURE PrintLine(obj: Object; x, y: INTEGER);
-:543:  PROCEDURE NewCaption;
-:548:  PROCEDURE CopyCaption(src, dst: Object);
-:559:  PROCEDURE ChangeCaption(obj: Object;  VAR M: Msg);
-:578:  PROCEDURE CaptionSelectable(obj: Object; x, y: INTEGER): BOOLEAN;
-:583:  PROCEDURE ReadCaption(obj: Object; VAR R: Files.Rider; VAR C: Context);
-:591:  PROCEDURE WriteCaption(obj: Object; cno: INTEGER; VAR W: Files.Rider; VAR C: Context);
-:604:(*  PROCEDURE PrintCaption(obj: Object; x, y: INTEGER);
-:621:  PROCEDURE NewMacro;
-:626:  PROCEDURE CopyMacro(src, dst: Object);
-:631:  PROCEDURE ChangeMacro(obj: Object; VAR M: Msg);
-:636:  PROCEDURE MacroSelectable(obj: Object; x, y: INTEGER): BOOLEAN;
-:641:  PROCEDURE ReadMacro(obj: Object; VAR R: Files.Rider; VAR C: Context);
-:647:  PROCEDURE WriteMacro(obj: Object; cno: INTEGER; VAR W1: Files.Rider; VAR C: Context);
-:658:(*  PROCEDURE PrintMacro(obj: Object; x, y: INTEGER);
-:666:  PROCEDURE Notify(T: Texts.Text; op: INTEGER; beg, end: LONGINT);
-:670:  PROCEDURE InstallDrawMethods*(drawLine, drawCaption, drawMacro: PROCEDURE (obj: Object; VAR msg: Msg));
-/Input.Mod:14:  PROCEDURE Peek();
-:30:  PROCEDURE Available*(): INTEGER;
-:35:  PROCEDURE Read*(VAR ch: CHAR);
-:45:  PROCEDURE Mouse*(VAR keys: SET; VAR x, y: INTEGER);
-:53:  PROCEDURE SetMouseLimits*(w, h: INTEGER);
-:57:  PROCEDURE Init*;
+\item{\it 95:} New*(obj: Object);
+\item{\it 99:} Add*(G: Graph; obj: Object);
+\item{\it 104:} ThisObj*(G: Graph; x, y: \INTEGER): Object;
+\item{\it 111:} SelectObj*(G: Graph; obj: Object);
+\item{\it 116:} SelectArea*(G: Graph; x0, y0, x1, y1: \INTEGER);
+\item{\it 130:} Draw*(G: Graph; \VAR M: Msg);
+\item{\it 136:} List*(G: Graph);
+\item{\it 150:} Deselect*(G: Graph);
+\item{\it 156:} DrawSel*(G: Graph; \VAR M: Msg);
+\item{\it 165:} Change*(G: Graph; \VAR M: Msg);
+\item{\it 174:} Move*(G: Graph; dx, dy: \INTEGER);
+\item{\it 215:} Copy*(Gs, Gd: Graph; dx, dy: \INTEGER);
+\item{\it 228:} Delete*(G: Graph);
+\item{\it 244:} WMsg(s0, s1: \ARRAYOF\CHAR);
+\item{\it 249:} InitContext(\VAR C: Context);
+\item{\it 254:} FontNo*(\VAR W: Files.Rider; \VAR C: Context; fnt: Fonts.Font): \INTEGER;
+\item{\it 265:} StoreElems(\VAR W: Files.Rider; \VAR C: Context; obj: Object);
+\item{\it 281:} Store*(G: Graph; \VAR W: Files.Rider);
+\item{\it 286:} WriteObj*(\VAR W: Files.Rider; cno: \INTEGER; obj: Object);
+\item{\it 291:} WriteFile*(G: Graph; name: \ARRAYOF\CHAR);
+\item{\it 297:} Print*(G: Graph; x0, y0: \INTEGER);
+\item{\it 305:} GetClass*(module, allocator: \ARRAYOF\CHAR; \VAR com: Modules.Command);
+\item{\it 315:} Font*(\VAR R: Files.Rider; \VAR C: Context): Fonts.Font;
+\item{\it 320:} ReadObj(\VAR R: Files.Rider; obj: Object);
+\item{\it 327:} LoadElems(\VAR R: Files.Rider; \VAR C: Context; \VAR fobj: Object);
+\item{\it 352:} Load*(G: Graph; \VAR R: Files.Rider);
+\item{\it 357:} Open*(G: Graph; name: \ARRAYOF\CHAR);
+\item{\it 368:} SetWidth*(w: \INTEGER);
+\item{\it 374:} GetLib*(name: \ARRAYOF\CHAR; replace: \BOOLEAN; \VAR Lib: Library);
+\item{\it 406:} NewLib*(Lname: \ARRAYOF\CHAR): Library;
+\item{\it 412:} StoreLib*(L: Library; Fname: \ARRAYOF\CHAR);
+\item{\it 435:} RemoveLibraries*;
+\item{\it 439:} ThisMac*(L: Library; Mname: \ARRAYOF\CHAR): MacHead;
+\item{\it 446:} DrawMac*(mh: MacHead; \VAR M: Msg);
+\item{\it 454:} OpenMac*(mh: MacHead; G: Graph; x, y: \INTEGER);
+\item{\it 464:} MakeMac*(G: Graph; \VAR head: MacHead);
+\item{\it 487:} InsertMac*(mh: MacHead; L: Library; \VAR new: \BOOLEAN);
+\item{\it 500:} NewLine;
+\item{\it 505:} CopyLine(src, dst: Object);
+\item{\it 509:} ChangeLine(obj: Object; \VAR M: Msg);
+\item{\it 521:} LineSelectable(obj: Object; x, y: \INTEGER): \BOOLEAN;
+\item{\it 526:} ReadLine(obj: Object; \VAR R: Files.Rider; \VAR C: Context);
+\item{\it 530:} WriteLine(obj: Object; cno: \INTEGER; \VAR W: Files.Rider; \VAR C: Context);
+\item{\it 534:} PrintLine(obj: Object; x, y: \INTEGER);
+\item{\it 543:} NewCaption;
+\item{\it 548:} CopyCaption(src, dst: Object);
+\item{\it 559:} ChangeCaption(obj: Object;  \VAR M: Msg);
+\item{\it 578:} CaptionSelectable(obj: Object; x, y: \INTEGER): \BOOLEAN;
+\item{\it 583:} ReadCaption(obj: Object; \VAR R: Files.Rider; \VAR C: Context);
+\item{\it 591:} WriteCaption(obj: Object; cno: \INTEGER; \VAR W: Files.Rider; \VAR C: Context);
+\item{\it 604:} PrintCaption(obj: Object; x, y: \INTEGER);
+\item{\it 621:} NewMacro;
+\item{\it 626:} CopyMacro(src, dst: Object);
+\item{\it 631:} ChangeMacro(obj: Object; \VAR M: Msg);
+\item{\it 636:} MacroSelectable(obj: Object; x, y: \INTEGER): \BOOLEAN;
+\item{\it 641:} ReadMacro(obj: Object; \VAR R: Files.Rider; \VAR C: Context);
+\item{\it 647:} WriteMacro(obj: Object; cno: \INTEGER; \VAR W1: Files.Rider; \VAR C: Context);
+\item{\it 658:} PrintMacro(obj: Object; x, y: \INTEGER);
+\item{\it 666:} Notify(T: Texts.Text; op: \INTEGER; beg, end: \LONGINT);
+\item{\it 670:}  PROCEDURE InstallDrawMethods*(drawLine, drawCaption, drawMacro: PROCEDURE (obj: Object; \VAR msg: Msg));
+
+\beginsubsection 18.11. Input.
+  
+\item{\it 14:} Peek();
+\item{\it 30:} Available*(): \INTEGER;
+\item{\it 35:} Read*(\VAR ch: \CHAR);
+\item{\it 45:} Mouse*(\VAR keys: \SET; \VAR x, y: \INTEGER);
+\item{\it 53:} SetMouseLimits*(w, h: \INTEGER);
+\item{\it 57:} Init*;
 
 \beginsubsection 18.11. Kernel.
 
-:21:  PROCEDURE GetBlock(VAR p: LONGINT; len: LONGINT);
-:40:  PROCEDURE GetBlock128(VAR p: LONGINT);
-:49:  PROCEDURE GetBlock64(VAR p: LONGINT);
-:58:  PROCEDURE GetBlock32(VAR p: LONGINT);
-:67:   PROCEDURE New*(VAR ptr: LONGINT; tag: LONGINT);
-:84:  PROCEDURE Mark*(pref: LONGINT);
-:105:  PROCEDURE Scan*;
-:135:  PROCEDURE SPIIdle(n: INTEGER); (*send n FFs slowly with no card selected*)
-:143:  PROCEDURE SPI(n: INTEGER); (*send and rcv byte slowly with card selected*)
-:149:  PROCEDURE SPICmd(n, arg: INTEGER);
-:161:  PROCEDURE SDShift(VAR n: INTEGER);
-:169:  PROCEDURE ReadSD(src, dst: INTEGER);
-:183:  PROCEDURE WriteSD(dst, src: INTEGER);
-:197:  PROCEDURE InitSecMap*;
-:203:  PROCEDURE MarkSector*(sec: INTEGER);
-:208:  PROCEDURE FreeSector*(sec: INTEGER);
-:213:  PROCEDURE AllocSector*(hint: INTEGER; VAR sec: INTEGER);
-:223:  PROCEDURE GetSector*(src: INTEGER; VAR dst: Sector);
-:229:  PROCEDURE PutSector*(dst: INTEGER; VAR src: Sector);
-:237:  PROCEDURE Time*(): INTEGER;
-:242:  PROCEDURE Clock*(): INTEGER;
-:246:  PROCEDURE SetClock*(dt: INTEGER);
-:250:  PROCEDURE Install*(Padr, at: INTEGER);
-:254:  PROCEDURE Trap(VAR a: INTEGER; b: INTEGER);
-:262:  PROCEDURE Init*;
+\item{\it 21:} GetBlock(\VAR p: \LONGINT; len: \LONGINT);
+\item{\it 40:} GetBlock128(\VAR p: \LONGINT);
+\item{\it 49:} GetBlock64(\VAR p: \LONGINT);
+\item{\it 58:} GetBlock32(\VAR p: \LONGINT);
+\item{\it 67:} New*(\VAR ptr: \LONGINT; tag: \LONGINT);
+\item{\it 84:} Mark*(pref: \LONGINT);
+\item{\it 105:} Scan*;
+\item{\it 135:} SPIIdle(n: \INTEGER); (*send n FFs slowly with no card selected*)
+\item{\it 143:} SPI(n: \INTEGER); (*send and rcv byte slowly with card selected*)
+\item{\it 149:} SPICmd(n, arg: \INTEGER);
+\item{\it 161:} SDShift(\VAR n: \INTEGER);
+\item{\it 169:} ReadSD(src, dst: \INTEGER);
+\item{\it 183:} WriteSD(dst, src: \INTEGER);
+\item{\it 197:} InitSecMap*;
+\item{\it 203:} MarkSector*(sec: \INTEGER);
+\item{\it 208:} FreeSector*(sec: \INTEGER);
+\item{\it 213:} AllocSector*(hint: \INTEGER; \VAR sec: \INTEGER);
+\item{\it 223:} GetSector*(src: \INTEGER; \VAR dst: Sector);
+\item{\it 229:} PutSector*(dst: \INTEGER; \VAR src: Sector);
+\item{\it 237:} Time*(): \INTEGER;
+\item{\it 242:} Clock*(): \INTEGER;
+\item{\it 246:} SetClock*(dt: \INTEGER);
+\item{\it 250:} Install*(Padr, at: \INTEGER);
+\item{\it 254:} Trap(\VAR a: \INTEGER; b: \INTEGER);
+\item{\it 262:} Init*;
 
 \beginsubsection 18.12. MenuViewers.
 
-:17:  PROCEDURE Copy (V: Viewer; VAR V1: Viewer);
-:25:  PROCEDURE Draw (V: Viewers.Viewer);
-:33:  PROCEDURE Extend (V: Viewer; newY: INTEGER);
-:44:  PROCEDURE Reduce (V: Viewer; newY: INTEGER);
-:48:  PROCEDURE Grow (V: Viewer; oldH: INTEGER);
-:58:  PROCEDURE Shrink (V: Viewer; newH: INTEGER);
-:62:  PROCEDURE Adjust (F: Display.Frame; id, dY, Y, H: INTEGER);
-:67:  PROCEDURE Restore (V: Viewer);
-:81:  PROCEDURE Modify (V: Viewer; Y, H: INTEGER);
-:105:  PROCEDURE Change (V: Viewer; X, Y: INTEGER; Keys: SET);
-:161:  PROCEDURE Suspend (V: Viewer);
-:168:  PROCEDURE Handle* (V: Display.Frame; VAR M: Display.FrameMsg);
-:201:  PROCEDURE New* (Menu, Main: Display.Frame; menuH, X, Y: INTEGER): Viewer; 
+\item{\it 17:} Copy (V: Viewer; \VAR V1: Viewer);
+\item{\it 25:} Draw (V: Viewers.Viewer);
+\item{\it 33:} Extend (V: Viewer; newY: \INTEGER);
+\item{\it 44:} Reduce (V: Viewer; newY: \INTEGER);
+\item{\it 48:} Grow (V: Viewer; oldH: \INTEGER);
+\item{\it 58:} Shrink (V: Viewer; newH: \INTEGER);
+\item{\it 62:} Adjust (F: Display.Frame; id, dY, Y, H: \INTEGER);
+\item{\it 67:} Restore (V: Viewer);
+\item{\it 81:} Modify (V: Viewer; Y, H: \INTEGER);
+\item{\it 105:} Change (V: Viewer; X, Y: \INTEGER; Keys: \SET);
+\item{\it 161:} Suspend (V: Viewer);
+\item{\it 168:} Handle* (V: Display.Frame; \VAR M: Display.FrameMsg);
+\item{\it 201:} New* (Menu, Main: Display.Frame; menuH, X, Y: \INTEGER): Viewer; 
 
 \beginsubsection 18.13. Modules.
 
-:6:    Command* = PROCEDURE;
-:21:  PROCEDURE ThisFile(name: ARRAY OF CHAR): Files.File;
-:30:  PROCEDURE error(n: INTEGER; name: ARRAY OF CHAR);
-:34:  PROCEDURE Check(s: ARRAY OF CHAR);
-:45:  PROCEDURE Load*(name: ARRAY OF CHAR; VAR newmod: Module);
-:188:  PROCEDURE ThisCommand*(mod: Module; name: ARRAY OF CHAR): Command;
-:205:  PROCEDURE Free*(name: ARRAY OF CHAR);
-:218:  PROCEDURE Init*;
+\item{\it 21:} ThisFile(name: \ARRAYOF\CHAR): Files.File;
+\item{\it 30:} error(n: \INTEGER; name: \ARRAYOF\CHAR);
+\item{\it 34:} Check(s: \ARRAYOF\CHAR);
+\item{\it 45:} Load*(name: \ARRAYOF\CHAR; \VAR newmod: Module);
+\item{\it 188:} ThisCommand*(mod: Module; name: \ARRAYOF\CHAR): Command;
+\item{\it 205:} Free*(name: \ARRAYOF\CHAR);
+\item{\it 218:} Init*;
 
 \beginsubsection 18.14. Net.
 
-:19:  PROCEDURE SetPartner(name: ARRAY OF CHAR);
-:23:  PROCEDURE Send(t: BYTE; L: INTEGER; data: ARRAY OF BYTE);
-:27:  PROCEDURE ReceiveHead(timeout: LONGINT);
-:39:  PROCEDURE FindPartner(name: ARRAY OF CHAR; VAR res: INTEGER);
-:59:  PROCEDURE AppendS(s: ARRAY OF CHAR; VAR d: ARRAY OF BYTE; VAR k: INTEGER);
-:65:  PROCEDURE AppendW(s: LONGINT; VAR d: ARRAY OF BYTE;
-:72:  PROCEDURE PickS(VAR s: ARRAY OF CHAR);
-:78:  PROCEDURE PickQ(VAR w: LONGINT);
-:84:  PROCEDURE SendData(F: Files.File);
-:105:  PROCEDURE ReceiveData(F: Files.File; VAR done: BOOLEAN);
-:130:  PROCEDURE reply(msg: INTEGER);
-:142:  PROCEDURE Serve;
-:208:  PROCEDURE GetPar1(VAR S: Texts.Scanner);
-:212:  PROCEDURE GetPar(VAR S: Texts.Scanner; VAR end: LONGINT);
-:222:  PROCEDURE SendFiles*;
-:264:  PROCEDURE ReceiveFiles*;
-:309:  PROCEDURE SendMsg*;
-:328:  PROCEDURE GetTime*;
-:344:  PROCEDURE StartServer*;
-:352:  PROCEDURE Unprotect*;
-:356:  PROCEDURE WProtect*;
-:360:  PROCEDURE Reset*;
-:364:  PROCEDURE StopServer*;
-:369:  PROCEDURE SCCStatus*;
+\item{\it 19:} SetPartner(name: \ARRAYOF\CHAR);
+\item{\it 23:} Send(t: \BYTE; L: \INTEGER; data: \ARRAYOF \BYTE);
+\item{\it 27:} ReceiveHead(timeout: \LONGINT);
+\item{\it 39:} FindPartner(name: \ARRAYOF\CHAR; \VAR res: \INTEGER);
+\item{\it 59:} AppendS(s: \ARRAYOF\CHAR; \VAR d: \ARRAYOF \BYTE; \VAR k: \INTEGER);
+\item{\it 65:} AppendW(s: \LONGINT; \VAR d: \ARRAYOF \BYTE;
+\item{\it 72:} PickS(\VAR s: \ARRAYOF\CHAR);
+\item{\it 78:} PickQ(\VAR w: \LONGINT);
+\item{\it 84:} SendData(F: Files.File);
+\item{\it 105:} ReceiveData(F: Files.File; \VAR done: \BOOLEAN);
+\item{\it 130:} reply(msg: \INTEGER);
+\item{\it 142:} Serve;
+\item{\it 208:} GetPar1(\VAR S: Texts.Scanner);
+\item{\it 212:} GetPar(\VAR S: Texts.Scanner; \VAR end: \LONGINT);
+\item{\it 222:} SendFiles*;
+\item{\it 264:} ReceiveFiles*;
+\item{\it 309:} SendMsg*;
+\item{\it 328:} GetTime*;
+\item{\it 344:} StartServer*;
+\item{\it 352:} Unprotect*;
+\item{\it 356:} WProtect*;
+\item{\it 360:} Reset*;
+\item{\it 364:} StopServer*;
+\item{\it 369:} SCCStatus*;
 
-\beginsubsection 18.15. ORB.
+\beginsubsection 18.15. \ORB.
 
-:71:  PROCEDURE NewObj*(VAR obj: Object; id: ORS.Ident; class: INTEGER);  (*insert new Object with name id*)
-:82:  PROCEDURE thisObj*(): Object;
-:92:  PROCEDURE thisimport*(mod: Object): Object;
-:106:  PROCEDURE thisfield*(rec: Type): Object;
-:113:  PROCEDURE OpenScope*;
-:118:  PROCEDURE CloseScope*;
-:124:  PROCEDURE MakeFileName*(VAR FName: ORS.Ident; name, ext: ARRAY OF CHAR);
-:132:  PROCEDURE ThisModule(name, orgname: ORS.Ident; non: BOOLEAN; key: LONGINT): Object;
-:147:  PROCEDURE Read(VAR R: Files.Rider; VAR x: INTEGER);
-:153:  PROCEDURE InType(VAR R: Files.Rider; thismod: Object; VAR T: Type);
-:204:  PROCEDURE Import*(VAR modid, modid1: ORS.Ident);
-:242:  PROCEDURE Write(VAR R: Files.Rider; x: INTEGER);
-:246:  PROCEDURE OutType(VAR R: Files.Rider; t: Type);
-:249:    PROCEDURE OutPar(VAR R: Files.Rider; par: Object; n: INTEGER);
-:260:    PROCEDURE FindHiddenPointers(VAR R: Files.Rider; typ: Type; offset: LONGINT);
-:304:  PROCEDURE Export*(VAR modid: ORS.Ident; VAR newSF: BOOLEAN; VAR key: LONGINT);
-:353:  PROCEDURE Init*;
-:357:  PROCEDURE type(ref, form: INTEGER; size: LONGINT): Type;
-:363:  PROCEDURE enter(name: ARRAY OF CHAR; cl: INTEGER; type: Type; n: LONGINT);
+\item{\it 71:} NewObj*(\VAR obj: Object; id: \ORS.Ident; class: \INTEGER);  (*insert new Object with name id*)
+\item{\it 82:} thisObj*(): Object;
+\item{\it 92:} thisimport*(mod: Object): Object;
+\item{\it 106:} thisfield*(rec: Type): Object;
+\item{\it 113:} OpenScope*;
+\item{\it 118:} CloseScope*;
+\item{\it 124:} MakeFileName*(\VAR FName: \ORS.Ident; name, ext: \ARRAYOF\CHAR);
+\item{\it 132:} ThisModule(name, orgname: \ORS.Ident; non: \BOOLEAN; key: \LONGINT): Object;
+\item{\it 147:} Read(\VAR R: Files.Rider; \VAR x: \INTEGER);
+\item{\it 153:} InType(\VAR R: Files.Rider; thismod: Object; \VAR T: Type);
+\item{\it 204:} Import*(\VAR modid, modid1: \ORS.Ident);
+\item{\it 242:} Write(\VAR R: Files.Rider; x: \INTEGER);
+\item{\it 246:} OutType(\VAR R: Files.Rider; t: Type);
+\item{\it 249:} OutPar(\VAR R: Files.Rider; par: Object; n: \INTEGER);
+\item{\it 260:} FindHiddenPointers(\VAR R: Files.Rider; typ: Type; offset: \LONGINT);
+\item{\it 304:} Export*(\VAR modid: \ORS.Ident; \VAR newSF: \BOOLEAN; \VAR key: \LONGINT);
+\item{\it 353:} Init*;
+\item{\it 357:} type(ref, form: \INTEGER; size: \LONGINT): Type;
+\item{\it 363:} enter(name: \ARRAYOF\CHAR; cl: \INTEGER; type: Type; n: \LONGINT);
 
-\beginsubsection 18.16. ORG.
+\beginsubsection 18.16. \ORG.
 
-:54:  PROCEDURE Put0(op, a, b, c: LONGINT);
-:59:  PROCEDURE Put1(op, a, b, im: LONGINT);
-:65:  PROCEDURE Put1a(op, a, b, im: LONGINT);
-:74:  PROCEDURE Put2(op, a, b, off: LONGINT);
-:79:  PROCEDURE Put3(op, cond, off: LONGINT);
-:84:  PROCEDURE incR;
-:89:  PROCEDURE CheckRegs*;
-:96:  PROCEDURE SetCC(VAR x: Item; n: LONGINT);
-:100:  PROCEDURE Trap(cond, num: LONGINT);
-:106:  PROCEDURE negated(cond: LONGINT): LONGINT;
-:112:  PROCEDURE fix(at, with: LONGINT);
-:116:  PROCEDURE FixOne*(at: LONGINT);
-:120:  PROCEDURE FixLink*(L: LONGINT);
-:126:  PROCEDURE FixLinkWith(L0, dst: LONGINT);
-:135:  PROCEDURE merged(L0, L1: LONGINT): LONGINT;
-:147:  PROCEDURE GetSB(base: LONGINT);
-:154:  PROCEDURE NilCheck;
-:158:  PROCEDURE load(VAR x: Item);
-:190:  PROCEDURE loadAdr(VAR x: Item);
-:207:  PROCEDURE loadCond(VAR x: Item);
-:220:  PROCEDURE loadTypTagAdr(T: ORB.Type);
-:225:  PROCEDURE loadStringAdr(VAR x: Item);
-:231:  PROCEDURE MakeConstItem*(VAR x: Item; typ: ORB.Type; val: LONGINT);
-:235:  PROCEDURE MakeRealItem*(VAR x: Item; val: REAL);
-:239:  PROCEDURE MakeStringItem*(VAR x: Item; len: LONGINT); (*copies string from ORS-buffer to ORG-string array*)
-:249:  PROCEDURE MakeItem*(VAR x: Item; y: ORB.Object; curlev: LONGINT);
-:260:  PROCEDURE Field*(VAR x: Item; y: ORB.Object);   (* x := x.y *)
-:271:  PROCEDURE Index*(VAR x, y: Item);   (* x := x[y] *)
-:306:  PROCEDURE DeRef*(VAR x: Item);
-:319:  PROCEDURE Q(T: ORB.Type; VAR dcw: LONGINT);
-:327:  PROCEDURE FindPtrFlds(typ: ORB.Type; off: LONGINT; VAR dcw: LONGINT);
-:340:  PROCEDURE BuildTD*(T: ORB.Type; VAR dc: LONGINT);
-:356:  PROCEDURE TypeTest*(VAR x: Item; T: ORB.Type; varpar, isguard: BOOLEAN);
-:377:  PROCEDURE Not*(VAR x: Item);   (* x := ~x *)
-:384:  PROCEDURE And1*(VAR x: Item);   (* x := x AND *)
-:390:  PROCEDURE And2*(VAR x, y: Item);
-:396:  PROCEDURE Or1*(VAR x: Item);   (* x := x OR *)
-:402:  PROCEDURE Or2*(VAR x, y: Item);
-:410:  PROCEDURE Neg*(VAR x: Item);   (* x := -x *)
-:427:  PROCEDURE AddOp*(op: LONGINT; VAR x, y: Item);   (* x := x +- y *)
-:444:  PROCEDURE log2(m: LONGINT; VAR e: LONGINT): LONGINT;
-:450:  PROCEDURE MulOp*(VAR x, y: Item);   (* x := x * y *)
-:462:  PROCEDURE DivOp*(op: LONGINT; VAR x, y: Item);   (* x := x op y *)
-:491:  PROCEDURE RealOp*(op: INTEGER; VAR x, y: Item);   (* x := x op y *)
-:503:  PROCEDURE Singleton*(VAR x: Item);  (* x := {x} *)
-:510:  PROCEDURE Set*(VAR x, y: Item);   (* x := {x .. y} *)
-:529:  PROCEDURE In*(VAR x, y: Item);  (* x := x IN y *)
-:537:  PROCEDURE SetOp*(op: LONGINT; VAR x, y: Item);   (* x := x op y *)
-:567:  PROCEDURE IntRelation*(op: INTEGER; VAR x, y: Item);   (* x := x < y *)
-:580:  PROCEDURE RealRelation*(op: INTEGER; VAR x, y: Item);   (* x := x < y *)
-:588:  PROCEDURE StringRelation*(op: INTEGER; VAR x, y: Item);   (* x := x < y *)
-:602:  PROCEDURE StrToChar*(VAR x: Item);
-:606:  PROCEDURE Store*(VAR x, y: Item); (* x := y *)
-:621:  PROCEDURE StoreStruct*(VAR x, y: Item); (* x := y, frame = 0 *)
-:651:  PROCEDURE CopyString*(VAR x, y: Item);  (* x := y *) 
-:667:  PROCEDURE OpenArrayParam*(VAR x: Item);
-:673:  PROCEDURE VarParam*(VAR x: Item; ftype: ORB.Type);
-:684:  PROCEDURE ValueParam*(VAR x: Item);
-:688:  PROCEDURE StringParam*(VAR x: Item);
-:694:  PROCEDURE For0*(VAR x, y: Item);
-:698:  PROCEDURE For1*(VAR x, y, z, w: Item; VAR L: LONGINT);
-:711:  PROCEDURE For2*(VAR x, y, w: Item);
-:717:  PROCEDURE Here*(): LONGINT;
-:721:  PROCEDURE FJump*(VAR L: LONGINT);
-:725:  PROCEDURE CFJump*(VAR x: Item);
-:731:  PROCEDURE BJump*(L: LONGINT);
-:735:  PROCEDURE CBJump*(VAR x: Item; L: LONGINT);
-:741:  PROCEDURE Fixup*(VAR x: Item);
-:745:  PROCEDURE SaveRegs(r: LONGINT);  (* R[0 .. r-1]*)
-:752:  PROCEDURE RestoreRegs(r: LONGINT); (*R[0 .. r-1]*)
-:759:  PROCEDURE PrepCall*(VAR x: Item; VAR r: LONGINT);
-:766:  PROCEDURE Call*(VAR x: Item; r: LONGINT);
-:790:  PROCEDURE Enter*(parblksize, locblksize: LONGINT; int: BOOLEAN);
-:804:  PROCEDURE Return*(form: INTEGER; VAR x: Item; size: LONGINT; int: BOOLEAN);
-:818:  PROCEDURE Increment*(upordown: LONGINT; VAR x, y: Item);
-:834:  PROCEDURE Include*(inorex: LONGINT; VAR x, y: Item);
-:844:  PROCEDURE Assert*(VAR x: Item);
-:854:  PROCEDURE New*(VAR x: Item);
-:858:  PROCEDURE Pack*(VAR x, y: Item);
-:864:  PROCEDURE Unpk*(VAR x, y: Item);
-:871:  PROCEDURE Led*(VAR x: Item);
-:875:  PROCEDURE Get*(VAR x, y: Item);
-:879:  PROCEDURE Put*(VAR x, y: Item);
-:883:  PROCEDURE Copy*(VAR x, y, z: Item);
-:896:  PROCEDURE LDPSR*(VAR x: Item);
-:900:  PROCEDURE LDREG*(VAR x, y: Item);
-:909:  PROCEDURE Abs*(VAR x: Item);
-:919:  PROCEDURE Odd*(VAR x: Item);
-:923:  PROCEDURE Floor*(VAR x: Item);
-:927:  PROCEDURE Float*(VAR x: Item);
-:931:  PROCEDURE Ord*(VAR x: Item);
-:936:  PROCEDURE Len*(VAR x: Item);
-:945:  PROCEDURE Shift*(fct: LONGINT; VAR x, y: Item);
-:954:  PROCEDURE ADC*(VAR x, y: Item);
-:958:  PROCEDURE SBC*(VAR x, y: Item);
-:962:  PROCEDURE UML*(VAR x, y: Item);
-:966:  PROCEDURE Bit*(VAR x, y: Item);
-:974:  PROCEDURE Register*(VAR x: Item);
-:979:  PROCEDURE H*(VAR x: Item);
-:984:  PROCEDURE Adr*(VAR x: Item);
-:993:  PROCEDURE Condition*(VAR x: Item);
-:997:  PROCEDURE Open*(v: INTEGER);
-:1004:  PROCEDURE SetDataSize*(dc: LONGINT);
-:1008:  PROCEDURE Header*;
-:1015:  PROCEDURE NofPtrs(typ: ORB.Type): LONGINT;
-:1028:  PROCEDURE FindPtrs(VAR R: Files.Rider; typ: ORB.Type; adr: LONGINT);
-:1041:  PROCEDURE Close*(VAR modid: ORS.Ident; key, nofent: LONGINT);
+\item{\it 54:} Put0(op, a, b, c: \LONGINT);
+\item{\it 59:} Put1(op, a, b, im: \LONGINT);
+\item{\it 65:} Put1a(op, a, b, im: \LONGINT);
+\item{\it 74:} Put2(op, a, b, off: \LONGINT);
+\item{\it 79:} Put3(op, cond, off: \LONGINT);
+\item{\it 84:} incR;
+\item{\it 89:} CheckRegs*;
+\item{\it 96:} SetCC(\VAR x: Item; n: \LONGINT);
+\item{\it 100:} Trap(cond, num: \LONGINT);
+\item{\it 106:} negated(cond: \LONGINT): \LONGINT;
+\item{\it 112:} fix(at, with: \LONGINT);
+\item{\it 116:} FixOne*(at: \LONGINT);
+\item{\it 120:} FixLink*(L: \LONGINT);
+\item{\it 126:} FixLinkWith(L0, dst: \LONGINT);
+\item{\it 135:} merged(L0, L1: \LONGINT): \LONGINT;
+\item{\it 147:} GetSB(base: \LONGINT);
+\item{\it 154:} NilCheck;
+\item{\it 158:} load(\VAR x: Item);
+\item{\it 190:} loadAdr(\VAR x: Item);
+\item{\it 207:} loadCond(\VAR x: Item);
+\item{\it 220:} loadTypTagAdr(T: \ORB.Type);
+\item{\it 225:} loadStringAdr(\VAR x: Item);
+\item{\it 231:} MakeConstItem*(\VAR x: Item; typ: \ORB.Type; val: \LONGINT);
+\item{\it 235:} MakeRealItem*(\VAR x: Item; val: \REAL);
+\item{\it 239:} MakeStringItem*(\VAR x: Item; len: \LONGINT); (*copies string from \ORS-buffer to \ORG-string array*)
+\item{\it 249:} MakeItem*(\VAR x: Item; y: \ORB.Object; curlev: \LONGINT);
+\item{\it 260:} Field*(\VAR x: Item; y: \ORB.Object);   (* x := x.y *)
+\item{\it 271:} Index*(\VAR x, y: Item);   (* x := x[y] *)
+\item{\it 306:} DeRef*(\VAR x: Item);
+\item{\it 319:} Q(T: \ORB.Type; \VAR dcw: \LONGINT);
+\item{\it 327:} FindPtrFlds(typ: \ORB.Type; off: \LONGINT; \VAR dcw: \LONGINT);
+\item{\it 340:} BuildTD*(T: \ORB.Type; \VAR dc: \LONGINT);
+\item{\it 356:} TypeTest*(\VAR x: Item; T: \ORB.Type; varpar, isguard: \BOOLEAN);
+\item{\it 377:} Not*(\VAR x: Item);   (* x := ~x *)
+\item{\it 384:} And1*(\VAR x: Item);   (* x := x AND *)
+\item{\it 390:} And2*(\VAR x, y: Item);
+\item{\it 396:} Or1*(\VAR x: Item);   (* x := x OR *)
+\item{\it 402:} Or2*(\VAR x, y: Item);
+\item{\it 410:} Neg*(\VAR x: Item);   (* x := -x *)
+\item{\it 427:} AddOp*(op: \LONGINT; \VAR x, y: Item);   (* x := x +- y *)
+\item{\it 444:} log2(m: \LONGINT; \VAR e: \LONGINT): \LONGINT;
+\item{\it 450:} MulOp*(\VAR x, y: Item);   (* x := x * y *)
+\item{\it 462:} DivOp*(op: \LONGINT; \VAR x, y: Item);   (* x := x op y *)
+\item{\it 491:} RealOp*(op: \INTEGER; \VAR x, y: Item);   (* x := x op y *)
+\item{\it 503:} Singleton*(\VAR x: Item);  (* x := {x} *)
+\item{\it 510:} Set*(\VAR x, y: Item);   (* x := {x .. y} *)
+\item{\it 529:} In*(\VAR x, y: Item);  (* x := x IN y *)
+\item{\it 537:} SetOp*(op: \LONGINT; \VAR x, y: Item);   (* x := x op y *)
+\item{\it 567:} IntRelation*(op: \INTEGER; \VAR x, y: Item);   (* x := x < y *)
+\item{\it 580:} RealRelation*(op: \INTEGER; \VAR x, y: Item);   (* x := x < y *)
+\item{\it 588:} StringRelation*(op: \INTEGER; \VAR x, y: Item);   (* x := x < y *)
+\item{\it 602:} StrToChar*(\VAR x: Item);
+\item{\it 606:} Store*(\VAR x, y: Item); (* x := y *)
+\item{\it 621:} StoreStruct*(\VAR x, y: Item); (* x := y, frame = 0 *)
+\item{\it 651:} CopyString*(\VAR x, y: Item);  (* x := y *) 
+\item{\it 667:} OpenArrayParam*(\VAR x: Item);
+\item{\it 673:} VarParam*(\VAR x: Item; ftype: \ORB.Type);
+\item{\it 684:} ValueParam*(\VAR x: Item);
+\item{\it 688:} StringParam*(\VAR x: Item);
+\item{\it 694:} For0*(\VAR x, y: Item);
+\item{\it 698:} For1*(\VAR x, y, z, w: Item; \VAR L: \LONGINT);
+\item{\it 711:} For2*(\VAR x, y, w: Item);
+\item{\it 717:} Here*(): \LONGINT;
+\item{\it 721:} FJump*(\VAR L: \LONGINT);
+\item{\it 725:} CFJump*(\VAR x: Item);
+\item{\it 731:} BJump*(L: \LONGINT);
+\item{\it 735:} CBJump*(\VAR x: Item; L: \LONGINT);
+\item{\it 741:} Fixup*(\VAR x: Item);
+\item{\it 745:} SaveRegs(r: \LONGINT);  (* R[0 .. r-1]*)
+\item{\it 752:} RestoreRegs(r: \LONGINT); (*R[0 .. r-1]*)
+\item{\it 759:} PrepCall*(\VAR x: Item; \VAR r: \LONGINT);
+\item{\it 766:} Call*(\VAR x: Item; r: \LONGINT);
+\item{\it 790:} Enter*(parblksize, locblksize: \LONGINT; int: \BOOLEAN);
+\item{\it 804:} Return*(form: \INTEGER; \VAR x: Item; size: \LONGINT; int: \BOOLEAN);
+\item{\it 818:} Increment*(upordown: \LONGINT; \VAR x, y: Item);
+\item{\it 834:} Include*(inorex: \LONGINT; \VAR x, y: Item);
+\item{\it 844:} Assert*(\VAR x: Item);
+\item{\it 854:} New*(\VAR x: Item);
+\item{\it 858:} Pack*(\VAR x, y: Item);
+\item{\it 864:} Unpk*(\VAR x, y: Item);
+\item{\it 871:} Led*(\VAR x: Item);
+\item{\it 875:} Get*(\VAR x, y: Item);
+\item{\it 879:} Put*(\VAR x, y: Item);
+\item{\it 883:} Copy*(\VAR x, y, z: Item);
+\item{\it 896:} LDPSR*(\VAR x: Item);
+\item{\it 900:} LDREG*(\VAR x, y: Item);
+\item{\it 909:} Abs*(\VAR x: Item);
+\item{\it 919:} Odd*(\VAR x: Item);
+\item{\it 923:} Floor*(\VAR x: Item);
+\item{\it 927:} Float*(\VAR x: Item);
+\item{\it 931:} Ord*(\VAR x: Item);
+\item{\it 936:} Len*(\VAR x: Item);
+\item{\it 945:} Shift*(fct: \LONGINT; \VAR x, y: Item);
+\item{\it 954:} ADC*(\VAR x, y: Item);
+\item{\it 958:} SBC*(\VAR x, y: Item);
+\item{\it 962:} UML*(\VAR x, y: Item);
+\item{\it 966:} Bit*(\VAR x, y: Item);
+\item{\it 974:} Register*(\VAR x: Item);
+\item{\it 979:} H*(\VAR x: Item);
+\item{\it 984:} Adr*(\VAR x: Item);
+\item{\it 993:} Condition*(\VAR x: Item);
+\item{\it 997:} Open*(v: \INTEGER);
+\item{\it 1004:} SetDataSize*(dc: \LONGINT);
+\item{\it 1008:} Header*;
+\item{\it 1015:} NofPtrs(typ: \ORB.Type): \LONGINT;
+\item{\it 1028:} FindPtrs(\VAR R: Files.Rider; typ: \ORB.Type; adr: \LONGINT);
+\item{\it 1041:} Close*(\VAR modid: \ORS.Ident; key, nofent: \LONGINT);
 
-\beginsubsection 18.17. ORP.
+\beginsubsection 18.17. \ORP.
 
-:18:    expression: PROCEDURE (VAR x: ORG.Item);  (*to avoid forward reference*)
-:19:    Type: PROCEDURE (VAR type: ORB.Type);
-:20:    FormalType: PROCEDURE (VAR typ: ORB.Type; dim: INTEGER);
-:26:  PROCEDURE Check(s: INTEGER; msg: ARRAY OF CHAR);
-:31:  PROCEDURE qualident(VAR obj: ORB.Object);
-:43:  PROCEDURE CheckBool(VAR x: ORG.Item);
-:48:  PROCEDURE CheckInt(VAR x: ORG.Item);
-:53:  PROCEDURE CheckReal(VAR x: ORG.Item);
-:58:  PROCEDURE CheckSet(VAR x: ORG.Item);
-:63:  PROCEDURE CheckSetVal(VAR x: ORG.Item);
-:71:  PROCEDURE CheckConst(VAR x: ORG.Item);
-:76:  PROCEDURE CheckReadOnly(VAR x: ORG.Item);
-:81:  PROCEDURE CheckExport(VAR expo: BOOLEAN);
-:90:  PROCEDURE IsExtension(t0, t1: ORB.Type): BOOLEAN;
-:97:  PROCEDURE TypeTest(VAR x: ORG.Item; T: ORB.Type; guard: BOOLEAN);
-:120:  PROCEDURE selector(VAR x: ORG.Item);
-:164:  PROCEDURE EqualSignatures(t0, t1: ORB.Type): BOOLEAN;
-:183:  PROCEDURE CompTypes(t0, t1: ORB.Type; varpar: BOOLEAN): BOOLEAN;
-:194:  PROCEDURE Parameter(par: ORB.Object);
-:222:  PROCEDURE ParamList(VAR x: ORG.Item);
-:240:  PROCEDURE StandFunc(VAR x: ORG.Item; fct: LONGINT; restyp: ORB.Type);
-:284:  PROCEDURE element(VAR x: ORG.Item);
-:293:  PROCEDURE set(VAR x: ORG.Item);
-:309:  PROCEDURE factor(VAR x: ORG.Item);
-:341:  PROCEDURE term(VAR x: ORG.Item);
-:364:  PROCEDURE SimpleExpression(VAR x: ORG.Item);
-:382:  PROCEDURE expression0(VAR x: ORG.Item);
-:426:  PROCEDURE StandProc(pno: LONGINT);
-:463:  PROCEDURE StatSequence;
-:469:    PROCEDURE TypeCase(obj: ORB.Object; VAR x: ORG.Item);
-:481:    PROCEDURE SkipCase;
-:596:  PROCEDURE IdentList(class: INTEGER; VAR first: ORB.Object);
-:612:  PROCEDURE ArrayType(VAR type: ORB.Type);
-:628:  PROCEDURE RecordType(VAR type: ORB.Type);
-:673:  PROCEDURE FPSection(VAR adr: LONGINT; VAR nofpar: INTEGER);
-:692:  PROCEDURE ProcedureType(ptype: ORB.Type; VAR parblksize: LONGINT);
-:716:  PROCEDURE FormalType0(VAR typ: ORB.Type; dim: INTEGER);
-:735:  PROCEDURE CheckRecLevel(lev: INTEGER);
-:740:  PROCEDURE Type0(VAR type: ORB.Type);
-:782:  PROCEDURE Declarations(VAR varsize: LONGINT);
-:848:  PROCEDURE ProcedureDecl;
-:895:  PROCEDURE Module;
-:953:  PROCEDURE Option(VAR S: Texts.Scanner);
-:961:  PROCEDURE Compile*;
+\item{\it 26:} Check(s: \INTEGER; msg: \ARRAYOF\CHAR);
+\item{\it 31:} qualident(\VAR obj: \ORB.Object);
+\item{\it 43:} CheckBool(\VAR x: \ORG.Item);
+\item{\it 48:} CheckInt(\VAR x: \ORG.Item);
+\item{\it 53:} CheckReal(\VAR x: \ORG.Item);
+\item{\it 58:} CheckSet(\VAR x: \ORG.Item);
+\item{\it 63:} CheckSetVal(\VAR x: \ORG.Item);
+\item{\it 71:} CheckConst(\VAR x: \ORG.Item);
+\item{\it 76:} CheckReadOnly(\VAR x: \ORG.Item);
+\item{\it 81:} CheckExport(\VAR expo: \BOOLEAN);
+\item{\it 90:} IsExtension(t0, t1: \ORB.Type): \BOOLEAN;
+\item{\it 97:} TypeTest(\VAR x: \ORG.Item; T: \ORB.Type; guard: \BOOLEAN);
+\item{\it 120:} selector(\VAR x: \ORG.Item);
+\item{\it 164:} EqualSignatures(t0, t1: \ORB.Type): \BOOLEAN;
+\item{\it 183:} CompTypes(t0, t1: \ORB.Type; varpar: \BOOLEAN): \BOOLEAN;
+\item{\it 194:} Parameter(par: \ORB.Object);
+\item{\it 222:} ParamList(\VAR x: \ORG.Item);
+\item{\it 240:} StandFunc(\VAR x: \ORG.Item; fct: \LONGINT; restyp: \ORB.Type);
+\item{\it 284:} element(\VAR x: \ORG.Item);
+\item{\it 293:} set(\VAR x: \ORG.Item);
+\item{\it 309:} factor(\VAR x: \ORG.Item);
+\item{\it 341:} term(\VAR x: \ORG.Item);
+\item{\it 364:} SimpleExpression(\VAR x: \ORG.Item);
+\item{\it 382:} expression0(\VAR x: \ORG.Item);
+\item{\it 426:} StandProc(pno: \LONGINT);
+\item{\it 463:} StatSequence;
+\item{\it 469:} TypeCase(obj: \ORB.Object; \VAR x: \ORG.Item);
+\item{\it 481:} SkipCase;
+\item{\it 596:} IdentList(class: \INTEGER; \VAR first: \ORB.Object);
+\item{\it 612:} ArrayType(\VAR type: \ORB.Type);
+\item{\it 628:} RecordType(\VAR type: \ORB.Type);
+\item{\it 673:} FPSection(\VAR adr: \LONGINT; \VAR nofpar: \INTEGER);
+\item{\it 692:} ProcedureType(ptype: \ORB.Type; \VAR parblksize: \LONGINT);
+\item{\it 716:} FormalType0(\VAR typ: \ORB.Type; dim: \INTEGER);
+\item{\it 735:} CheckRecLevel(lev: \INTEGER);
+\item{\it 740:} Type0(\VAR type: \ORB.Type);
+\item{\it 782:} Declarations(\VAR varsize: \LONGINT);
+\item{\it 848:} ProcedureDecl;
+\item{\it 895:} Module;
+\item{\it 953:} Option(\VAR S: Texts.Scanner);
+\item{\it 961:} Compile*;
 
-\beginsubsection 18.18. ORS.
+\beginsubsection 18.18. \ORS.
 
-:50:  PROCEDURE CopyId*(VAR ident: Ident);
-:54:  PROCEDURE Pos*(): LONGINT;
-:58:  PROCEDURE Mark*(msg: ARRAY OF CHAR);
-:68:  PROCEDURE Identifier(VAR sym: INTEGER);
-:83:  PROCEDURE String;
-:95:  PROCEDURE HexString;
-:115:  PROCEDURE Ten(e: LONGINT): REAL;
-:125:  PROCEDURE Number(VAR sym: INTEGER);
-:194:  PROCEDURE comment;
-:208:  PROCEDURE Get*(VAR sym: INTEGER);
-:263:  PROCEDURE Init*(T: Texts.Text; pos: LONGINT);
-:267:  PROCEDURE EnterKW(sym: INTEGER; name: ARRAY OF CHAR);
-:310:  EnterKW(procedure, "PROCEDURE");
+\item{\it 50:} CopyId*(\VAR ident: Ident);
+\item{\it 54:} Pos*(): \LONGINT;
+\item{\it 58:} Mark*(msg: \ARRAYOF\CHAR);
+\item{\it 68:} Identifier(\VAR sym: \INTEGER);
+\item{\it 83:} String;
+\item{\it 95:} HexString;
+\item{\it 115:} Ten(e: \LONGINT): \REAL;
+\item{\it 125:} Number(\VAR sym: \INTEGER);
+\item{\it 194:} comment;
+\item{\it 208:} Get*(\VAR sym: \INTEGER);
+\item{\it 263:} Init*(T: Texts.Text; pos: \LONGINT);
+\item{\it 267:} EnterKW(sym: \INTEGER; name: \ARRAYOF\CHAR);
+\item{\it 310:}(procedure, "PROCEDURE");
 
 \beginsubsection 18.19. ORTool.
 
-:7:  PROCEDURE Read(VAR R: Files.Rider; VAR n: INTEGER);
-:13:  PROCEDURE ReadType(VAR R: Files.Rider);
-:59:  PROCEDURE DecSym*;  (*decode symbol file*)
-:100:  PROCEDURE WriteReg(r: LONGINT);
-:110:  PROCEDURE opcode(w: LONGINT);
-:145:  PROCEDURE Sync(VAR R: Files.Rider);
-:150:  PROCEDURE Write(VAR R: Files.Rider; x: INTEGER);
-:154:  PROCEDURE DecObj*;   (*decode object file*)
+\item{\it 7:} Read(\VAR R: Files.Rider; \VAR n: \INTEGER);
+\item{\it 13:} ReadType(\VAR R: Files.Rider);
+\item{\it 59:} DecSym*;  (*decode symbol file*)
+\item{\it 100:} WriteReg(r: \LONGINT);
+\item{\it 110:} opcode(w: \LONGINT);
+\item{\it 145:} Sync(\VAR R: Files.Rider);
+\item{\it 150:} Write(\VAR R: Files.Rider; x: \INTEGER);
+\item{\it 154:} DecObj*;   (*decode object file*)
 
 \beginsubsection 18.20. Oberon.
 
-:10:  TYPE Painter* = PROCEDURE (x, y: INTEGER);
-:42:    Handler* = PROCEDURE;
-:74:  PROCEDURE Code(VAR s: ARRAY OF CHAR): LONGINT;
-:86:  PROCEDURE SetUser* (VAR user, password: ARRAY OF CHAR);
-:90:  PROCEDURE Clock*(): LONGINT;
-:94:  PROCEDURE SetClock* (d: LONGINT);
-:98:  PROCEDURE Time*(): LONGINT;
-:104:  PROCEDURE FlipArrow (X, Y: INTEGER);
-:115:  PROCEDURE FlipStar (X, Y: INTEGER);
-:126:  PROCEDURE OpenCursor(VAR c: Cursor);
-:130:  PROCEDURE FadeCursor(VAR c: Cursor);
-:134:  PROCEDURE DrawCursor(VAR c: Cursor; m: Marker; x, y: INTEGER);
-:144:  PROCEDURE DrawMouse*(m: Marker; x, y: INTEGER);
-:148:  PROCEDURE DrawMouseArrow*(x, y: INTEGER);
-:152:  PROCEDURE FadeMouse*;
-:156:  PROCEDURE DrawPointer*(x, y: INTEGER);
-:162:  PROCEDURE RemoveMarks* (X, Y, W, H: INTEGER);
-:172:  PROCEDURE HandleFiller (V: Display.Frame; VAR M: Display.FrameMsg);
-:188:  PROCEDURE OpenDisplay* (UW, SW, H: INTEGER);
-:199:  PROCEDURE DisplayWidth* (X: INTEGER): INTEGER;
-:203:  PROCEDURE DisplayHeight* (X: INTEGER): INTEGER;
-:207:  PROCEDURE OpenTrack* (X, W: INTEGER);
-:214:  PROCEDURE UserTrack* (X: INTEGER): INTEGER;
-:218:  PROCEDURE SystemTrack* (X: INTEGER): INTEGER;
-:222:  PROCEDURE UY (X: INTEGER): INTEGER;
-:231:  PROCEDURE AllocateUserViewer* (DX: INTEGER; VAR X, Y: INTEGER);
-:238:  PROCEDURE SY (X: INTEGER): INTEGER;
-:255:  PROCEDURE AllocateSystemViewer* (DX: INTEGER; VAR X, Y: INTEGER);
-:262:  PROCEDURE MarkedViewer* (): Viewers.Viewer;
-:266:  PROCEDURE PassFocus* (V: Viewers.Viewer);
-:271:  PROCEDURE OpenLog*(T: Texts.Text);
-:276:  PROCEDURE SetPar*(F: Display.Frame; T: Texts.Text; pos: LONGINT);
-:280:  PROCEDURE Call* (name: ARRAY OF CHAR; VAR res: INTEGER);
-:300:  PROCEDURE GetSelection* (VAR text: Texts.Text; VAR beg, end, time: LONGINT);
-:307:  PROCEDURE GC;
-:323:  PROCEDURE NewTask*(h: Handler; period: INTEGER): Task;
-:328:  PROCEDURE Install* (T: Task);
-:335:  PROCEDURE Remove* (T: Task);
-:344:  PROCEDURE Collect* (count: INTEGER);
-:348:  PROCEDURE SetFont* (fnt: Fonts.Font);
-:352:  PROCEDURE SetColor* (col: INTEGER);
-:356:  PROCEDURE SetOffset* (voff: INTEGER);
-:360:  PROCEDURE Loop*;
-:393:  PROCEDURE Reset*;
+\item{\it 74:} Code(\VAR s: \ARRAYOF\CHAR): \LONGINT;
+\item{\it 86:} SetUser* (\VAR user, password: \ARRAYOF\CHAR);
+\item{\it 90:} Clock*(): \LONGINT;
+\item{\it 94:} SetClock* (d: \LONGINT);
+\item{\it 98:} Time*(): \LONGINT;
+\item{\it 104:} FlipArrow (X, Y: \INTEGER);
+\item{\it 115:} FlipStar (X, Y: \INTEGER);
+\item{\it 126:} OpenCursor(\VAR c: Cursor);
+\item{\it 130:} FadeCursor(\VAR c: Cursor);
+\item{\it 134:} DrawCursor(\VAR c: Cursor; m: Marker; x, y: \INTEGER);
+\item{\it 144:} DrawMouse*(m: Marker; x, y: \INTEGER);
+\item{\it 148:} DrawMouseArrow*(x, y: \INTEGER);
+\item{\it 152:} FadeMouse*;
+\item{\it 156:} DrawPointer*(x, y: \INTEGER);
+\item{\it 162:} RemoveMarks* (X, Y, W, H: \INTEGER);
+\item{\it 172:} HandleFiller (V: Display.Frame; \VAR M: Display.FrameMsg);
+\item{\it 188:} OpenDisplay* (UW, SW, H: \INTEGER);
+\item{\it 199:} DisplayWidth* (X: \INTEGER): \INTEGER;
+\item{\it 203:} DisplayHeight* (X: \INTEGER): \INTEGER;
+\item{\it 207:} OpenTrack* (X, W: \INTEGER);
+\item{\it 214:} UserTrack* (X: \INTEGER): \INTEGER;
+\item{\it 218:} SystemTrack* (X: \INTEGER): \INTEGER;
+\item{\it 222:} UY (X: \INTEGER): \INTEGER;
+\item{\it 231:} AllocateUserViewer* (DX: \INTEGER; \VAR X, Y: \INTEGER);
+\item{\it 238:} SY (X: \INTEGER): \INTEGER;
+\item{\it 255:} AllocateSystemViewer* (DX: \INTEGER; \VAR X, Y: \INTEGER);
+\item{\it 262:} MarkedViewer* (): Viewers.Viewer;
+\item{\it 266:} PassFocus* (V: Viewers.Viewer);
+\item{\it 271:} OpenLog*(T: Texts.Text);
+\item{\it 276:} SetPar*(F: Display.Frame; T: Texts.Text; pos: \LONGINT);
+\item{\it 280:} Call* (name: \ARRAYOF\CHAR; \VAR res: \INTEGER);
+\item{\it 300:} GetSelection* (\VAR text: Texts.Text; \VAR beg, end, time: \LONGINT);
+\item{\it 307:} GC;
+\item{\it 323:} NewTask*(h: Handler; period: \INTEGER): Task;
+\item{\it 328:} Install* (T: Task);
+\item{\it 335:} Remove* (T: Task);
+\item{\it 344:} Collect* (count: \INTEGER);
+\item{\it 348:} SetFont* (fnt: Fonts.Font);
+\item{\it 352:} SetColor* (col: \INTEGER);
+\item{\it 356:} SetOffset* (voff: \INTEGER);
+\item{\it 360:} Loop*;
+\item{\it 393:} Reset*;
 
 \beginsubsection 18.21. Rectangles.
 
-:13:  PROCEDURE New*;
-:18:  PROCEDURE Copy(src, dst: Graphics.Object);
-:23:  PROCEDURE mark(f: GraphicFrames.Frame; col, x, y: INTEGER);
-:27:  PROCEDURE Draw(obj: Graphics.Object; VAR M: Graphics.Msg);
-:30:    PROCEDURE draw(f: GraphicFrames.Frame; col, x, y, w, h, lw: INTEGER);
-:55:  PROCEDURE Selectable(obj: Graphics.Object; x, y: INTEGER): BOOLEAN;
-:60:  PROCEDURE Change(obj: Graphics.Object; VAR M: Graphics.Msg);
-:69:  PROCEDURE Read(obj: Graphics.Object; VAR R: Files.Rider; VAR C: Graphics.Context);
-:76:  PROCEDURE Write(obj: Graphics.Object; cno: INTEGER; VAR W: Files.Rider; VAR C: Graphics.Context);
-:81:(* PROCEDURE Print(obj: Graphics.Object; x, y: INTEGER);
-:92:  PROCEDURE Make*;  (*command*)
+\item{\it 13:} New*;
+\item{\it 18:} Copy(src, dst: Graphics.Object);
+\item{\it 23:} mark(f: GraphicFrames.Frame; col, x, y: \INTEGER);
+\item{\it 27:} Draw(obj: Graphics.Object; \VAR M: Graphics.Msg);
+\item{\it 30:} draw(f: GraphicFrames.Frame; col, x, y, w, h, lw: \INTEGER);
+\item{\it 55:} Selectable(obj: Graphics.Object; x, y: \INTEGER): \BOOLEAN;
+\item{\it 60:} Change(obj: Graphics.Object; \VAR M: Graphics.Msg);
+\item{\it 69:} Read(obj: Graphics.Object; \VAR R: Files.Rider; \VAR C: Graphics.Context);
+\item{\it 76:} Write(obj: Graphics.Object; cno: \INTEGER; \VAR W: Files.Rider; \VAR C: Graphics.Context);
+\item{\it 81:} Print(obj: Graphics.Object; x, y: \INTEGER);
+\item{\it 92:} Make*;  (*command*)
 
 \beginsubsection 18.22. SCC.
-
-:24:  PROCEDURE SPICtrl(s: SET);
-:29:  PROCEDURE SPI(n: INTEGER);
-:34:  PROCEDURE StartCmd(cmd: INTEGER);
-:38:  PROCEDURE WriteReg1(reg, dat: INTEGER);  (*disables radio!*)
-:42:  PROCEDURE SubRcv(dst: INTEGER);
-:54:  PROCEDURE SubSnd(src: INTEGER; VAR timeout: BOOLEAN);
-:83:  PROCEDURE Flush();
-:88:  PROCEDURE ResetRcv;
-:92:  PROCEDURE Listen(b: BOOLEAN);
-:99:  PROCEDURE Start*(filt: BOOLEAN);
-:109:  PROCEDURE SendPacket*(VAR head: Header; dat: ARRAY OF BYTE);
-:132:  PROCEDURE Available*(): INTEGER;
-:137:  PROCEDURE Receive*(VAR x: BYTE);
-:142:  PROCEDURE Rcvd(time: INTEGER): BOOLEAN;
-:153:  PROCEDURE ReceiveHead*(VAR head: Header);  (*actually, recv whole packet*)
-:171:  PROCEDURE Skip*(m: INTEGER);
-:176:  PROCEDURE Stop*;
+  
+\item{\it :24:} SPICtrl(s: \SET);
+\item{\it 29:} SPI(n: \INTEGER);
+\item{\it 34:} StartCmd(cmd: \INTEGER);
+\item{\it 38:} WriteReg1(reg, dat: \INTEGER);  (*disables radio!*)
+\item{\it 42:} SubRcv(dst: \INTEGER);
+\item{\it 54:} SubSnd(src: \INTEGER; \VAR timeout: \BOOLEAN);
+\item{\it 83:} Flush();
+\item{\it 88:} ResetRcv;
+\item{\it 92:} Listen(b: \BOOLEAN);
+\item{\it 99:} Start*(filt: \BOOLEAN);
+\item{\it 109:} SendPacket*(\VAR head: Header; dat: \ARRAYOF \BYTE);
+\item{\it 132:} Available*(): \INTEGER;
+\item{\it 137:} Receive*(\VAR x: \BYTE);
+\item{\it 142:} Rcvd(time: \INTEGER): \BOOLEAN;
+\item{\it 153:} ReceiveHead*(\VAR head: Header);  (*actually, recv whole packet*)
+\item{\it 171:} Skip*(m: \INTEGER);
+\item{\it 176:} Stop*;
 
 \beginsubsection 18.23. System.
 
-:12:  PROCEDURE GetArg(VAR S: Texts.Scanner);
-:21:  PROCEDURE EndLine;
-:27:  PROCEDURE SetUser*;
-:38:  PROCEDURE SetFont*;
-:44:  PROCEDURE SetColor*;
-:50:  PROCEDURE SetOffset*;
-:56:  PROCEDURE Date*;
-:70:  PROCEDURE Collect*;
-:76:  PROCEDURE Open*;  (*open viewer in system track*)
-:89:  PROCEDURE Clear*;  (*clear Log*)
-:97:  PROCEDURE Close*;
-:106:  PROCEDURE CloseTrack*;
-:111:  PROCEDURE Recall*;
-:119:  PROCEDURE Copy*;
-:126:  PROCEDURE Grow*;
-:143:  PROCEDURE Free1(VAR S: Texts.Scanner);
-:150:  PROCEDURE Free*;
-:167:  PROCEDURE FreeFonts*;
-:173:  PROCEDURE List(name: FileDir.FileName; adr: LONGINT; VAR cont: BOOLEAN);
-:203:  PROCEDURE Directory*;
-:233:  PROCEDURE CopyFiles*;
-:261:  PROCEDURE RenameFiles*;
-:283:  PROCEDURE DeleteFiles*;
-:297:  PROCEDURE Watch*;
-:308:  PROCEDURE ShowModules*;
-:329:  PROCEDURE ShowCommands*;
-:356:  PROCEDURE ShowFonts*;
-:365:  PROCEDURE OpenViewers;
-:380:  PROCEDURE ExtendDisplay*;
-:396:  PROCEDURE Trap(VAR a: INTEGER; b: INTEGER);
-:409:  PROCEDURE Abort;
+\item{\it 12:} GetArg(\VAR S: Texts.Scanner);
+\item{\it 21:} EndLine;
+\item{\it 27:} SetUser*;
+\item{\it 38:} SetFont*;
+\item{\it 44:} SetColor*;
+\item{\it 50:} SetOffset*;
+\item{\it 56:} Date*;
+\item{\it 70:} Collect*;
+\item{\it 76:} Open*;  (*open viewer in system track*)
+\item{\it 89:} Clear*;  (*clear Log*)
+\item{\it 97:} Close*;
+\item{\it 106:} CloseTrack*;
+\item{\it 111:} Recall*;
+\item{\it 119:} Copy*;
+\item{\it 126:} Grow*;
+\item{\it 143:} Free1(\VAR S: Texts.Scanner);
+\item{\it 150:} Free*;
+\item{\it 167:} FreeFonts*;
+\item{\it 173:} List(name: FileDir.FileName; adr: \LONGINT; \VAR cont: \BOOLEAN);
+\item{\it 203:} Directory*;
+\item{\it 233:} CopyFiles*;
+\item{\it 261:} RenameFiles*;
+\item{\it 283:} DeleteFiles*;
+\item{\it 297:} Watch*;
+\item{\it 308:} ShowModules*;
+\item{\it 329:} ShowCommands*;
+\item{\it 356:} ShowFonts*;
+\item{\it 365:} OpenViewers;
+\item{\it 380:} ExtendDisplay*;
+\item{\it 396:} Trap(\VAR a: \INTEGER; b: \INTEGER);
+\item{\it 409:} Abort;
 
 \beginsubsection 18.24. TextFrames.
 
-:55:  PROCEDURE Min (i, j: INTEGER): INTEGER;
-:62:  PROCEDURE ReplConst (col: INTEGER; F: Frame; X, Y, W, H: INTEGER; mode: INTEGER);
-:69:  PROCEDURE FlipSM(X, Y: INTEGER);
-:81:  PROCEDURE UpdateMark (F: Frame);  (*in scroll bar*)
-:90:  PROCEDURE SetChangeMark (F: Frame; on: BOOLEAN);  (*in corner*)
-:99:  PROCEDURE Width (VAR R: Texts.Reader; len: LONGINT): INTEGER;
-:109:  PROCEDURE DisplayLine (F: Frame; L: Line;
-:124:  PROCEDURE Validate (T: Texts.Text; VAR pos: LONGINT);
-:135:  PROCEDURE Mark* (F: Frame; on: BOOLEAN);
-:143:  PROCEDURE Restore* (F: Frame);
-:162:  PROCEDURE Suspend* (F: Frame);
-:166:  PROCEDURE Extend* (F: Frame; newY: INTEGER);
-:190:  PROCEDURE Reduce* (F: Frame; newY: INTEGER);
-:205:  PROCEDURE Show* (F: Frame; pos: LONGINT);
-:248:  PROCEDURE LocateLine (F: Frame; y: INTEGER; VAR loc: Location);
-:257:  PROCEDURE LocateString (F: Frame; x, y: INTEGER; VAR loc: Location);
-:286:  PROCEDURE LocateChar (F: Frame; x, y: INTEGER; VAR loc: Location);
-:306:  PROCEDURE LocatePos (F: Frame; pos: LONGINT; VAR loc: Location);
-:321:  PROCEDURE Pos* (F: Frame; X, Y: INTEGER): LONGINT;
-:326:  PROCEDURE FlipCaret (F: Frame);
-:333:  PROCEDURE SetCaret* (F: Frame; pos: LONGINT);
-:337:  PROCEDURE TrackCaret* (F: Frame; X, Y: INTEGER; VAR keysum: SET);
-:351:  PROCEDURE RemoveCaret* (F: Frame);
-:355:  PROCEDURE FlipSelection (F: Frame; VAR beg, end: Location);
-:370:  PROCEDURE SetSelection* (F: Frame; beg, end: LONGINT);
-:379:  PROCEDURE TrackSelection* (F: Frame; X, Y: INTEGER; VAR keysum: SET);
-:406:  PROCEDURE RemoveSelection* (F: Frame);
-:410:  PROCEDURE TrackLine* (F: Frame; X, Y: INTEGER; VAR org: LONGINT; VAR keysum: SET);
-:433:  PROCEDURE TrackWord* (F: Frame; X, Y: INTEGER; VAR pos: LONGINT; VAR keysum: SET);
-:456:  PROCEDURE Replace* (F: Frame; beg, end: LONGINT);
-:482:  PROCEDURE Insert* (F: Frame; beg, end: LONGINT);
-:532:  PROCEDURE Delete* (F: Frame; beg, end: LONGINT);
-:581:  PROCEDURE Recall*(VAR B: Texts.Buffer);
-:587:  PROCEDURE RemoveMarks (F: Frame);
-:591:  PROCEDURE NotifyDisplay* (T: Texts.Text; op: INTEGER; beg, end: LONGINT);
-:596:  PROCEDURE Call* (F: Frame; pos: LONGINT; new: BOOLEAN);
-:617:  PROCEDURE Write* (F: Frame; ch: CHAR; fnt: Fonts.Font; col, voff: INTEGER);
-:642:  PROCEDURE Defocus* (F: Frame);
-:646:  PROCEDURE Neutralize* (F: Frame);
-:650:  PROCEDURE Modify* (F: Frame; id, dY, Y, H: INTEGER);
-:663:  PROCEDURE Open* (F: Frame; H: Display.Handler; T: Texts.Text; org: LONGINT;
-:673:  PROCEDURE Copy* (F: Frame; VAR F1: Frame);
-:678:  PROCEDURE CopyOver(F: Frame; text: Texts.Text; beg, end: LONGINT);
-:688:  PROCEDURE GetSelection* (F: Frame; VAR text: Texts.Text; VAR beg, end, time: LONGINT);
-:700:  PROCEDURE Update* (F: Frame; VAR M: UpdateMsg);
-:710:  PROCEDURE Edit* (F: Frame; X, Y: INTEGER; Keys: SET);
-:794:  PROCEDURE Handle* (F: Display.Frame; VAR M: Display.FrameMsg);
-:820:  PROCEDURE Menu (name, commands: ARRAY OF CHAR): Texts.Text;
-:827:  PROCEDURE Text* (name: ARRAY OF CHAR): Texts.Text;
-:832:  PROCEDURE NewMenu* (name, commands: ARRAY OF CHAR): Frame;
-:838:  PROCEDURE NewText* (text: Texts.Text; pos: LONGINT): Frame;
+\item{\it 55:} Min (i, j: \INTEGER): \INTEGER;
+\item{\it 62:} ReplConst (col: \INTEGER; F: Frame; X, Y, W, H: \INTEGER; mode: \INTEGER);
+\item{\it 69:} FlipSM(X, Y: \INTEGER);
+\item{\it 81:} UpdateMark (F: Frame);  (*in scroll bar*)
+\item{\it 90:} SetChangeMark (F: Frame; on: \BOOLEAN);  (*in corner*)
+\item{\it 99:} Width (\VAR R: Texts.Reader; len: \LONGINT): \INTEGER;
+\item{\it 109:} DisplayLine (F: Frame; L: Line;
+\item{\it 124:} Validate (T: Texts.Text; \VAR pos: \LONGINT);
+\item{\it 135:} Mark* (F: Frame; on: \BOOLEAN);
+\item{\it 143:} Restore* (F: Frame);
+\item{\it 162:} Suspend* (F: Frame);
+\item{\it 166:} Extend* (F: Frame; newY: \INTEGER);
+\item{\it 190:} Reduce* (F: Frame; newY: \INTEGER);
+\item{\it 205:} Show* (F: Frame; pos: \LONGINT);
+\item{\it 248:} LocateLine (F: Frame; y: \INTEGER; \VAR loc: Location);
+\item{\it 257:} LocateString (F: Frame; x, y: \INTEGER; \VAR loc: Location);
+\item{\it 286:} LocateChar (F: Frame; x, y: \INTEGER; \VAR loc: Location);
+\item{\it 306:} LocatePos (F: Frame; pos: \LONGINT; \VAR loc: Location);
+\item{\it 321:} Pos* (F: Frame; X, Y: \INTEGER): \LONGINT;
+\item{\it 326:} FlipCaret (F: Frame);
+\item{\it 333:} SetCaret* (F: Frame; pos: \LONGINT);
+\item{\it 337:} TrackCaret* (F: Frame; X, Y: \INTEGER; \VAR keysum: \SET);
+\item{\it 351:} RemoveCaret* (F: Frame);
+\item{\it 355:} FlipSelection (F: Frame; \VAR beg, end: Location);
+\item{\it 370:} SetSelection* (F: Frame; beg, end: \LONGINT);
+\item{\it 379:} TrackSelection* (F: Frame; X, Y: \INTEGER; \VAR keysum: \SET);
+\item{\it 406:} RemoveSelection* (F: Frame);
+\item{\it 410:} TrackLine* (F: Frame; X, Y: \INTEGER; \VAR org: \LONGINT; \VAR keysum: \SET);
+\item{\it 433:} TrackWord* (F: Frame; X, Y: \INTEGER; \VAR pos: \LONGINT; \VAR keysum: \SET);
+\item{\it 456:} Replace* (F: Frame; beg, end: \LONGINT);
+\item{\it 482:} Insert* (F: Frame; beg, end: \LONGINT);
+\item{\it 532:} Delete* (F: Frame; beg, end: \LONGINT);
+\item{\it 581:} Recall*(\VAR B: Texts.Buffer);
+\item{\it 587:} RemoveMarks (F: Frame);
+\item{\it 591:} NotifyDisplay* (T: Texts.Text; op: \INTEGER; beg, end: \LONGINT);
+\item{\it 596:} Call* (F: Frame; pos: \LONGINT; new: \BOOLEAN);
+\item{\it 617:} Write* (F: Frame; ch: \CHAR; fnt: Fonts.Font; col, voff: \INTEGER);
+\item{\it 642:} Defocus* (F: Frame);
+\item{\it 646:} Neutralize* (F: Frame);
+\item{\it 650:} Modify* (F: Frame; id, dY, Y, H: \INTEGER);
+\item{\it 663:} Open* (F: Frame; H: Display.Handler; T: Texts.Text; org: \LONGINT;
+\item{\it 673:} Copy* (F: Frame; \VAR F1: Frame);
+\item{\it 678:} CopyOver(F: Frame; text: Texts.Text; beg, end: \LONGINT);
+\item{\it 688:} GetSelection* (F: Frame; \VAR text: Texts.Text; \VAR beg, end, time: \LONGINT);
+\item{\it 700:} Update* (F: Frame; \VAR M: UpdateMsg);
+\item{\it 710:} Edit* (F: Frame; X, Y: \INTEGER; Keys: \SET);
+\item{\it 794:} Handle* (F: Display.Frame; \VAR M: Display.FrameMsg);
+\item{\it 820:} Menu (name, commands: \ARRAYOF\CHAR): Texts.Text;
+\item{\it 827:} Text* (name: \ARRAYOF\CHAR): Texts.Text;
+\item{\it 832:} NewMenu* (name, commands: \ARRAYOF\CHAR): Frame;
+\item{\it 838:} NewText* (text: Texts.Text; pos: \LONGINT): Frame;
 
 \beginsubsection 18.25. Texts.
 
-:29:    Notifier* = PROCEDURE (T: Text; op: INTEGER; beg, end: LONGINT);
-:77:  PROCEDURE Trailer(): Piece;
-:83:  PROCEDURE Load* (VAR R: Files.Rider; T: Text);
-:109:  PROCEDURE Open* (T: Text; name: ARRAY OF CHAR);
-:127:  PROCEDURE Store* (VAR W: Files.Rider; T: Text);
-:161:  PROCEDURE Close*(T: Text; name: ARRAY OF CHAR);
-:169:  PROCEDURE OpenBuf* (B: Buffer);
-:174:  PROCEDURE FindPiece (T: Text; pos: LONGINT; VAR org: LONGINT; VAR pce: Piece);
-:186:  PROCEDURE SplitPiece (p: Piece; off: LONGINT; VAR pr: Piece);
-:201:  PROCEDURE Save* (T: Text; beg, end: LONGINT; B: Buffer);
-:219:  PROCEDURE Copy* (SB, DB: Buffer);
-:228:  PROCEDURE Insert* (T: Text; pos: LONGINT; B: Buffer);
-:246:  PROCEDURE Append* (T: Text; B: Buffer);
-:250:  PROCEDURE Delete* (T: Text; beg, end: LONGINT; B: Buffer);
-:267:  PROCEDURE ChangeLooks* (T: Text; beg, end: LONGINT; sel: SET; fnt: Fonts.Font; col, voff: INTEGER);
-:283:  PROCEDURE Attributes*(T: Text; pos: LONGINT; VAR fnt: Fonts.Font; VAR col, voff: INTEGER);
-:290:  PROCEDURE OpenReader* (VAR R: Reader; T: Text; pos: LONGINT);
-:297:  PROCEDURE Read* (VAR R: Reader; VAR ch: CHAR);
-:309:  PROCEDURE Pos* (VAR R: Reader): LONGINT;
-:315:  PROCEDURE OpenScanner* (VAR S: Scanner; T: Text; pos: LONGINT);
-:323:  PROCEDURE Ten(n: INTEGER): REAL;
-:333:  PROCEDURE Scan* (VAR S: Scanner);
-:401:  PROCEDURE OpenWriter* (VAR W: Writer);
-:407:  PROCEDURE SetFont* (VAR W: Writer; fnt: Fonts.Font);
-:411:  PROCEDURE SetColor* (VAR W: Writer; col: INTEGER);
-:415:  PROCEDURE SetOffset* (VAR W: Writer; voff: INTEGER);
-:419:  PROCEDURE Write* (VAR W: Writer; ch: CHAR);
-:432:  PROCEDURE WriteLn* (VAR W: Writer);
-:436:  PROCEDURE WriteString* (VAR W: Writer; s: ARRAY OF CHAR);
-:442:  PROCEDURE WriteInt* (VAR W: Writer; x, n: LONGINT);
-:458:  PROCEDURE WriteHex* (VAR W: Writer; x: LONGINT);
-:469: PROCEDURE WriteReal* (VAR W: Writer; x: REAL; n: INTEGER);
-:495:  PROCEDURE WriteRealFix* (VAR W: Writer; x: REAL; n, k: INTEGER);
-:516:  PROCEDURE WritePair(VAR W: Writer; ch: CHAR; x: LONGINT);
-:521:  PROCEDURE WriteClock* (VAR W: Writer; d: LONGINT);
+\item{\it 77:} Trailer(): Piece;
+\item{\it 83:} Load* (\VAR R: Files.Rider; T: Text);
+\item{\it 109:} Open* (T: Text; name: \ARRAYOF\CHAR);
+\item{\it 127:} Store* (\VAR W: Files.Rider; T: Text);
+\item{\it 161:} Close*(T: Text; name: \ARRAYOF\CHAR);
+\item{\it 169:} OpenBuf* (B: Buffer);
+\item{\it 174:} FindPiece (T: Text; pos: \LONGINT; \VAR org: \LONGINT; \VAR pce: Piece);
+\item{\it 186:} SplitPiece (p: Piece; off: \LONGINT; \VAR pr: Piece);
+\item{\it 201:} Save* (T: Text; beg, end: \LONGINT; B: Buffer);
+\item{\it 219:} Copy* (SB, DB: Buffer);
+\item{\it 228:} Insert* (T: Text; pos: \LONGINT; B: Buffer);
+\item{\it 246:} Append* (T: Text; B: Buffer);
+\item{\it 250:} Delete* (T: Text; beg, end: \LONGINT; B: Buffer);
+\item{\it 267:} ChangeLooks* (T: Text; beg, end: \LONGINT; sel: \SET; fnt: Fonts.Font; col, voff: \INTEGER);
+\item{\it 283:} Attributes*(T: Text; pos: \LONGINT; \VAR fnt: Fonts.Font; \VAR col, voff: \INTEGER);
+\item{\it 290:} OpenReader* (\VAR R: Reader; T: Text; pos: \LONGINT);
+\item{\it 297:} Read* (\VAR R: Reader; \VAR ch: \CHAR);
+\item{\it 309:} Pos* (\VAR R: Reader): \LONGINT;
+\item{\it 315:} OpenScanner* (\VAR S: Scanner; T: Text; pos: \LONGINT);
+\item{\it 323:} Ten(n: \INTEGER): \REAL;
+\item{\it 333:} Scan* (\VAR S: Scanner);
+\item{\it 401:} OpenWriter* (\VAR W: Writer);
+\item{\it 407:} SetFont* (\VAR W: Writer; fnt: Fonts.Font);
+\item{\it 411:} SetColor* (\VAR W: Writer; col: \INTEGER);
+\item{\it 415:} SetOffset* (\VAR W: Writer; voff: \INTEGER);
+\item{\it 419:} Write* (\VAR W: Writer; ch: \CHAR);
+\item{\it 432:} WriteLn* (\VAR W: Writer);
+\item{\it 436:} WriteString* (\VAR W: Writer; s: \ARRAYOF\CHAR);
+\item{\it 442:} WriteInt* (\VAR W: Writer; x, n: \LONGINT);
+\item{\it 458:} WriteHex* (\VAR W: Writer; x: \LONGINT);
+\item{\it 469:} WriteReal* (\VAR W: Writer; x: \REAL; n: \INTEGER);
+\item{\it 495:} WriteRealFix* (\VAR W: Writer; x: \REAL; n, k: \INTEGER);
+\item{\it 516:} WritePair(\VAR W: Writer; ch: \CHAR; x: \LONGINT);
+\item{\it 521:} WriteClock* (\VAR W: Writer; d: \LONGINT);
 
 \beginsubsection 18.26. Viewers.
 
-:25:  PROCEDURE Open* (V: Viewer; X, Y: INTEGER);
-:49:  PROCEDURE Change* (V: Viewer; Y: INTEGER);
-:63:  PROCEDURE RestoreTrack (S: Display.Frame);
-:76:  PROCEDURE Close* (V: Viewer);
-:98:  PROCEDURE Recall* (VAR V: Viewer);
-:102:  PROCEDURE This* (X, Y: INTEGER): Viewer;
-:115:  PROCEDURE Next* (V: Viewer): Viewer;
-:119:  PROCEDURE Locate* (X, H: INTEGER; VAR fil, bot, alt, max: Display.Frame);
-:142:  PROCEDURE InitTrack* (W, H: INTEGER; Filler: Viewer);
-:157:  PROCEDURE OpenTrack* (X, W: INTEGER; Filler: Viewer);
-:177:  PROCEDURE CloseTrack* (X: INTEGER);
-:191:  PROCEDURE Broadcast* (VAR M: Display.FrameMsg);
+\item{\it 25:} Open* (V: Viewer; X, Y: \INTEGER);
+\item{\it 49:} Change* (V: Viewer; Y: \INTEGER);
+\item{\it 63:} RestoreTrack (S: Display.Frame);
+\item{\it 76:} Close* (V: Viewer);
+\item{\it 98:} Recall* (\VAR V: Viewer);
+\item{\it 102:} This* (X, Y: \INTEGER): Viewer;
+\item{\it 115:} Next* (V: Viewer): Viewer;
+\item{\it 119:} Locate* (X, H: \INTEGER; \VAR fil, bot, alt, max: Display.Frame);
+\item{\it 142:} InitTrack* (W, H: \INTEGER; Filler: Viewer);
+\item{\it 157:} OpenTrack* (X, W: \INTEGER; Filler: Viewer);
+\item{\it 177:} CloseTrack* (X: \INTEGER);
+\item{\it 191:} Broadcast* (\VAR M: Display.FrameMsg);
 
 \end
