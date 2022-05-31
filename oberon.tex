@@ -2745,20 +2745,18 @@ PROCEDURE Read (VAR R: Reader; VAR ch: CHAR);
 \code{T\/}. Procedure \code{Read\/} returns the character at the current position of \code{R\/}
 and makes \code{R\/} move to the next position.
 
-\noindent The current position of reader \code{R\/} is returned by a call to the function \code{Pos\/}:
+The current position of reader \code{R\/} is returned by a call to the function \code{Pos\/}:
 \begintt
 PROCEDURE Pos (VAR R: Reader): INTEGER;
 \endtt
 
 \noindent In Chapter 3 we learned that commands plus parameter lists are often
 embedded in ordinary texts. When interpreting such commands, the
-underlying text appears as a sequence of tokens like name, number,
-special symbol etc. much rather than as a sequence of
+underlying text appears as a sequence of tokens like \emph{name}, \emph{number}, \emph{special symbol}, \emph{etc.} much rather than as a sequence of
 characters. Therefore, we have adopted the well-known concepts of
-syntax and scanning from the discipline of compiler construction,
-including functional support. The Oberon scanner recognizes tokens of
-some universal classes. They are name, string, integer, real,
-longreal, and special character.
+\emph{syntax} and \emph{scanning} from the discipline of compiler construction, including functional support. The Oberon scanner recognizes tokens of
+some universal classes. They are \emph{name, string, integer, real,
+longreal}, and \emph{special character}.
 
 The exact syntax of universal Oberon tokens is:
 \begintt
@@ -2769,7 +2767,8 @@ string = """ { char } """.
 integer = ["+"|"-"] number.
 real = ["+"|"-"] number "." number ["E" ["+"|"-"] number].
 number = digit { digit }.
-spexchar = any character except letters, digits, space, tab, and carriage-return.
+spexchar = any character except letters, digits, space, tab,
+               and carriage-return.
 \endtt
 
 \noindent Type \code{Scanner\/} is defined correspondingly as
@@ -2787,8 +2786,8 @@ END;
 \endtt
 
 \noindent This type is actually a variant record type with class as
-discriminating tag. Depending on its class the value of the current
-token is stored in one of the fields \code{i\/}\code{, x\/}\code{, c\/}\code{, or\/}\code{ s\/}. \code{len\/} gives the length of \code{s\/}, \code{nextCh\/} typically exposes the character terminating the current token, and line counts the number of lines scanned.
+discriminating tag. Depending on its \code{class} the value of the current
+token is stored in one of the fields \code{i\/}\code{, x\/}\code{, c\/}\code{, or\/}\code{ s\/}. \code{len\/} gives the length of \code{s\/}, \code{nextCh\/} typically exposes the character terminating the current token, and \code{line} counts the number of lines scanned.
 
 The operations on scanners are
 \begintt
@@ -2812,9 +2811,9 @@ Writer = RECORD buf:
 END;
 \endtt
 
-\noindent \code{buf\/} is an internal buffer containing the consumed data. \code{fnt\/}, \code{col\/}, and \code{voff\/} specify the current looks for the next character consumed by this writer.
+\noindent \code{buf} is an internal buffer containing the consumed data. \code{fnt}, \code{col}, and \code{voff} specify the current looks for the next character consumed by this writer.
 
-The following procedures constitute the \code{Writer\/} API:
+The following procedures constitute the \code{Writer} \acro{API}:
 \begintt
 PROCEDURE OpenWriter (VAR W: Writer);
 PROCEDURE SetFont (VAR W: Writer; fnt: Fonts.Font);
@@ -2822,9 +2821,9 @@ PROCEDURE SetColor (VAR W: Writer; col: INTEGER);
 PROCEDURE SetOffset (VAR W: Writer; voff: INTEGER);
 \endtt
 
-\noindent Procedure \code{OpenWriter\/} opens a new writer with an empty buffer. Procedures \code{SetFont\/}, \code{SetColor\/}, and \code{SetOffset\/} set the respective current look. For example,
-\code{SetFont(W, fnt)\/} is equivalent with \code{W.fnt := fnt\/}.
-These procedures are included because \code{fnt\/}, \code{col\/}, and \code{voff\/} are read-only for clients.
+\noindent Procedure \code{OpenWrite/} opens a new writer with an empty buffer. Procedures \code{SetFont}, \code{SetColor}, and \code{SetOffset} set the respective current look. For example,
+\code{SetFont(W, fnt)} is equivalent with \code{W.fnt := fnt}.
+These procedures are included because \code{fnt}, \code{col}, and \code{voff} are read-only for clients.
 
 The question may arise how data is produced and transferred to
 writers. The answer is a set of writer procedures, each of them
