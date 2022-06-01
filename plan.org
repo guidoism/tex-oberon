@@ -39,7 +39,7 @@
 - [X] Proofread until 7.1. FILES.
 - [X] Proofread until 7.2. IMPLEMENTATION OF FILES ON A RANDOM-ACCESS STORE.
 - [X] Proofread until 7.3. IMPLEMENTATION OF FILES ON A DISK.
-- [ ] Proofread until 7.4. THE FILE DIRECTORY.
+- [X] Proofread until 7.4. THE FILE DIRECTORY.
 - [ ] Proofread until 7.5. THE TOOLBOX OF FILE UTILITIES.
 - [ ] Proofread until 8.1. LAYOUT AND RUN-TIME ORGANIZATION.
 - [ ] Proofread until 8.2. MANAGEMENT OF DYNAMIC STORAGE.
