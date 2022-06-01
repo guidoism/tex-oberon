@@ -4266,66 +4266,71 @@ Even with the presence of a single rider, the possibility of having several buff
 \smallskip
 \noindent The outlined scheme requires and is based upon the following data structures and types:
 \begintt
-File = Buffer = Index =
-POINTER TO FileDesc; POINTER TO BufferRecord; POINTER TO IndexRecord;
+File = POINTER TO FileDesc;
+Buffer = POINTER TO BufferRecord;
+Index = POINTER TO IndexRecord;
+
 FileDesc = RECORD next: File;
-aleng, bleng: INTEGER; (*file length*)
-nofbufs: INTEGER; (*no. of buffers allocated*)
-modH, registered: BOOLEAN; (*header has been modified*) firstbuf: Buffer: (*head of buffer chain*)
-sechint: DiskAdr; (*sector hint*)
-name: FileDir.FileName;
-date: INTEGER;
-ext: ARRAY FileDir.ExTabSize OF Index;
-sec: ARRAY 64 OF DiskAdr END;
-BufferRecord = RECORD apos, lim: INTEGER;(*lim = no. of bytes*) mod: BOOLEAN; (*buffer has been modified*)
-next: Buffer; (*buffer chain*)
-data: FileDir.DataSector END;
+             aleng, bleng: INTEGER; (*file length*)
+             nofbufs: INTEGER; (*no. of buffers allocated*)
+             modH, registered: BOOLEAN; (*header has been modified*)
+             firstbuf: Buffer: (*head of buffer chain*)
+             sechint: DiskAdr; (*sector hint*)
+             name: FileDir.FileName;
+             date: INTEGER;
+             ext: ARRAY FileDir.ExTabSize OF Index;
+             sec: ARRAY 64 OF DiskAdr
+           END;
+           
+BufferRecord = RECORD apos, lim: INTEGER;(*lim = no. of bytes*)
+                 mod: BOOLEAN; (*buffer has been modified*)
+                 next: Buffer; (*buffer chain*)
+                 data: FileDir.DataSector
+               END;
+
 IndexRecord = RECORD adr: DiskAdr;
-mod: BOOLEAN; (*index record has been modified*)
-Rider =
-sec: FileDir.IndexSector END;
-RECORD eof: BOOLEAN; res: INTEGER;
-file: File;
-apos, bpos: INTEGER; buf: Buffer
-END ;
-(*end of file reached*) (*no. of unread bytes*)
-(*position*)
-(*hint: likely buffer*)
+                mod: BOOLEAN; (*index record has been modified*)
+                sec: FileDir.IndexSector END;
+                
+Rider =  RECORD eof: BOOLEAN; (*end of file reached*)
+           res: INTEGER; (*no. of unread bytes*)
+           file: File;
+           apos, bpos: INTEGER; (*position*)
+           buf: Buffer (*hint: likely buffer*)
+         END;
 \endtt
 
 \noindent In order to increase efficiency of access, riders have been provided with a field containing the address of the element of the rider's position. From the conditions stated above for the allocation of buffers, it is evident that the value of this field can be a hint only. This implies that there can be no reliance on its information. Whenever it is used, its validity has to be checked. The check consists in a comparison of the riders' position \code{r.apos} with the hinted buffer's actual position \code{r.buf.apos}. If they differ, a buffer with the desired position must be searched and, if not present, allocated. The advantage of the hint lies in the fact that the hint is correct with a very high probability. The check is included in procedures \code{Read}, \code{ReadByte}, \code{Write}, and \code{WriteByte}.
 
 Some fields of the record types require additional explanations:
 
-1. The length is stored in a ``preprocessed'' form, namely by the two integers \code{aleng} and \code{bleng} such that aleng is a sector number and
-
+\noindent 1. The length is stored in a ``preprocessed'' form, namely by the two integers \code{aleng} and \code{bleng} such that aleng is a sector number and
+\begintt
 length = (aleng * SS) + bleng - HS
-
 aleng = (length + HS) DIV SS
-
 bleng = (length + HS) MOD SS
-
+\endtt
 The same holds for the form of the position in riders (\code{apos}, \code{bpos}).
 
-2. The field \code{nofbufs} indicates the number of buffers in the list headed by \code{firstbuf}:
-
-1 \le nofbufs \le Maxbufs.
-
+\smallskip\noindent 2. The field \code{nofbufs} indicates the number of buffers in the list headed by \code{firstbuf}:
+$$1 \le {\tt nofbufs} \le {\tt Maxbufs}$$
 3. Whenever data are written into a buffer, the file becomes inconsistent, i.e. the data on the disk are outdated. The file is updated, i.e. the buffer is copied into the corresponding disk sector, whenever the buffer is reallocated, e.g. during sequential writing after the buffer is full and is ``advanced''. During sequential reading, a buffer is also advanced and reused, but needs not be copied onto disk, because it is still consistent. Whether a buffer is consistent or not is indicated by its state variable \code{mod} (modified). Similarly, the field \code{modH} in the file descriptor indicates whether or not the header had been modified.
 
-4. The field \code{sechint} records the number of the last sector allocated to the file and serves as a hint to the kernel's allocation procedure, which allocates a next sector with an address larger than the hint. This is a measure to gain speed in sequential scans.
+\smallskip\noindent 4. The field \code{sechint} records the number of the last sector allocated to the file and serves as a hint to the kernel's allocation procedure, which allocates a next sector with an address larger than the hint. This is a measure to gain speed in sequential scans.
 
-5. The buffer's position is specified by its field \code{apos}. Used as index in the file header's sector table, it yields the sector corresponding to the current buffer contents. The field \code{lim} specifies the number of bytes's stored in the buffer. Reading cannot proceed beyond this limiting index; writing beyond it implies an increase in the file's length. All buffers except the one for the last sector are filled and specify \code{lim = SS}.
+\smallskip\noindent 5. The buffer's position is specified by its field \code{apos}. Used as index in the file header's sector table, it yields the sector corresponding to the current buffer contents. The field \code{lim} specifies the number of bytes's stored in the buffer. Reading cannot proceed beyond this limiting index; writing beyond it implies an increase in the file's length. All buffers except the one for the last sector are filled and specify \code{lim = SS}.
 
-6. The hidden rider field buf is merely a hint to speed up localization of the concerned buffer. A hint is likely, but not guaranteed to be correct. Its validity must be checked before use. The buffer hint is invalidated when a buffer is reallocated and/or a rider is repositioned.
+\smallskip\noindent 6. The hidden rider field buf is merely a hint to speed up localization of the concerned buffer. A hint is likely, but not guaranteed to be correct. Its validity must be checked before use. The buffer hint is invalidated when a buffer is reallocated and/or a rider is repositioned.
 
 The structure of riders remains practically the same as for files using main store. The hidden field \code{adr} is merely replaced by a pointer to the buffer covering the rider's position. A configuration of a file \code{f} with two riders is shown in Fig 7.2.
 
-TODO: Figure 7.2 File f with two riders and two buffers
+Some comments concerning module \code{Files} follow.
 
-1. After the writing of a file has been completed, its name is usually registered in the directory. \code{Register} invokes procedure \code{Unbuffer}. It inspects the associated buffers and copies those onto disk which had been modified. During this process, new index sectors may have to be transferred as well. If a file is to remain anonymous and local to a module or command, i.e. is not to be registered, but merely to be read, the release of buffers must be specified by an explicit call to \code{Close} (meaning ``close buffers''), which also invokes \code{Unbuffer}.
+\smallskip\noindent 1. After the writing of a file has been completed, its name is usually registered in the directory. \code{Register} invokes procedure \code{Unbuffer}. It inspects the associated buffers and copies those onto disk which had been modified. During this process, new index sectors may have to be transferred as well. If a file is to remain anonymous and local to a module or command, i.e. is not to be registered, but merely to be read, the release of buffers must be specified by an explicit call to \code{Close} (meaning ``close buffers''), which also invokes \code{Unbuffer}.
 
-2. Procedure \code{Old} (and for reasons of consistency also \code{New}) deviates from the general Oberon programming rule that an object be allocated by the calling (instead of the called) module. This rule would suggest the statements
+\figure{pdfs/fig-7.2.png}{3.5in}{7.2}{File \code{f} with two riders and two buffers}
+
+\smallskip\noindent 2. Procedure \code{Old} (and for reasons of consistency also \code{New}) deviates from the general Oberon programming rule that an object be allocated by the calling (instead of the called) module. This rule would suggest the statements
 \begintt
 New(f); Files.Open(f, name)
 \endtt

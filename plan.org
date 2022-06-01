@@ -36,9 +36,9 @@
 - [X] Proofread until 6.3. THE LINKING LOADER.
 - [X] Proofread until 6.4. THE TOOLBOX OF THE LOADER.
 - [X] Proofread until 6.5. THE OBERON OBJECT FILE FORMAT.
-- [ ] Proofread until 7.1. FILES.
-- [ ] Proofread until 7.2. IMPLEMENTATION OF FILES ON A RANDOM-ACCESS STORE.
-- [ ] Proofread until 7.3. IMPLEMENTATION OF FILES ON A DISK.
+- [X] Proofread until 7.1. FILES.
+- [X] Proofread until 7.2. IMPLEMENTATION OF FILES ON A RANDOM-ACCESS STORE.
+- [X] Proofread until 7.3. IMPLEMENTATION OF FILES ON A DISK.
 - [ ] Proofread until 7.4. THE FILE DIRECTORY.
 - [ ] Proofread until 7.5. THE TOOLBOX OF FILE UTILITIES.
 - [ ] Proofread until 8.1. LAYOUT AND RUN-TIME ORGANIZATION.
