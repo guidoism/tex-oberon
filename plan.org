@@ -28,9 +28,9 @@
 - [X] Proofread until 5.1.2. Editing Text.
 - [X] Proofread until 5.1.3. Accessing Text.
 - [X] Proofread until 5.2. TEXT MANAGEMENT.
-- [ ] Proofread until 5.3. TEXT FRAMES.
-- [ ] Proofread until 5.4. THE FONT MACHINERY.
-- [ ] Proofread until 5.5. THE EDIT TOOLBOX.
+- [X] Proofread until 5.3. TEXT FRAMES.
+- [X] Proofread until 5.4. THE FONT MACHINERY.
+- [X] Proofread until 5.5. THE EDIT TOOLBOX.
 - [ ] Proofread until 6.1. LINKING AND LOADING.
 - [ ] Proofread until 6.2. MODULE REPRESENTATION.
 - [ ] Proofread until 6.3. THE LINKING LOADER.
