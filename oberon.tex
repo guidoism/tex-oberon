@@ -3856,7 +3856,7 @@ Certain linkage information must not only be provided in each object file, but a
 
 The primary requirement is that a system must be represented in a form that allows to add new modules quickly. What is a sensible representation for this purpose? The simplest solution that comes to mind is a list of module blocks containing sections for the global data, for the program code, and perhaps meta data for the linking process. The list is rooted in a variable global to the loader module, here called \code{Modules}.
 
-TODO: Fig. 6.1. System of 4 modules
+\figure{pdfs/fig-6.1.png}{3.7in}{6.1}{System of 4 modules}
 
 The first part, containing the link to the next module, is called the module descriptor. On the Oberon System, it contains further links to the various sections of a module. The type \code{Module} is defined as follows:
 \begintt
@@ -3877,7 +3877,7 @@ ModTable[mod.mno] = mod.data
 
 \noindent for all \code{mod} in the module list. \code{size} is the entire module block's size excluding the descriptor, and \code{refcnt} is the number of other modules importing this module. This number is used to check whether a module can be released by procedure \code{Modules.Free}.
 
-TODO: Figure 6.2. Module block headed by descriptor
+\figure{pdfs/fig-6.2.png}{2.1in}{6.2}{Module block headed by descriptor}
 
 The section with meta data follows the data and code areas and consists of several parts. \emph{Imports} is an array of the modules imported by this module, each entry being the address of the respective module descriptor. \emph{Commands} is a sequence of procedure identifiers followed by their offset in the code section. This section is used when activating a command. \emph{Entries} is an array of offsets of all exported entities (including commands). This section is used by the loader itself for linking. \emph{Pointer refs} is an array of offsets of global pointer variables in the data section. These are used by the garbage collector as the roots of graphs of heap objects in use.
 
@@ -3910,7 +3910,7 @@ END
 \noindent 
 The loading process stops, if a key mismatch is detected (\code{err} = 3). After successful loading of all imports, the loading of the actual module proceeds by allocating a descriptor and then reading the remaining sections of the file. The data is allocated (and cleared) and the code section is read in a straight-forward way without alteration.
 
-At the very end of the file three integers called \code{fixorgP}, \code{fixorgD}, and \code{fixorgT} are read. They are the anchors of linked lists in the program code of instructions that need fixups. These fixups are performed only after the entire file had been read. Traversing the P-list, the pairs mno-pno are replaced by computed offsets in \code{BL} instructions (procedure calls). Traversing the D-list, addresses of \code{LDR} instructions and instruction pairs are fixed up, and traversing the T-list, addresses of type descriptors are computed and inserted. This low-level piece of code is shown below for call instructions (\code{BL}). Those for the D-List and the T-list are analogous.
+At the very end of the file three integers called \code{fixorgP}, \code{fixorgD}, and \code{fixorgT} are read. They are the anchors of linked lists in the program code of instructions that need fixups. These fixups are performed only after the entire file had been read. Traversing the P-list, the pairs \code{mno}-\code{pno} are replaced by computed offsets in \code{BL} instructions (procedure calls). Traversing the D-list, addresses of \code{LDR} instructions and instruction pairs are fixed up, and traversing the T-list, addresses of type descriptors are computed and inserted. This low-level piece of code is shown below for call instructions (\code{BL}). Those for the D-List and the T-list are analogous.
 \begintt
 adr := mod.code + fixorgP*4;
 WHILE adr # mod.code DO
@@ -3941,13 +3941,11 @@ The frequent use of the low-level procedures \code{SYSTEM.GET} and \code{SYSTEM.
 \beginsubsection 6.4. THE TOOLBOX OF THE LOADER.
 
 User commands directed to the loader are contained in module \code{System}. The toolbox offers the following three commands:
-
-System.ShowModules
-
-System.ShowCommands modname
-
-System.Free {modname} ~
-
+\smallskip
+\item{} System.ShowModules
+\item{} System.ShowCommands modname
+\item{} System.Free {modname} ~
+\smallskip
 \noindent The first command opens a viewer and provides a list of all loaded modules. The list indicates the block length and the number of clients importing a module (the reference count). \code{ShowCommands} opens a viewer and lists the commands provided by the specified module. The commands are prefixed by the module name, and hence can immediately be activated by a mouse click. \code{Free} is called in order to remove modules either to regain storage space or to replace a module by a newly compiled version. A module can be dispensed only if (1) it has no clients, and (2) if does not declare any record types which are extensions of imported types.
 
 \beginsubsection 6.5. THE OBERON OBJECT FILE FORMAT.
@@ -4023,7 +4021,7 @@ DEFINITION Files;
 END Files.
 \endtt
 
-\noindent \code{New(name)} yields a new (empty) file without registering it in the directory. \code{Old(name)} retrieves the file with the specified name, or yields \code{NIL}, if it is not found in the directory. \code{Register(f)} inserts the name of \code{f} (specified in the call of \code{New}) in the directory. An already existing entry with this name is replaced. \code{Close(f)} must be called after writing is completed and the file is not to be registered. \code{Close} actually stands for ``close buffers'', and is implied in the procedure \code{Register}. Procedure \code{Purge}\code{ will} be explained at the end of section 7.2.
+\noindent \code{New(name)} yields a new (empty) file without registering it in the directory. \code{Old(name)} retrieves the file with the specified name, or yields \code{NIL}, if it is not found in the directory. \code{Register(f)} inserts the name of \code{f} (specified in the call of \code{New}) in the directory. An already existing entry with this name is replaced. \code{Close(f)} must be called after writing is completed and the file is not to be registered. \code{Close} actually stands for ``close buffers'', and is implied in the procedure \code{Register}. Procedure \code{Purge} will be explained at the end of section 7.2.
 
 The sequential scan of a file \code{f} (reading characters) is programmed as shown in the following template:
 \begintt
@@ -4062,9 +4060,9 @@ It immediately follows that access to an element is not as simple as in the case
 
 The second most crucial design decision concerns the data structure in which sectors are organized; it determines how a succeeding sector is located. The simplest solution is to link sectors in a list. This is acceptable if access is to be restricted to purely sequential scans. Although this would be sufficient for most applications, it is unnecessarily restrictive for media other than purely sequential ones (tapes). After all, it is sometimes practical to position a rider at an arbitrary point in the file rather than always at its beginning. This is made possible by the use of an indexed sector table, typically stored as a header in the file. The table is an array of the addresses of the file's data sectors. Unfortunately, the length of the table needed is unknown. Choosing a fixed length for all files is controversial, because it inevitably leads to either a limitation of file length (when chosen too small) that is unacceptable in some applications, or to a large waste of file space (when chosen too large). Experience shows that in practice most files are quite short, i.e. in the order of a few thousand bytes. The dilemma is avoided by a two-level table, i.e. by using a table of tables.
 
-The scheme chosen in Oberon is slightly more complex in order to favor short files ($<$ 64 K bytes): Each file header contains a table of 64 entries, each pointing to a 1K byte sector. Additionally, it contains a table of 12 entries, the so-called extensions, each pointing to an index sector containing 256 further sector pointers. The file length is thereby limited to 64 + 12*256 sectors, or 3,211,264 bytes (minus the length of the header). The chosen structure is illustrated in Fig. 7.1. sec[0] always points to the sector containing the file header.
+The scheme chosen in Oberon is slightly more complex in order to favor short files ($<$ 64 K bytes): Each file header contains a table of 64 entries, each pointing to a 1K byte sector. Additionally, it contains a table of 12 entries, the so-called extensions, each pointing to an index sector containing 256 further sector pointers. The file length is thereby limited to $64 + 12 \times 256$ sectors, or 3,211,264 bytes (minus the length of the header). The chosen structure is illustrated in Fig. 7.1. sec[0] always points to the sector containing the file header.
 
-TODO: Figure 7.1 File header and extension sectors
+\figure{pdfs/fig-7.1.png}{3.5in}{7.1}{File header and extension sectors}
 
 The header contains some additional data, namely the length of the file (in bytes), its name, and date and time of its creation. The size of the header is 352 bytes; the remaining 672 bytes of the first sector are used for data. Hence, truly short files occupy a single sector only. The declaration of the file header is contained in the definition of module \code{FileDir}. An abbreviated version containing the fields relevant so far is:
 \begintt
@@ -4102,80 +4100,134 @@ END
 \noindent We emphasize that in all but one out of 1024 cases only three instructions and a single test are to be executed. This improvement therefore is crucial to the efficiency of file access, and to that of the entire Oberon System. We now present the entire file module (for files on a random-access store).
 \begintt
 MODULE MFiles; (*NW 24.8.90 / 12.10.90 / 20.6.2013*)
-IMPORT SYSTEM, Kernel, FileDir;
-(*A file consists of a sequence of sectors. The first sector contains the header.
-Part of the header is the sector table, an array of addresses to the sectors. A file is referenced through riders each of which indicates a position.*)
-CONST
-HS =FileDir.HeaderSize; SS =FileDir.SectorSize; STS= FileDir.SecTabSize; XS =FileDir.IndexSize;
-TYPE File* = POINTER TO FileDesc;
-Index = POINTER TO IndexRecord;
-IndexRecord = RECORD sec: FileDir.IndexSector END ;
-Rider* =
-RECORD eof*: BOOLEAN;
-res*, pos, adr: INTEGER;
-file: File END ;
-FileDesc =
-RECORD mark: INTEGER;
-name: FileDir.FileName;
-len, date: INTEGER;
-ext: ARRAY FileDir.ExTabSize OF Index;
-sec: FileDir.SectorTable END ;
-PROCEDURE Old*(name: ARRAY OF CHAR): File; VAR head: INTEGER;
-namebuf: FileDir.FileName; BEGIN
-FileDir.Search(name, head); RETURN SYSTEM.VAL(File, head) END Old;
-PROCEDURE New*(name: ARRAY OF CHAR): File; VAR f: File; head: INTEGER;
-BEGIN f := NIL; Kernel.AllocSector(0, head); IF head # 0 THEN
-f := SYSTEM.VAL(File, head); f.mark := FileDir.HeaderMark; f.len := HS; f.name := name;
-f.date := Kernel.Clock(); f.sec[0] := head
-END ;
-RETURN f END New;
-PROCEDURE Register*(f: File); BEGIN
-IF (f # NIL) & (f.name[0] > 0X) THEN FileDir.Insert(f.name, f.sec[0]) END ; END Register;
-PROCEDURE Length*(f: File): INTEGER; BEGIN RETURN f.len - HS
-END Length;
-PROCEDURE Date*(f: File): INTEGER; BEGIN RETURN f.date
-END Date;
-PROCEDURE Set*(VAR r: Rider; f: File; pos: LONGINT); VAR m, n: INTEGER;
-BEGIN r.eof := FALSE; r.res := 0; IF f # NIL THEN
-IF pos < 0 THEN r.pos := HS
-ELSIF pos > f.len - HS THEN r.pos := f.len
-ELSE r.pos := pos + HS
-END ;
-r.file := f; m := r.pos DIV SS; n := r.pos MOD SS;
-IF m < STS THEN r.adr := f.sec[m] + n
-ELSE r.adr := f.ext[(m-STS) DIV XS].sec[(m-STS) MOD XS] + n END
-END END Set;
-PROCEDURE ReadByte*(VAR r: Rider; VAR x: BYTE); VAR m: INTEGER;
-BEGIN
-IF r.pos < r.file.len THEN
-SYSTEM.GET(r.adr, x); INC(r.adr); INC(r.pos); IF r.adr MOD SS = 0 THEN
-m := r.pos DIV SS;
-IF m < STS THEN r.adr := r.file.sec[m]
-ELSE r.adr := r.file.ext[(m-STS) DIV XS].sec[(m-STS) MOD XS] END
-END
-ELSE x := 0; r.eof := TRUE END
-END ReadByte;
-PROCEDURE WriteByte*(VAR r: Rider; x: BYTE); VAR k, m, n, ix: INTEGER;
-BEGIN
-IF r.pos < r.file.len THEN
-m := r.pos DIV SS; INC(r.pos);
-IF m < STS THEN r.adr := r.file.sec[m]
-ELSE r.adr := r.file.ext[(m-STS) DIV XS].sec[(m-STS) MOD XS] END
-ELSE
-IF r.adr MOD SS = 0 THEN
-m := r.pos DIV SS;
-IF m < STS THEN Kernel.AllocSector(0, r.adr); r.file.sec[m] := r.adr ELSE n := (m - STS) DIV XS; k := (m - STS) MOD XS;
-IF k = 0 THEN (*new index*)
-Kernel.AllocSector(0, ix); r.file.ext[n] := SYSTEM.VAL(Index, ix)
-END ;
-Kernel.AllocSector(0, r.adr); r.file.ext[n].sec[k] := r.adr END
-END ;
-INC(r.pos); r.file.len := r.pos END ;
-SYSTEM.PUT(r.adr, x); INC(r.adr) END WriteByte;
-PROCEDURE Pos*(VAR r: Rider): INTEGER; BEGIN RETURN r.pos - HS
-END Pos;
-PROCEDURE Base*(VAR r: Rider): File; BEGIN RETURN r.file
-END Base;
+  IMPORT SYSTEM, Kernel, FileDir;
+  (*A file consists of a sequence of sectors. The first sector contains the header.
+    Part of the header is the sector table, an array of addresses to the sectors.
+    A file is referenced through riders each of which indicates a position.*)
+    
+  CONST
+    HS = FileDir.HeaderSize;
+    SS = FileDir.SectorSize;
+    STS = FileDir.SecTabSize;
+    XS = FileDir.IndexSize;
+    
+  TYPE File* = POINTER TO FileDesc;
+       Index = POINTER TO IndexRecord;
+       IndexRecord = RECORD sec: FileDir.IndexSector END ;
+  
+  Rider* =
+    RECORD eof*: BOOLEAN;
+      res*, pos, adr: INTEGER;
+      file: File END ;
+      
+  FileDesc =
+    RECORD mark: INTEGER;
+      name: FileDir.FileName;
+      len, date: INTEGER;
+      ext: ARRAY FileDir.ExTabSize OF Index;
+      sec: FileDir.SectorTable END ;
+      
+  PROCEDURE Old*(name: ARRAY OF CHAR): File;
+  VAR head: INTEGER;
+      namebuf: FileDir.FileName;
+  BEGIN
+    FileDir.Search(name, head); RETURN SYSTEM.VAL(File, head)
+  END Old;
+    
+  PROCEDURE New*(name: ARRAY OF CHAR): File;
+  VAR f: File; head: INTEGER;
+  BEGIN
+    f := NIL; Kernel.AllocSector(0, head);
+    IF head # 0 THEN
+      f := SYSTEM.VAL(File, head); f.mark := FileDir.HeaderMark;
+      f.len := HS; f.name := name;
+      f.date := Kernel.Clock(); f.sec[0] := head
+    END ;
+    RETURN f
+  END New;
+
+  PROCEDURE Register*(f: File);
+  BEGIN
+    IF (f # NIL) & (f.name[0] > 0X) THEN
+      FileDir.Insert(f.name, f.sec[0])
+    END ;
+  END Register;
+  
+  PROCEDURE Length*(f: File): INTEGER;
+  BEGIN
+    RETURN f.len - HS
+  END Length;
+
+  PROCEDURE Date*(f: File): INTEGER;
+  BEGIN
+    RETURN f.date
+  END Date;
+  
+  PROCEDURE Set*(VAR r: Rider; f: File; pos: LONGINT);
+  VAR m, n: INTEGER;
+  BEGIN
+    r.eof := FALSE; r.res := 0;
+    IF f # NIL THEN
+      IF pos < 0 THEN r.pos := HS
+      ELSIF pos > f.len - HS THEN r.pos := f.len
+      ELSE r.pos := pos + HS
+      END ;
+      r.file := f; m := r.pos DIV SS; n := r.pos MOD SS;
+      IF m < STS THEN r.adr := f.sec[m] + n
+      ELSE r.adr := f.ext[(m-STS) DIV XS].sec[(m-STS) MOD XS] + n
+      END
+    END
+  END Set;
+    
+  PROCEDURE ReadByte*(VAR r: Rider; VAR x: BYTE);
+  VAR m: INTEGER;
+  BEGIN
+    IF r.pos < r.file.len THEN
+      SYSTEM.GET(r.adr, x); INC(r.adr); INC(r.pos);
+      IF r.adr MOD SS = 0 THEN
+        m := r.pos DIV SS;
+        IF m < STS THEN r.adr := r.file.sec[m]
+        ELSE r.adr := r.file.ext[(m-STS) DIV XS].sec[(m-STS) MOD XS]
+        END
+      END
+    ELSE x := 0; r.eof := TRUE
+    END
+  END ReadByte;
+
+  PROCEDURE WriteByte*(VAR r: Rider; x: BYTE);
+  VAR k, m, n, ix: INTEGER;
+  BEGIN
+    IF r.pos < r.file.len THEN
+      m := r.pos DIV SS; INC(r.pos);
+      IF m < STS THEN r.adr := r.file.sec[m]
+      ELSE r.adr := r.file.ext[(m-STS) DIV XS].sec[(m-STS) MOD XS]
+      END
+    ELSE
+      IF r.adr MOD SS = 0 THEN
+        m := r.pos DIV SS;
+        IF m < STS THEN Kernel.AllocSector(0, r.adr); r.file.sec[m] := r.adr
+        ELSE
+          n := (m - STS) DIV XS; k := (m - STS) MOD XS;
+          IF k = 0 THEN (*new index*)
+            Kernel.AllocSector(0, ix); r.file.ext[n] := SYSTEM.VAL(Index, ix)
+          END ;
+          Kernel.AllocSector(0, r.adr); r.file.ext[n].sec[k] := r.adr
+        END
+      END ;
+      INC(r.pos); r.file.len := r.pos
+    END ;
+    SYSTEM.PUT(r.adr, x); INC(r.adr)
+  END WriteByte;
+
+  PROCEDURE Pos*(VAR r: Rider): INTEGER;
+  BEGIN
+    RETURN r.pos - HS
+  END Pos;
+
+  PROCEDURE Base*(VAR r: Rider): File;
+  BEGIN
+    RETURN r.file
+  END Base;
 END MFiles.
 \endtt
 
@@ -4194,7 +4246,7 @@ PROCEDURE FreeSector(sec: INTEGER); (*used in Purge*)
 
 \beginsubsection 7.3. IMPLEMENTATION OF FILES ON A DISK.
 
-First we recall that the organization of files as sets of individually allocated blocks (sectors) is inherently required by the allocation considerations of dynamically growing sequences. However, if the storage medium is a tape, a disk, or a flash-RAM, there exists an additional reason for the use of blocks. They constitute the subsequences to be individually buffered for transmission in order to overcome the timing constraints imposed by the medium. If an adequate space utilization is to be achieved, the blocks must not be too long. A typical size is 1, 2, or 4K bytes.
+First we recall that the organization of files as sets of individually allocated blocks (sectors) is inherently required by the allocation considerations of dynamically growing sequences. However, if the storage medium is a tape, a disk, or a flash-\acro{RAM}, there exists an additional reason for the use of blocks. They constitute the subsequences to be individually buffered for transmission in order to overcome the timing constraints imposed by the medium. If an adequate space utilization is to be achieved, the blocks must not be too long. A typical size is 1, 2, or 4K bytes.
 
 This necessity of buffering has a profound influence on the implementation of file access. The complication arises because the abstraction of the sequence of individual bytes needs to be maintained. The increase in complexity of file access is considerable, as can be seen by comparing the program listings of the two respective implementations.
 
@@ -4205,18 +4257,13 @@ If a file is read (or written) in purely sequential manner, a single buffer is a
 However, we recall that several riders may be placed on a file and be moved independently. It might be appealing to associate a buffer with each rider. But this proposal must quickly be rejected when we realize that several riders may be active at neighbouring positions. If these positions refer to the same sector, which is duplicated in the riders' distinct buffers, the buffers may easily become inconsistent. Obviously, buffers must not be associated with riders, but with the file itself. The descriptor therefore contains the head of a list of linked buffers. Each buffer is identified by its position in the file. An invariant of the system is that no two buffers represent the same sector.
 
 Even with the presence of a single rider, the possibility of having several buffers associated with a file can be advantageous, if a rider is frequently repositioned. It becomes a question of strategy and heuristics when to allocate a new buffer. In the Oberon system, we have adopted the following solution:
-
-1. The first buffer is created when the file is opened (New, Old).
-
-2. Additional buffers may be allocated when a rider is placed (or repositioned) on the file.
-
-3. At most four buffers are connected to the same file.
-
-4. Purely sequential movements of riders do not cause allocation of buffers.
-
-5. Separate buffers are generated when extensions of the file's sector table need be accessed
-(rider position > 64K). Each buffers the 256 sector addresses of the respective index sector.
-
+\smallskip
+\item{1.} The first buffer is created when the file is opened (New, Old).
+\item{2.} Additional buffers may be allocated when a rider is placed (or repositioned) on the file.
+\item{3.} At most four buffers are connected to the same file.
+\item{4.} Purely sequential movements of riders do not cause allocation of buffers.
+\item{5.} Separate buffers are generated when extensions of the file's sector table need be accessed (rider position $>$ 64K). Each buffers the 256 sector addresses of the respective index sector.
+\smallskip
 \noindent The outlined scheme requires and is based upon the following data structures and types:
 \begintt
 File = Buffer = Index =
