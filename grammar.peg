@@ -26,7 +26,8 @@ proceduredeclaration = 'TODO'
 procedurecall     = 'TODO'
 ifstatement       = 'TODO'
 casestatement     = 'TODO'
-whilestatement    = 'TODO'
+whilestatement    = 'WHILE' sp* expression sp* 'DO' sp* statementsequence
+                    ('ELSIF' sp* expression sp* 'DO' sp* statementsequence)* sp* 'END' sp*
 repeatstatement   = 'TODO'
 forstatement      = 'TODO'
 fieldlistsequence = fieldlist sp* (';' sp* fieldlist sp*)*
@@ -37,8 +38,8 @@ designator        = qualident selector*
 qualident         = ident '.' qualident / ident
 selector          = '.' ident / '[' explist ']' / '^' / '(' qualident ')'
 explist           = expression sp* (',' sp* expression)*
-relation          = 'TODO'
-expression        = simpleexpression (relation simpleexpression)?
+relation          = '=' / '#' / '<=' / '<' / '>=' / '>' / 'IN' / 'IS'
+expression        = simpleexpression sp* (relation sp* simpleexpression)?
 simpleexpression  = ('+' / '-')? term sp* (addoperator sp* term sp*)*
 addoperator       = '+' / '-' / 'OR'
 muloperator       = '*' / '/' / 'DIV' / 'MOD' / '&'
@@ -54,11 +55,12 @@ number            = real / integer
 integer           = digit+ / digit hexdigit* 'H'
 real              = digit+ '.' digit* scalefactor?
 scalefactor       = 'E' ('+' / '-')? digit+
-ident             = alpha alphanum*
+ident             = !keyword alpha alphanum*
 alpha             = [a-zA-Z]
 digit             = [0-9]
 hexdigit          = [0-9a-fA-F]
 alphanum          = alpha / digit
 character         = [\x20-\uFFFF]
 sp                = [ \t\r\n\f]
+keyword           = 'END'
 
