@@ -63,7 +63,7 @@
   - [-] Write PEG grammar
     - [X] Works on Pattern 1 (from Section 12.2)
     - [X] Works on Pattern 2 (from Section 12.2)
-    - [ ] Works on Pattern 3 (from Section 12.2)
+    - [X] Works on Pattern 3 (from Section 12.2)
     - [ ] Works on Pattern 4 (from Section 12.2)
     - [ ] Works on Pattern 5 (from Section 12.2)
     - [ ] Works on Pattern 6 (from Section 12.2)
