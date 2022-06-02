@@ -41,10 +41,10 @@
 - [X] Proofread until 7.3. IMPLEMENTATION OF FILES ON A DISK.
 - [X] Proofread until 7.4. THE FILE DIRECTORY.
 - [X] Proofread until 7.5. THE TOOLBOX OF FILE UTILITIES.
-- [ ] Proofread until 8.1. LAYOUT AND RUN-TIME ORGANIZATION.
-- [ ] Proofread until 8.2. MANAGEMENT OF DYNAMIC STORAGE.
-- [ ] Proofread until 8.3. THE KERNEL.
-- [ ] Proofread until 8.4. THE STORAGE MANAGEMENT'S TOOLBOX.
+- [X] Proofread until 8.1. LAYOUT AND RUN-TIME ORGANIZATION.
+- [X] Proofread until 8.2. MANAGEMENT OF DYNAMIC STORAGE.
+- [X] Proofread until 8.3. THE KERNEL.
+- [X] Proofread until 8.4. THE STORAGE MANAGEMENT'S TOOLBOX.
 - [ ] Proofread until 9.1. OVERVIEW.
 - [ ] Proofread until 9.2. KEYBOARD AND MOUSE.
 - [ ] Proofread until 9.3. THE SD-CARD (DISK).
@@ -56,3 +56,4 @@
 
 - [ ] Rewrite in metapost and insert Figure 2.2  
 - [ ] Figure out a better way to do references in section 2.4
+- [ ] Clean up code formatting so it fits on the page
