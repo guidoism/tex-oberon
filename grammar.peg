@@ -28,7 +28,7 @@ ifstatement       = 'TODO'
 casestatement     = 'TODO'
 whilestatement    = 'WHILE' sp* expression sp* 'DO' sp* statementsequence
                     ('ELSIF' sp* expression sp* 'DO' sp* statementsequence)* sp* 'END' sp*
-repeatstatement   = 'TODO'
+repeatstatement   = 'REPEAT' sp* statementsequence sp* 'UNTIL' sp* expression
 forstatement      = 'TODO'
 fieldlistsequence = fieldlist sp* (';' sp* fieldlist sp*)*
 fieldlist         = identlist sp* ':' sp* type
