@@ -21,17 +21,21 @@ length               = constexpression
 constexpression      = expression
 recordtype           = 'RECORD' sp* ('(' sp* basetype sp* ')')? sp* fieldlistsequence? sp* 'END'
 pointertype          = 'POINTER' sp* 'TO' sp* type
-proceduretype        = 'TODO'
-proceduredeclaration = 'TODO'
-procedurecall     = 'TODO'
-ifstatement       = 'TODO'
-casestatement     = 'TODO'
-whilestatement    = 'WHILE' sp* expression sp* 'DO' sp* statementsequence
-                    ('ELSIF' sp* expression sp* 'DO' sp* statementsequence)* sp* 'END' sp*
-repeatstatement   = 'REPEAT' sp* statementsequence sp* 'UNTIL' sp* expression
-forstatement      = 'TODO'
-fieldlistsequence = fieldlist sp* (';' sp* fieldlist sp*)*
-fieldlist         = identlist sp* ':' sp* type
+proceduretype        = 'PROCEDURE' sp* formalparameters?
+proceduredeclaration = procedureheading sp* ';' sp* procedurebody sp* ident
+procedureheading     = 'PROCEDURE' sp* identdef sp* formalparameters?
+procedurebody        = declarationsequence ('BEGIN' sp* statementsequence)?
+                       sp* ('RETURN' expression)? sp* 'END'
+procedurecall        = designator sp* actualparameters?
+ifstatement          = 'TODO'
+casestatement        = 'TODO'
+whilestatement       = 'WHILE' sp* expression sp* 'DO' sp* statementsequence
+                       ('ELSIF' sp* expression sp* 'DO' sp* statementsequence)* sp* 'END' sp*
+repeatstatement      = 'REPEAT' sp* statementsequence sp* 'UNTIL' sp* expression
+forstatement         = 'FOR' sp* ident sp* ':=' sp* expression sp* 'TO' sp* expression sp*
+                       ('BY' sp* constexpression)? sp* 'DO' sp* statementsequence sp* 'END'
+fieldlistsequence    = fieldlist sp* (';' sp* fieldlist sp*)*
+fieldlist            = identlist sp* ':' sp* type
 basetype          = qualident
 assignment        = designator sp* ':=' sp* expression
 designator        = qualident selector*
@@ -47,7 +51,10 @@ term              = factor sp* (muloperator sp* factor)*
 factor            = number / string / 'NIL' / 'TRUE' / 'FALSE' /
                     set / designator actualparameters? / '(' expression ')' / '~' factor
 designator        = qualident selector*
-actualparameters  = 'TODO'
+actualparameters  = '(' sp* explist? sp* ')'
+formalparameters  = '(' (fpsection sp* (';' sp* fpsection)*)? sp* ')' sp* (':' sp* qualident)?
+fpsection         = 'VAR'? sp* ident sp* (',' sp* ident)* sp* ':' sp* formaltype
+formaltype        = ('ARRAY OF' sp*)* qualident
 set               = '{' sp* (element sp* (sp* ',' sp* element)*)? '}'
 element           = expression ('..' expression)*
 string            = '"' (!'"' character)+ '"' / digit hexdigit? 'X'
