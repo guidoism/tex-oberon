@@ -57,3 +57,27 @@
 - [ ] Rewrite in metapost and insert Figure 2.2  
 - [ ] Figure out a better way to do references in section 2.4
 - [ ] Clean up code formatting so it fits on the page
+
+* Code formatting
+
+  - [-] Write PEG grammar
+    - [X] Works on Pattern 1 (from Section 12.2)
+    - [X] Works on Pattern 2 (from Section 12.2)
+    - [ ] Works on Pattern 3 (from Section 12.2)
+    - [ ] Works on Pattern 4 (from Section 12.2)
+    - [ ] Works on Pattern 5 (from Section 12.2)
+    - [ ] Works on Pattern 6 (from Section 12.2)
+    - [ ] Works on Pattern 7 (from Section 12.2)
+    - [ ] Works on Pattern 8 (from Section 12.2)
+    - [ ] Works on Pattern 9 (from Section 12.2)
+    - [ ] Works on Pattern 10 (from Section 12.2)
+    - [ ] Works on Pattern 11 (from Section 12.2)
+    - [ ] Works on Pattern 12 (from Section 12.2)
+    - [ ] Works on Pattern 13 (from Section 12.2)
+    - [ ] Works on Pattern 14 (from Section 12.2)
+    - [ ] Works on Pattern 15 (from Section 12.2)
+    - [ ] Works on Pattern 16 (from Section 12.2)
+    - [ ] Works on Pattern 17 (from Section 12.2)
+
+
+      
