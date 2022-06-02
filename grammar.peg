@@ -1,7 +1,19 @@
-statementsequence = statement sp* (";" sp* statement )*
-statement         = (assignment / procedurecall / ifstatement /
-                     casestatement / whilestatement / repeatstatement /
-                     forstatement)?
+declarationsequence  = ('CONST' (constdeclaration ';')*)?
+                       ('TYPE' (typedeclaration ';')*)?
+                       ('VAR' sp+ (variabledeclaration sp* ';' sp*)*)?
+                       (proceduredeclaration ';')*
+statementsequence    = statement sp* (";" sp* statement )*
+statement            = (assignment / procedurecall / ifstatement /
+                        casestatement / whilestatement / repeatstatement /
+                        forstatement)?
+constdeclaration     = 'TODO'
+typedeclaration      = 'TODO'
+variabledeclaration  = identlist ':' sp* type
+identlist            = identdef sp* (',' sp* identdef)*
+identdef             = ident '*'?
+type                 = qualident / structype
+structype            = 'TODO'
+proceduredeclaration = 'TODO'
 procedurecall     = 'TODO'
 ifstatement       = 'TODO'
 casestatement     = 'TODO'
