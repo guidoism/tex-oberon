@@ -1,7 +1,10 @@
+module               = 'MODULE' sp+ ident ';' sp+ importlist? declarationsequence sp*
+                       ('BEGIN' sp+ statementsequence)? sp* 'END' sp+ ident sp* '.' sp*
 declarationsequence  = ('CONST' (constdeclaration ';')*)?
                        ('TYPE' (typedeclaration ';')*)?
                        ('VAR' sp+ (variabledeclaration sp* ';' sp*)*)?
                        (proceduredeclaration ';')*
+importlist           = 'TODO'
 statementsequence    = statement sp* (";" sp* statement )*
 statement            = (assignment / procedurecall / ifstatement /
                         casestatement / whilestatement / repeatstatement /
@@ -46,3 +49,5 @@ hexdigit          = [0-9a-fA-F]
 alphanum          = alpha / digit
 character         = [\x20-\uFFFF]
 sp                = [ \t\r\n\f]
+
+
