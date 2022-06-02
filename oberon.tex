@@ -16,6 +16,7 @@
 \def\pattern#1{{\bf Pattern #1:}}
 \def\RISC{\acro{RISC} }
 \def\MMU{\acro{MMU} }
+\def\ASCII{\acro{ASCII} }
 
 % TODO: Change raw tags to use semantic \code and \emph macros
 
@@ -4894,7 +4895,7 @@ PROCEDURE SetClock; / year, month, day, hour, minute, second
 
 Device drivers are collections of procedures that constitute the immediate interface between hardware and software. They refer to those parts of the computer hardware that are usually called \emph{peripheral}. Computers typically contain a system bus which transmits data among its different parts. Processor and memory are considered as its internal parts; the remaining parts, such as disk, keyboard, display, etc, are considered as external or peripheral, notwithstanding the fact that they are often contained in the same cabinet or board.
 
-Such peripheral devices are connected to the system bus via special registers (data buffers) and transceivers (switches, buffers in the sense of digital electronics). These registers and transceivers are addressed by the processor in the same way as memory locations---they are said to be \emph{memory-mapped}--and they constitute the hardware interface between processor bus and device. References to them are typically confined to specific driver procedures which constitute the software interface.
+Such peripheral devices are connected to the system bus via special registers (data buffers) and transceivers (switches, buffers in the sense of digital electronics). These registers and transceivers are addressed by the processor in the same way as memory locations---they are said to be \emph{memory-mapped}---and they constitute the hardware interface between processor bus and device. References to them are typically confined to specific driver procedures which constitute the software interface.
 
 Drivers are inherently hardware specific, and the justification of their existence is precisely that they encapsulate these specifics and present to their clients an appropriate abstraction of the device. Evidently, this abstraction must still reflect the essential characteristics of the device, but not the details (such as e.g. the addresses of its interface registers).
 
@@ -4902,40 +4903,42 @@ Our justification to present the drivers connecting the Oberon system with the \
 
 In order to reduce the number of interface types, standards have been established. The \RISC computer also uses such interface standards, and we will concentrate on them in the following presentations. The following devices are presented:
 
-1. The \emph{Keyboard} is considered as a serial device delivering one byte of input data per key stroke. It is connected by a serial line according to the PS/2 and ASCII (American Standard Code for Information Interchange) standards. The software is contained in module \code{Input} (Sect. 9.2), and the hardware is explained in Sect. 17.2.1.
+1. The \emph{Keyboard} is considered as a serial device delivering one byte of input data per key stroke. It is connected by a serial line according to the \acro{PS}/2 and \ASCII (American Standard Code for Information Interchange) standards. The software is contained in module \code{Input} (Sect. 9.2), and the hardware is explained in Sect. 17.2.1.
 
 2. The \emph{mouse} is a pointing device delivering coordinates in addition to key states. The software is also part of module \code{Input} (Sect. 9.2).
 
-3. \emph{Display}. The interface to the display is an area of memory that contains the displayed information, exactly one bit per pixel for a monochrome display. This area is called frame buffer or bitmap Here the size is of the display area is 768 lines and 1024 dots per line, representing a raster. The software is module Display, which primarily consists of operations to draw frequently occurring patterns. These operations are called raster-ops. They are explained in Section 4.5. The actual display requires a hardware interface called a display controller. The connection between the controller and the display follows the VGA-Standard (see Sect. 17.2.4).
+3. \emph{Display}. The interface to the display is an area of memory that contains the displayed information, exactly one bit per pixel for a monochrome display. This area is called frame buffer or bitmap Here the size is of the display area is 768 lines and 1024 dots per line, representing a raster. The software is module Display, which primarily consists of operations to draw frequently occurring patterns. These operations are called raster-ops. They are explained in Section 4.5. The actual display requires a hardware interface called a display controller. The connection between the controller and the display follows the \acro{VGA}-Standard (see Sect. 17.2.4).
 
-4. \emph{Disk}. Our \RISC computer does not use a magnetic, rotating disk for storing non-volatile data. Instead, it uses an SD-card (flash-RAM). The driver is contained in module \code{Kernel} (Section 8.3). The hardware is discussed in Sect. 17.2.2.
+4. \emph{Disk}. Our \RISC computer does not use a magnetic, rotating disk for storing non-volatile data. Instead, it uses an \acro{SD}-card (flash-\acro{RAM}). The driver is contained in module \code{Kernel} (Section 8.3). The hardware is discussed in Sect. 17.2.2.
 
-5. \emph{Net}. In the original text, a network was presented consisting of a bus connecting many computers, based on the RS-485 standard. It was implemented by the serial communications controller Zilog 8530, operating at a frequency of 230 Kb/s. The name SCC has been retained as a generic interface, behind which the packet transport has now been re-implemented as a simple wireless network (Nordic nRF24L01 controller) in the regulation-free 2.4GHz industrial/scientific/medical (ISM) frequency band.
+5. \emph{Net}. In the original text, a network was presented consisting of a bus connecting many computers, based on the \acro{RS}-485 standard. It was implemented by the serial communications controller Zilog 8530, operating at a frequency of 230 Kb/s. The name \acro{SCC} has been retained as a generic interface, behind which the packet transport has now been re-implemented as a simple wireless network (Nordic nRF24L01 controller) in the regulation-free 2.4GHz industrial/scientific/medical (\acro{ISM}) frequency band.
 
 In all driver modules the implementation-dependent procedures \code{SYSTEM.PUT}, \code{SYSTEM.GET}, and \code{SYSTEM.BIT} are used to access the registers of the device interface. Their first parameter is the address of the register, the second an expression or variable.
 
 \beginsubsection 9.2. KEYBOARD AND MOUSE.
 
-The driver procedures for the keyboard and the mouse are located in module \code{Input}. \code{Available()} signals that a character has been typed on the keyboard, if its value is greater than 0. The character is read by calling \code{Read(ch)}. Module \code{Input} is restricting the data to the ASCII character set Latin-1, i.e. the values lie in the range $0X \ge ch < 80X$ (7-bit values). \code{Mouse(k, x, y)} yields the current state of the mouse keys and the mouse's coordinates.
+The driver procedures for the keyboard and the mouse are located in module \code{Input}. \code{Available()} signals that a character has been typed on the keyboard, if its value is greater than 0. The character is read by calling \code{Read(ch)}. Module \code{Input} is restricting the data to the \ASCII character set Latin-1, i.e. the values lie in the range $0X \ge ch < 80X$ (7-bit values). \code{Mouse(k, x, y)} yields the current state of the mouse keys and the mouse's coordinates.
 \begintt
 MODULE Input;
 PROCEDURE Available(): INTEGER;
 PROCEDURE Read(VAR ch: CHAR);
-PROCEDURE Mouse(VAR keys: SET; VAR x, y: INTEGER); PROCEDURE SetMouseLimits(w, h: INTEGER); PROCEDURE Init;
+PROCEDURE Mouse(VAR keys: SET; VAR x, y: INTEGER);
+PROCEDURE SetMouseLimits(w, h: INTEGER);
+PROCEDURE Init;
 END Input.
 \endtt
 
-\noindent The driver software accesses the keyboard via the Standard PS/2 interface represented by an 8-bit register for the received data kbdCode, and a single-bit flag indicating whether a byte had been received.
+\noindent The driver software accesses the keyboard via the Standard \acro{PS}/2 interface represented by an 8-bit register for the received data \code{kbdCode}, and a single-bit flag indicating whether a byte had been received.
 
-The keyboard codes received from the keyboard via a PS/2 line are not identical with the character values delivered to the Read procedure. A conversion is necessary. This is so, because modern keyboards treat all keys in the same way, including the ones for upper case, control, alternative, etc. Separate codes are sent to signal the pushing down and the release of a key, followed by another code identifying which key had been pressed or released. This requires, besides a translation table from codes to characters, a set of state variables. They are the global, \code{Boolean} variables \code{Recd}, \code{Up}, \code{Shift}, \code{Ctrl}, and \code{Ext}. Procedure \code{Peek} determines whether an actual character is present, or merely a code signalling a key shift. \code{Peek} controls the state.
+The keyboard codes received from the keyboard via a \acro{PS}/2 line are not identical with the character values delivered to the \code{Read} procedure. A conversion is necessary. This is so, because modern keyboards treat all keys in the same way, including the ones for upper case, control, alternative, etc. Separate codes are sent to signal the pushing down and the release of a key, followed by another code identifying which key had been pressed or released. This requires, besides a translation table from codes to characters, a set of state variables. They are the global, \code{Boolean} variables \code{Recd}, \code{Up}, \code{Shift}, \code{Ctrl}, and \code{Ext}. Procedure \code{Peek} determines whether an actual character is present, or merely a code signalling a key shift. \code{Peek} controls the state.
 
-Procedure \code{Mouse} fetches a word from the mouse interface register and decomposes it into its components (key state and coordinates). (kb is the bit indicating whether a code had been received from the keyboard).
+Procedure \code{Mouse} fetches a word from the mouse interface register and decomposes it into its components (key state and coordinates). (\code{kb} is the bit indicating whether a code had been received from the keyboard).
 
-\figure{pdfs/fig-9.1.png}{4.3in}{9.1}{Format of the mouse register}
+\figure{pdfs/fig-9.1.png}{2.3in}{9.1}{Format of the mouse register}
 
 \beginsubsection 9.3. THE SD-CARD (DISK).
 
-SD-card are high-volume memory devices based on flash-store technology. They are typically organized as individually accessible blocks of 1K bytes. The driver for the SD-card is contained in module \code{Kernel}, which also handles allocation and reservation of blocks, here in analogy to rotating disks still called sectors.
+\acro{SD}-card are high-volume memory devices based on flash-store technology. They are typically organized as individually accessible blocks of 1K bytes. The driver for the \acro{SD}-card is contained in module \code{Kernel}, which also handles allocation and reservation of blocks, here in analogy to rotating disks still called sectors.
 \begintt
 TYPE Sector = ARRAY SectorLength OF BYTE;
 PROCEDURE GetSector(src: INTEGER; VAR dst: Sector);
@@ -4945,7 +4948,7 @@ PROCEDURE MarkSector(sec: INTEGER);
 PROCEDURE FreeSector(sec: INTEGER);
 \endtt
 
-\noindent Data transfer is sequebtial and handled by procedures \code{ReadSD} and \code{WriteSD} by issuing commands. These are for transmitting a block address, for receiving, and for sending a block of data. Synchronous transmission of sequences of words follows the SPI standard, which uses 3 lines, one for data input, one for dats output, and one for the clock (see also Section 17.2.2). The hardware interface contains a 32-bit register. The bit-rate is 8.3 MB/s.
+\noindent Data transfer is sequebtial and handled by procedures \code{ReadSD} and \code{WriteSD} by issuing commands. These are for transmitting a block address, for receiving, and for sending a block of data. Synchronous transmission of sequences of words follows the \acro{SPI} standard, which uses 3 lines, one for data input, one for dats output, and one for the clock (see also Section 17.2.2). The hardware interface contains a 32-bit register. The bit-rate is 8.3 MB/s.
 
 \beginsubsection 9.4. SERIAL ASYNCHRONOUS INTERFACE (RS 232).
 

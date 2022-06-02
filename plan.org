@@ -45,8 +45,8 @@
 - [X] Proofread until 8.2. MANAGEMENT OF DYNAMIC STORAGE.
 - [X] Proofread until 8.3. THE KERNEL.
 - [X] Proofread until 8.4. THE STORAGE MANAGEMENT'S TOOLBOX.
-- [ ] Proofread until 9.1. OVERVIEW.
-- [ ] Proofread until 9.2. KEYBOARD AND MOUSE.
+- [X] Proofread until 9.1. OVERVIEW.
+- [X] Proofread until 9.2. KEYBOARD AND MOUSE.
 - [ ] Proofread until 9.3. THE SD-CARD (DISK).
 - [ ] Proofread until 9.4. SERIAL ASYNCHRONOUS INTERFACE (RS 232).
 - [ ] Proofread until 9.5. SERIAL COMMUNICATIONS CONTROLLER (SCC).
