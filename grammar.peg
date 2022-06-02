@@ -1,7 +1,7 @@
 module               = 'MODULE' sp+ ident ';' sp+ importlist? declarationsequence sp*
                        ('BEGIN' sp+ statementsequence)? sp* 'END' sp+ ident sp* '.' sp*
-declarationsequence  = ('CONST' (constdeclaration ';')*)?
-                       ('TYPE' (typedeclaration ';')*)?
+declarationsequence  = ('CONST' sp+ (constdeclaration sp* ';' sp*)*)?
+                       ('TYPE' sp+ (typedeclaration sp* ';' sp* )*)?
                        ('VAR' sp+ (variabledeclaration sp* ';' sp*)*)?
                        (proceduredeclaration ';')*
 importlist           = 'TODO'
@@ -10,7 +10,7 @@ statement            = (assignment / procedurecall / ifstatement /
                         casestatement / whilestatement / repeatstatement /
                         forstatement)?
 constdeclaration     = 'TODO'
-typedeclaration      = 'TODO'
+typedeclaration      = identdef sp* '=' sp* structype
 variabledeclaration  = identlist ':' sp* type
 identlist            = identdef sp* (',' sp* identdef)*
 identdef             = ident '*'?
@@ -19,8 +19,8 @@ structype            = arraytype / recordtype / pointertype / proceduretype
 arraytype            = 'ARRAY' sp* length (',' sp* length)* sp* 'OF' sp+ type
 length               = constexpression
 constexpression      = expression
-recordtype           = 'TODO'
-pointertype          = 'TODO'
+recordtype           = 'RECORD' sp* ('(' sp* basetype sp* ')')? sp* fieldlistsequence? sp* 'END'
+pointertype          = 'POINTER' sp* 'TO' sp* type
 proceduretype        = 'TODO'
 proceduredeclaration = 'TODO'
 procedurecall     = 'TODO'
@@ -29,6 +29,9 @@ casestatement     = 'TODO'
 whilestatement    = 'TODO'
 repeatstatement   = 'TODO'
 forstatement      = 'TODO'
+fieldlistsequence = fieldlist sp* (';' sp* fieldlist sp*)*
+fieldlist         = identlist sp* ':' sp* type
+basetype          = qualident
 assignment        = designator sp* ':=' sp* expression
 designator        = qualident selector*
 qualident         = ident '.' qualident / ident
