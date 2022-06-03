@@ -6,7 +6,7 @@ declarationsequence  = ('CONST' sp+ (constdeclaration sp* ';' sp*)*)?
                        (proceduredeclaration ';')*
 importlist           = 'IMPORT' sp* import sp* ("," sp* import)* sp* ';'
 import               = ident sp* (':=' sp* ident)?
-statementsequence    = statement sp* (';' sp* statement )*
+statementsequence    = statement (sp* ';' sp* statement )*
 statement            = (assignment / procedurecall / ifstatement /
                         casestatement / whilestatement / repeatstatement /
                         forstatement)?
