@@ -53,7 +53,6 @@ muloperator       = '*' / '/' / 'DIV' / 'MOD' / '&'
 term              = factor sp* (muloperator sp* factor)*
 factor            = number / string / 'NIL' / 'TRUE' / 'FALSE' /
                     set / designator actualparameters? / '(' expression ')' / '~' factor
-designator        = qualident selector*
 actualparameters  = '(' sp* explist? sp* ')'
 formalparameters  = '(' (fpsection sp* (';' sp* fpsection)*)? sp* ')' sp* (':' sp* qualident)?
 fpsection         = 'VAR'? sp* ident sp* (',' sp* ident)* sp* ':' sp* formaltype

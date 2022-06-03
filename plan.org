@@ -47,9 +47,9 @@
 - [X] Proofread until 8.4. THE STORAGE MANAGEMENT'S TOOLBOX.
 - [X] Proofread until 9.1. OVERVIEW.
 - [X] Proofread until 9.2. KEYBOARD AND MOUSE.
-- [ ] Proofread until 9.3. THE SD-CARD (DISK).
-- [ ] Proofread until 9.4. SERIAL ASYNCHRONOUS INTERFACE (RS 232).
-- [ ] Proofread until 9.5. SERIAL COMMUNICATIONS CONTROLLER (SCC).
+- [X] Proofread until 9.3. THE SD-CARD (DISK).
+- [X] Proofread until 9.4. SERIAL ASYNCHRONOUS INTERFACE (RS 232).
+- [X] Proofread until 9.5. SERIAL COMMUNICATIONS CONTROLLER (SCC).
 
 
 * Other tasks
@@ -78,6 +78,9 @@
     - [X] Works on Pattern 15 (from Section 12.2)
     - [X] Works on Pattern 16 (from Section 12.2)
     - [X] Works on Pattern 17 (from Section 12.2)
+ - [ ] Add support for comments
+ - [ ] Go back and confirm that it still works on all of snippets
+ - [ ] Tweak to output typeset code
 
 
       

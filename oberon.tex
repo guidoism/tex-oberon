@@ -4948,19 +4948,24 @@ PROCEDURE MarkSector(sec: INTEGER);
 PROCEDURE FreeSector(sec: INTEGER);
 \endtt
 
-\noindent Data transfer is sequebtial and handled by procedures \code{ReadSD} and \code{WriteSD} by issuing commands. These are for transmitting a block address, for receiving, and for sending a block of data. Synchronous transmission of sequences of words follows the \acro{SPI} standard, which uses 3 lines, one for data input, one for dats output, and one for the clock (see also Section 17.2.2). The hardware interface contains a 32-bit register. The bit-rate is 8.3 MB/s.
+\noindent Data transfer is sequential and handled by procedures \code{ReadSD} and \code{WriteSD} by issuing commands. These are for transmitting a block address, for receiving, and for sending a block of data. Synchronous transmission of sequences of words follows the \acro{SPI} standard, which uses 3 lines, one for data input, one for data output, and one for the clock (see also Section 17.2.2). The hardware interface contains a 32-bit register. The bit-rate is 8.3 \acro{MB}/s.
 
 \beginsubsection 9.4. SERIAL ASYNCHRONOUS INTERFACE (RS 232).
 
-The RS-232 standard serves to transmit sequences of bytes over a data line asynchronously. This implies that there is no separate clock line (see also Section 17.2.3). The hardware interface contains a 10-bit register for the transmitter and one for the receiver. The data rate used here is 19200 bit/s. A byte is sent and received over the line by the following programs.
+The \acro{RS}-232 standard serves to transmit sequences of bytes over a data line asynchronously. This implies that there is no separate clock line (see also Section 17.2.3). The hardware interface contains a 10-bit register for the transmitter and one for the receiver. The data rate used here is 19200 bit/s. A byte is sent and received over the line by the following programs.
 \begintt
 CONST data = -56; stat = -52; (*device register addresses*)
-PROCEDURE Send(x: BYTE); BEGIN
-REPEAT UNTIL SYSTEM.BIT(stat, 1);
-SYSTEM.PUT(data, x) END Send;
-PROCEDURE Rec(VAR x: BYTE); BEGIN
-REPEAT UNTIL SYSTEM.BIT(stat, 0);
-SYSTEM.GET(data, x) END Rec;
+PROCEDURE Send(x: BYTE);
+BEGIN
+  REPEAT UNTIL SYSTEM.BIT(stat, 1);
+  SYSTEM.PUT(data, x)
+END Send;
+
+PROCEDURE Rec(VAR x: BYTE);
+BEGIN
+  REPEAT UNTIL SYSTEM.BIT(stat, 0);
+  SYSTEM.GET(data, x)
+END Rec;
 \endtt
 
 \noindent These procedures are used in the driver module \code{RS232} presented in Section 15.2. This module itself is not used in the Oberon core, but it was instrumental in building the System on a host computer and downloading it. It is characterized by a very simple interface.
@@ -4971,10 +4976,13 @@ The interface of the driver for the network was taken over from the original des
 \begintt
 DEFINITION SCC;
 TYPE Header =
-RECORD valid: BOOLEAN; dadr, sadr, typ: BYTE;
-len: INTEGER; (*of data following header*) END ;
+  RECORD valid: BOOLEAN; dadr, sadr, typ: BYTE;
+    len: INTEGER; (*of data following header*)
+  END;
+  
 PROCEDURE Start(filter: BOOLEAN);
-PROCEDURE Send(VAR head: Header; buf: ARRAY OF BYTE); PROCEDURE Available(): INTEGER;
+PROCEDURE Send(VAR head: Header; buf: ARRAY OF BYTE);
+PROCEDURE Available(): INTEGER;
 PROCEDURE ReceiveHead(VAR head: Header);
 PROCEDURE Receive(VAR x: BYTE);
 PROCEDURE Skip(m: INTEGER);
