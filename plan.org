@@ -50,6 +50,83 @@
 - [X] Proofread until 9.3. THE SD-CARD (DISK).
 - [X] Proofread until 9.4. SERIAL ASYNCHRONOUS INTERFACE (RS 232).
 - [X] Proofread until 9.5. SERIAL COMMUNICATIONS CONTROLLER (SCC).
+- [X] Proofread until 10.1. INTRODUCTION.
+- [ ] Proofread until 10.2. THE PROTOCOL.            xxx Chapters 10 and 11
+- [ ] Proofread until 10.3. STATION ADDRESSING.      xxx are a mess. I might
+- [ ] Proofread until 10.4. THE IMPLEMENTATION.      xxx just remove them
+- [ ] Proofread until 11.1. CONCEPT AND STRUCTURE.   xxx from the book. Text
+- [ ] Proofread until 11.2. ELECTRONIC MAIL SERVICE. xxx is missing from the
+- [ ] Proofread until 11.3. PRINTING SERVICE.        xxx source.
+- [ ] Proofread until 11.4. MISCELLANEOUS SERVICES.  xxx
+- [ ] Proofread until 11.5. USER ADMINISTRATION.     xxx
+- [ ] Proofread until 12.1. INTRODUCTION.
+- [ ] Proofread until 12.2. CODE PATTERNS.
+- [ ] Proofread until 12.3. INTERNAL DATA STRUCTURES AND MODULE INTERFACES.
+- [ ] Proofread until 12.3.1. Data structures.
+- [ ] Proofread until 12.3.2. Module interfaces.
+- [ ] Proofread until 12.4. THE PARSER.
+- [ ] Proofread until 12.5. THE SCANNER.
+- [ ] Proofread until 12.6. SEARCHING THE SYMBOL TABLE, AND HANDLING SYMBOL FILES.
+- [ ] Proofread until 12.6.1. The structure of the symbol table.
+- [ ] Proofread until 12.6.2. Symbol files.
+- [ ] Proofread until 12.7. THE CODE GENERATOR.
+- [ ] Proofread until 12.7.1. Expressions.
+- [ ] Proofread until 12.7.2. Relations.
+- [ ] Proofread until 12.7.3. Set operations.
+- [ ] Proofread until 12.7.4. Assignments.
+- [ ] Proofread until 12.7.5. Conditional and repetitive statements.
+- [ ] Proofread until 12.7.6. Boolean expressions.
+- [ ] Proofread until 12.7.7. Procedures.
+- [ ] Proofread until 12.7.8. Type extension.
+- [ ] Proofread until 12.7.9. Import and export, global variables.
+- [ ] Proofread until 12.7.10. Traps.
+- [ ] Proofread until 13.1. HISTORY AND GOAL.
+- [ ] Proofread until 13.2. A BRIEF USER GUIDE.
+- [ ] Proofread until 13.2.1. Basic commands.
+- [ ] Proofread until 13.2.2. Menu commands.
+- [ ] Proofread until 13.2.3. Further commands.
+- [ ] Proofread until 13.2.4. Macros.
+- [ ] Proofread until 13.2.5. Rectangles.
+- [ ] Proofread until 13.2.6. Oblique lines and circles.
+- [ ] Proofread until 13.2.7. Spline curves.
+- [ ] Proofread until 13.2.8. Constructing new macros.
+- [ ] Proofread until 13.3. THE CORE AND ITS STRUCTURE.
+- [ ] Proofread until 13.4. DISPLAYING GRAPHICS.
+- [ ] Proofread until 13.5. THE USER INTERFACE.
+- [ ] Proofread until 13.6. MACROS.
+- [ ] Proofread until 13.7. OBJECT CLASSES.
+- [ ] Proofread until 13.8. THE IMPLEMENTATION.
+- [ ] Proofread until 13.8.1. Module Draw.
+- [ ] Proofread until 13.8.2. Module GraphicFrames.
+- [ ] Proofread until 13.8.3. Module Graphics.
+- [ ] Proofread until 13.9. RECTANGLES AND CURVES.
+- [ ] Proofread until 13.9.1. Rectangles.
+- [ ] Proofread until 13.9.2. Oblique lines and circles.
+- [ ] Proofread until 14.1. THE STARTUP PROCESS.
+- [ ] Proofread until 14.2. BUILDING TOOLS.
+- [ ] Proofread until 14.3. MAINTENANCE TOOLS.
+- [ ] Proofread until 15.1. BASIC MATHEMATICAL FUNCTIONS.
+- [ ] Proofread until 15.2. A DATA LINK.
+- [ ] Proofread until 15.3. A GENERATOR OF GRAPHIC MACROS.
+- [ ] Proofread until 16.1. INTRODUCTION.
+- [ ] Proofread until 16.2. THE ARITHMETIC AND LOGIC UNIT (ALU).
+- [ ] Proofread until 16.2.1 Shifters.
+- [ ] Proofread until 16.2.2. Multiplication.
+- [ ] Proofread until 16.2.3. Division.
+- [ ] Proofread until 16.3. FLOATING-POINT ARITHMETIC.
+- [ ] Proofread until 16.3.1. Floating-point addition.
+- [ ] Proofread until 16.3.2. Floating-point multiplication.
+- [ ] Proofread until 16.3.3. Floating-point division.
+- [ ] Proofread until 16.4. THE CONTROL UNIT.
+- [ ] Proofread until 17.1. THE SRAM MEMORY.
+- [ ] Proofread until 17.2. PERIPHERAL INTERFACES.
+- [ ] Proofread until 17.2.1. The PS-2 interface.
+- [ ] Proofread until 17.2.2. The SPI interface.
+- [ ] Proofread until 17.2.3. The RS-232 interface.
+- [ ] Proofread until 17.2.4. The display controller.
+- [ ] Proofread until 17.2.5. The Mouse interface.
+
+
 
 
 * Other tasks
@@ -57,6 +134,7 @@
 - [ ] Rewrite in metapost and insert Figure 2.2  
 - [ ] Figure out a better way to do references in section 2.4
 - [ ] Clean up code formatting so it fits on the page
+- [ ] Confirm: "source language Oberon defined in Appendix 1, and with the target computer RISC, defined in Appendix 2."
 
 * Code formatting
 
