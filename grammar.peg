@@ -13,11 +13,11 @@ statement            = (assignment / procedurecall / ifstatement /
 constdeclaration     = 'TODO'
 typedeclaration      = identdef sp* '=' sp* structype
 variabledeclaration  = identlist ':' sp* type
-identlist            = identdef sp* (',' sp* identdef)*
+identlist            = identdef (sp* ',' sp* identdef)*
 identdef             = ident '*'?
 type                 = structype / qualident
 structype            = arraytype / recordtype / pointertype / proceduretype
-arraytype            = 'ARRAY' sp* length (',' sp* length)* sp* 'OF' sp+ type
+arraytype            = 'ARRAY' sp* length (sp* ',' sp* length)* sp* 'OF' sp+ type
 length               = constexpression
 constexpression      = expression
 recordtype           = 'RECORD' sp* ('(' sp* basetype sp* ')')? sp* fieldlistsequence? sp* 'END'
@@ -37,20 +37,20 @@ whilestatement       = 'WHILE' sp* expression sp* 'DO' sp* statementsequence
 repeatstatement      = 'REPEAT' sp* statementsequence sp* 'UNTIL' sp* expression
 forstatement         = 'FOR' sp* ident sp* ':=' sp* expression sp* 'TO' sp* expression sp*
                        ('BY' sp* constexpression)? sp* 'DO' sp* statementsequence sp* 'END'
-fieldlistsequence    = fieldlist sp* (';' sp* fieldlist sp*)*
+fieldlistsequence    = fieldlist (sp* ';' sp* fieldlist sp*)*
 fieldlist            = identlist sp* ':' sp* type
 basetype          = qualident
 assignment        = designator sp* ':=' sp* expression
 designator        = qualident selector*
 qualident         = ident '.' qualident / ident
 selector          = '.' ident / '[' explist ']' / '^' / '(' qualident ')'
-explist           = expression sp* (',' sp* expression)*
+explist           = expression (sp* ',' sp* expression)*
 relation          = '=' / '#' / '<=' / '<' / '>=' / '>' / 'IN' / 'IS'
-expression        = simpleexpression sp* (relation sp* simpleexpression)?
+expression        = simpleexpression (sp* relation sp* simpleexpression)?
 simpleexpression  = ('+' / '-')? term sp* (addoperator sp* term sp*)*
 addoperator       = '+' / '-' / 'OR'
 muloperator       = '*' / '/' / 'DIV' / 'MOD' / '&'
-term              = factor sp* (muloperator sp* factor)*
+term              = factor (sp* muloperator sp* factor)*
 factor            = number / string / 'NIL' / 'TRUE' / 'FALSE' /
                     set / designator actualparameters? / '(' expression ')' / '~' factor
 actualparameters  = '(' sp* explist? sp* ')'
@@ -58,7 +58,7 @@ formalparameters  = '(' (fpsection sp* (';' sp* fpsection)*)? sp* ')' sp* (':' s
 fpsection         = 'VAR'? sp* ident sp* (',' sp* ident)* sp* ':' sp* formaltype
 formaltype        = ('ARRAY OF' sp*)* qualident
 set               = '{' sp* (element sp* (sp* ',' sp* element)*)? '}'
-element           = expression sp* ('..'sp* expression)*
+element           = expression (sp* '..' sp* expression)*
 string            = '"' (!'"' character)+ '"' / digit hexdigit? 'X'
 number            = real / integer
 integer           = digit+ / digit hexdigit* 'H'

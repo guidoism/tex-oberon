@@ -156,8 +156,8 @@
     - [X] Works on Pattern 15 (from Section 12.2)
     - [X] Works on Pattern 16 (from Section 12.2)
     - [X] Works on Pattern 17 (from Section 12.2)
- - [ ] Add support for comments
- - [ ] Go back and confirm that it still works on all of snippets
+ - [X] Add support for comments
+ - [X] Go back and confirm that it still works on all of snippets
  - [ ] Tweak to output typeset code
 
 
