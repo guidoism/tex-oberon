@@ -5369,7 +5369,7 @@ END Pattern1.                             module exit code
 
 \noindent \pattern{2} \emph{Simple expressions}: The result of an expression containing operators is always stored in a register before it is assigned to a variable or used in another operation.
 
-Registers for intermediate results are allocated sequentially in ascending order $R0, R1, ... , R11$. Integer multiplication and division by powers of 2 are represented by shifts (\code{LSL}, \code{ASR}). Similarly, the modulus by a power of 2 is obtained by masking off leading bits. The operations of set union, difference, and intersection are represented by logical operations (\code{OR}, \code{AND}).
+Registers for intermediate results are allocated sequentially in ascending order $R_0, R_1, ... , R_{11}$. Integer multiplication and division by powers of 2 are represented by shifts (\code{LSL}, \code{ASR}). Similarly, the modulus by a power of 2 is obtained by masking off leading bits. The operations of set union, difference, and intersection are represented by logical operations (\code{OR}, \code{AND}).
 \begintt
 MODULE Pattern2;
   VAR i, j, k, n: INTEGER;      0, 4, 8, 12
@@ -5413,10 +5413,8 @@ END Pattern2.
 
 \noindent \pattern{3} \emph{Indexed variables}: References to elements of arrays make use of the possibility to add an index value to an offset. The index must be present in a register and be multiplied by the size of the array elements. (For integers with size 4 this is done by a shift of 2 bits). Then this index is checked whether it lies within the bounds specified in the array's declaration. This is achieved by a comparison, actually a subtraction, and a subsequent branch instruction causing a trap, if the index is either negative or beyond the upper bound.
 
-If the reference is to an element of a multi-dimensional array (matrix), its address computation involves several multiplications and additions. The address of an element $A[ik-1, ... , i1, i0]$ of a $k$-dimensional array $A$ with lengths $nk-1, ... , n1, n0$ is
-
-$$adr(A)+((...((ik-1 *nk-2)+ik-2)*nk-3 +...)*n1 +i1)*n0 +i0$$
-
+If the reference is to an element of a multi-dimensional array (matrix), its address computation involves several multiplications and additions. The address of an element $A[i_{k-1}, ... , i_1, i_0]$ of a $k$-dimensional array $A$ with lengths $n_{k-1}, ... , n_1, n_0$ is
+$$adr(A)+((...((i_{k-1} *n_{k-2})+i_{k-2})*n_{k-3} +...)*n_1 +i_1)*n_0 +i_0$$
 Note that for index checks \code{CMP} is written instead of \code{SUB} to mark that the subtraction is merely a comparison, that the result remains unused and only the condition flag registers hold the result.
 \begintt
 MODULE Pattern3;
@@ -5499,65 +5497,67 @@ END Pattern4.
 
 \noindent \pattern{5} \emph{Boolean expressions, If statements}: Conditional statements imply that parts of them are skipped. This is done by the use of branch instructions whose operand specifies the distance of the branch. The instructions refer to the condition-register as an implicit operand. Its value is determined by a preceding instruction, typically a compare or a bit-test instruction.
 
-The Boolean operators \code{\&} and \code{OR} are purposely not defined as total functions, but rather by the equations
+The Boolean operators \code{\&} and \code{OR} are purposely not defined as total functions, but rather by the equations % TODO: add definition of total function
 \begintt
   p & q  = if p then q else FALSE
   p OR q = if p then TRUE else q
 \endtt
 
-\noindent Consequently, Boolean operators must be translated into branches too. Evidently, branches stemming from if statements and branches stemming from Boolean operators should be merged, if possible. The resulting code therefore does not necessarily mirror the structure of the if statement directly, as can be seen from the code in \code{Pattern5}. We must conclude that code generation for Boolean expressions differs in some aspects from that for arithmetic expressions.
+\noindent Consequently, Boolean operators must be translated into branches too. Evidently, branches stemming from if statements and branches stemming from Boolean operators should be merged, if possible. The resulting code therefore does not necessarily mirror the structure of the \code{if} statement directly, as can be seen from the code in \code{Pattern5}. We must conclude that code generation for Boolean expressions differs in some aspects from that for arithmetic expressions.
 
 The example of \code{Pattern5} is also used to exhibit the code resulting from the standard procedures \code{INC}, \code{DEC}, \code{INCL}, and \code{EXCL}. These procedures provide an opportunity to use shorter code in those cases where a single two-operand instruction suffices, i.e. when one of the arguments is identical with the destination.
 \begintt
-LDRR0SB0
-CMPR0R0 0
+LDR R0 SB 0
+CMP R0 R0 0
 BNE 3
-LDRR0SB0
-ADDR0R0 1
-STRR0SB 0
+LDR R0 SB 0
+ADD R0 R0 1
+STR R0 SB 0
 LDR SB R0 ...
-LDRR0SB0 (n)
-CMPR0R0 0
+LDR R0 SB 0 (n)
+CMP R0 R0 0
 BLT 6
-LDRR0SB 0
+LDR R0 SB 0
 CMP R0 R0 100
 BGE 3
-LDRR0SB0
-SUBR0R0 1
-STRR0R0 0
+LDR R0 SB 0
+SUB R0 R0 1
+STR R0 R0 0
 LDR SB R0 ...
-LDRR0SB0 (n)
-ANDR0R0 1
+LDR R0 SB 0 (n)
+AND R0 R0 1
 BNE 5
-LDRR0SB4 (s)
-LDRR1SB 0
-ADDR1R1 1
+LDR R0 SB 4 (s)
+LDR R1 SB 0
+ADD R1 R1 1
 ROR R0 R0 R1
 BPL 2
 MOV R0 R0 -1000
-STRR0SB 0
+STR R0 SB 0
 LDR SB R0 ...
-LDRR0SB 0
-CMPR0R0 0
+LDR R0 SB 0
+CMP R0 R0 0
 BGE 3
 MOV R0 R0 0 {}
-STRR0SB 4
+STR R0 SB 4
 B 17
 LDR SB R0 ...
-LDRR0SB 0
-CMPR0R0 10
-BGE 3 MOVR0R01
-STR R0SB 4
+LDR R0 SB 0
+CMP R0 R0 10
+BGE 3
+MOV R0 R0 1
+STR R0 SB 4
 B 10
 LDR SB R0 ...
-LDRR0SB 0
+LDR R0 SB 0
 CMP R0 R0 100
 BGE 3
-MOVR0R02
-STRR0SB 4 B3
-MOVR0R04
+MOV R0 R0 2
+STR R0 SB 4
+B 3
+MOV R0 R0 4
 LDR SB R0 ...
-STRR0SB 4
+STR R0 SB 4
 \endtt
 
 
