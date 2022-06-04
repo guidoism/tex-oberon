@@ -5507,57 +5507,66 @@ The Boolean operators \code{\&} and \code{OR} are purposely not defined as total
 
 The example of \code{Pattern5} is also used to exhibit the code resulting from the standard procedures \code{INC}, \code{DEC}, \code{INCL}, and \code{EXCL}. These procedures provide an opportunity to use shorter code in those cases where a single two-operand instruction suffices, i.e. when one of the arguments is identical with the destination.
 \begintt
-LDR R0 SB 0
-CMP R0 R0 0
-BNE 3
-LDR R0 SB 0
-ADD R0 R0 1
-STR R0 SB 0
-LDR SB R0 ...
-LDR R0 SB 0 (n)
-CMP R0 R0 0
-BLT 6
-LDR R0 SB 0
-CMP R0 R0 100
-BGE 3
-LDR R0 SB 0
-SUB R0 R0 1
-STR R0 R0 0
-LDR SB R0 ...
-LDR R0 SB 0 (n)
-AND R0 R0 1
-BNE 5
-LDR R0 SB 4 (s)
-LDR R1 SB 0
-ADD R1 R1 1
-ROR R0 R0 R1
-BPL 2
-MOV R0 R0 -1000
-STR R0 SB 0
-LDR SB R0 ...
-LDR R0 SB 0
-CMP R0 R0 0
-BGE 3
-MOV R0 R0 0 {}
-STR R0 SB 4
-B 17
-LDR SB R0 ...
-LDR R0 SB 0
-CMP R0 R0 10
-BGE 3
-MOV R0 R0 1
-STR R0 SB 4
-B 10
-LDR SB R0 ...
-LDR R0 SB 0
-CMP R0 R0 100
-BGE 3
-MOV R0 R0 2
-STR R0 SB 4
-B 3
-MOV R0 R0 4
-LDR SB R0 ...
-STR R0 SB 4
+MODULE Pattern5;
+  VAR n: INTEGER; s: SET;            0,4
+BEGIN
+  IF n = 0 THEN                      LDR R0 SB 0
+                                     CMP R0 R0 0
+                                     BNE 3
+    INC(n)                           LDR R0 SB 0
+                                     ADD R0 R0 1
+                                     STR R0 SB 0
+  END ;                              
+  IF (n >= 0) & (n < 100) THEN       LDR SB R0 ...
+                                     LDR R0 SB 0 (n)
+                                     CMP R0 R0 0
+                                     BLT 6
+                                     LDR R0 SB 0
+                                     CMP R0 R0 100
+                                     BGE 3
+    DEC(n)                           LDR R0 SB 0
+                                     SUB R0 R0 1
+                                     STR R0 R0 0
+  END ;                              
+  IF ODD(n) OR (n IN s) THEN         LDR SB R0 ...
+                                     LDR R0 SB 0 (n)
+                                     AND R0 R0 1
+                                     BNE 5
+                                     LDR R0 SB 4 (s)
+                                     LDR R1 SB 0
+                                     ADD R1 R1 1
+                                     ROR R0 R0 R1
+                                     BPL 2
+    n := -1000                       MOV R0 R0 -1000
+                                     STR R0 SB 0
+  END ;                                   
+  IF n < 0 THEN                      LDR SB R0 ...
+                                     LDR R0 SB 0
+                                     CMP R0 R0 0
+                                     BGE 3
+    s := {}                          MOV R0 R0 0 {}
+                                     STR R0 SB 4
+                                     B 17
+  ELSIF n < 10 THEN                  LDR SB R0 ...
+                                     LDR R0 SB 0
+                                     CMP R0 R0 10
+                                     BGE 3
+    s := {0}                         MOV R0 R0 1
+                                     STR R0 SB 4
+                                     B 10
+  ELSIF n < 100 THEN                 LDR SB R0 ...
+                                     LDR R0 SB 0
+                                     CMP R0 R0 100
+                                     BGE 3
+    s := {1}                         MOV R0 R0 2
+                                     STR R0 SB 4
+                                     B 3
+  ELSE                               
+    s := {2}                         MOV R0 R0 4
+                                     LDR SB R0 ...
+                                     STR R0 SB 4
+  END
+END Pattern5.
 \endtt
 
 
