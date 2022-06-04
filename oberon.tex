@@ -5302,9 +5302,9 @@ Oberon program texts are regarded as sequences of symbols rather than sequences 
 
 In passing we note that the scanner alone reflects the definition of symbols in terms of characters, whereas the parser is based on the notion of symbols only. The scanner implements the abstraction of symbols. The recognition of symbols within a character sequence is called lexical analysis.
 
-Ideally the recognition of any syntactic construct, say A, consisting of subconstructs, say B1, B2, ... , Bn, leads to the generation of code that depends only on (1) the semantic rules associated with A, and (2) on (attributes of) B1, B2, ... , Bn. If this condition is satisfied, the construct is said to be context-free, and if all constructs of a language are context-free, then also the language is context-free. Syntax and semantics of Oberon adhere to this rule, although with a significant exception. This exception is embodied by the notion of declarations. The declaration of an identifier, say \code{x}, attaches permanent properties to \code{x}, such as the fact that \code{x} denotes a variable and that its type is \code{T}. These properties are ``invisible'' when parsing a statement containing \code{x}, because the declaration of \code{x} is not also part of the statement. The ``meaning'' of identifiers is thus inherently context-dependent.
+Ideally the recognition of any syntactic construct, say $A$, consisting of subconstructs, say $B_1, B_2, ... , B_n$, leads to the generation of code that depends only on (1) the semantic rules associated with $A$, and (2) on (attributes of) $B_1, B_2, ... , B_n$. If this condition is satisfied, the construct is said to be context-free, and if all constructs of a language are context-free, then also the language is context-free. Syntax and semantics of Oberon adhere to this rule, although with a significant exception. This exception is embodied by the notion of declarations. The declaration of an identifier, say \code{x}, attaches permanent properties to \code{x}, such as the fact that \code{x} denotes a variable and that its type is \code{T}. These properties are ``invisible'' when parsing a statement containing \code{x}, because the declaration of \code{x} is not also part of the statement. The ``meaning'' of identifiers is thus inherently context-dependent.
 
-Context-dependence due to declarations is the immediate reason for the use of a global data structure which represents the declared identifiers and their properties (attributes). Since this concept stems from early assemblers where identifiers (then called symbols) were registered in a linear table, the term symbol table tends to persist for this structure, although in this compiler it is considerably more complex than an array. Basically, it grows during the processing of declarations, and it is searched while expressions and statements are processed. Procedures for building and for searching are contained in module ORB.
+Context-dependence due to declarations is the immediate reason for the use of a global data structure which represents the declared identifiers and their properties (attributes). Since this concept stems from early assemblers where identifiers (then called symbols) were registered in a linear table, the term symbol table tends to persist for this structure, although in this compiler it is considerably more complex than an array. Basically, it grows during the processing of declarations, and it is searched while expressions and statements are processed. Procedures for building and for searching are contained in module \code{ORB}. % TODO: add reference to Knuth's attribute grammars here
 
 A complication arises from the notion of exports and imports in Oberon. Its consequence is that the declaration of an identifier \code{x} may be in a module, say \code{M}, different from where \code{x} is referenced. If \code{x} is exported, the compiler includes \code{x} together with its attributes in the symbol file of the compiled module \code{M}. When compiling another module which imports \code{M}, that symbol file is read and its data are incorporated into the symbol table. Procedures for reading and writing symbol files are contained in module \code{ORB}, and no other module relies on information about the structure of symbol files.
 
@@ -5312,8 +5312,7 @@ The syntax is precisely and rigorously defined by a small set of syntactic equat
 
 The resulting module structure of the compiler is shown in Fig. 12.1 in a slightly simplified manner. In reality \code{OCS} is imported by all other modules due to their need for procedure \code{OCS.Mark}. This, however, will be explained later.
 
-TODO: Figure
-% \figure{pdfs/fig-12.1.png}{4.3in}{12.1}{Compiler's module structure}
+\figure{pdfs/fig-12.1.png}{3.0in}{12.1}{Compiler's module structure}
 
 \beginsubsection 12.2. CODE PATTERNS.
 
@@ -5322,14 +5321,13 @@ Before it is possible to understand how code is generated, one needs to know whi
 As a prerequisite to understanding the resulting instructions and in particular their parameters, we need to know where declared variables are stored, i.e. which are their addresses. This compiler uses the straight-forward scheme of sequential allocation of consecutively declared variables. An address is a pair consisting of a base address (in a register) and an offset. Global variables are allocated in the module's data section and the respective base address register is \code{SB} (Static Base, see Chapter 6). Local variables are allocated in a procedure activation record on the stack; the respective base register is \code{SP} (Stack Pointer). Offsets are positive integers.
 
 The amount of storage needed for a variable (called its size) is determined by the variable's type. The sizes of basic types are prescribed by the target computer's data representation. The following holds for the \RISC processor:
-
-TODO: table
-Type
-BYTE, CHAR, BOOLEAN
-INTEGER, REAL, SET, POINTER, PROCEDURE
-No. of bytes
-1 4
-
+\medskip
+\halign{#\hfil\quad&#\hfil\quad&#\hfil\cr
+Type & Number of bytes\cr
+\noalign{\smallskip\hrule}\cr
+\code{BYTE}, \code{CHAR}, \code{BOOLEAN} & 1 \cr
+\code{INTEGER}, \code{REAL}, \code{SET}, \code{POINTER}, \code{PROCEDURE} & 4 \cr
+}\medskip
 \noindent The size of an array is the size of the element type multiplied by the number of elements. The size of a record is the sum of the sizes of its fields.
 
 A complication arises due to so-called alignment. By alignment is meant the adjustment of an address to a multiple of the variable's size. Alignment is performed for variable addresses as well as for record field offsets. The motivation for alignment is the avoidance of double memory references for variables being ``distributed'' over two adjacent words. Proper alignment enhances processing speed quite significantly. Variable allocation using alignment is shown by the example in Fig. 12.2.
@@ -5337,16 +5335,14 @@ A complication arises due to so-called alignment. By alignment is meant the adju
 VAR b0: BYTE; int0: INTEGER; b1: BYTE; int1: INTEGER;
 \endtt
 
-TODO: Figure 12.2. Alignment of variables
-% \figure{pdfs/fig-8.2.png}{4.3in}{8.2}{}
+\figure{pdfs/fig-12.2.png}{3.0in}{12.2}{Alignment of variables}
 
 \noindent We note in passing that a reordering of the four variables lessens the number of unused bytes, as shown in Fig. 12.3.
 \begintt
 VAR int0, int1: INTEGER; b0, b1: BYTE;
 \endtt
 
-TODO: Figure 12.3. Improved order of variables
-% \figure{pdfs/fig-8.2.png}{4.3in}{8.2}{}
+\figure{pdfs/fig-12.3.png}{1.3in}{12.3}{Improved order of variables}
 
 Memory instructions compute the address as the sum of a register (base) and an offset constant. Local variables use the stack pointer \code{SP} (\code{R14}) as base, global variables the static base \code{SB} (\code{R13}) Every module has its own \code{SB} value, and therefore access to global (and imported) variables requires two instructions, one for fetching the base value, and one for loading or storing data. If the compiler can determine, whether the correct base value has already been loaded into the \code{SB} register, the former instruction is omitted.
 

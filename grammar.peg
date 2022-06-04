@@ -3,14 +3,15 @@ module               = 'MODULE' sp+ ident ';' sp+ importlist? sp* declarationseq
 declarationsequence  = ('CONST' sp+ (constdeclaration sp* ';' sp*)*)?
                        ('TYPE' sp+ (typedeclaration sp* ';' sp* )*)?
                        ('VAR' sp+ (variabledeclaration sp* ';' sp*)*)?
-                       (proceduredeclaration ';')*
+                       (proceduredeclaration ';' sp*)*
 importlist           = 'IMPORT' sp* import sp* ("," sp* import)* sp* ';'
 import               = ident sp* (':=' sp* ident)?
-statementsequence    = statement (sp* ';' sp* statement )*
+statementsequence    = statement (sp* ';' sp* statement)*
 statement            = (assignment / procedurecall / ifstatement /
                         casestatement / whilestatement / repeatstatement /
                         forstatement)?
-constdeclaration     = 'TODO'
+constdeclaration     = identdef sp* '=' sp* constexpression
+constexpression      = expression
 typedeclaration      = identdef sp* '=' sp* structype
 variabledeclaration  = identlist ':' sp* type
 identlist            = identdef (sp* ',' sp* identdef)*
@@ -28,10 +29,14 @@ procedureheading     = 'PROCEDURE' sp* identdef sp* formalparameters?
 procedurebody        = declarationsequence ('BEGIN' sp* statementsequence)?
                        sp* ('RETURN' sp* expression)? sp* 'END'
 procedurecall        = designator sp* actualparameters?
-ifstatement          = 'IF' sp* expression sp* 'THEN' sp* statementsequence sp*
+ifstatement          = 'IF' sp* expression sp* 'THEN' sp* statementsequence 
                        (sp* 'ELSIF' sp* expression sp* 'THEN' sp* statementsequence)*
-                       (sp* 'ELSE' sp* statementsequence)? 'END'
-casestatement        = 'TODO'
+                       (sp* 'ELSE' sp* statementsequence)? sp* 'END'
+casestatement        = 'CASE' sp* expression sp* 'OF' sp* case (sp* "|" sp* case sp*)* 'END'
+case                 = (caselabellist ':' statementsequence)?
+caselabellist        = labelrange (sp* ',' sp* labelrange)*
+labelrange           = label (sp* ".." sp* label)?
+label                = integer / string / qualident
 whilestatement       = 'WHILE' sp* expression sp* 'DO' sp* statementsequence
                        ('ELSIF' sp* expression sp* 'DO' sp* statementsequence)* sp* 'END' sp*
 repeatstatement      = 'REPEAT' sp* statementsequence sp* 'UNTIL' sp* expression
