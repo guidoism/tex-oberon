@@ -5569,6 +5569,79 @@ BEGIN
 END Pattern5.
 \endtt
 
+\noindent \pattern{6} \emph{While and repeat statements.}
+\begintt
+MODULE Pattern6;
+  VAR i: INTEGER;
+BEGIN i := 0;                        MOV R0 R0 0
+                                     STR R0 SB 0
+  WHILE i < 10 DO                    LDR SB R0 ...
+                                     LDR R0 SB 0
+                                     CMP R0 R0 10
+                                     BGE 4
+    i := i + 2                       LDR R0 SB 0
+                                     ADD R0 R0 2
+                                     STR R0 SB 0
+  END ;                              B-8
+  REPEAT i := i - 1                  LDR SB R0 ...
+                                     LDR R0 SB 0
+                                     SUB R0 R0 1
+                                     STR R0 SB 0
+  UNTIL i = 0                        LDR R0 SB 0
+                                     CMP R0 R0 0
+                                     BNE -7
+END Pattern6.                        
+\endtt
+
+\noindent \pattern{7} \emph{For statements.}
+\begintt
+
+MODULE Pattern7;
+VAR i, m, n: INTEGER;
+BEGIN
+  FOR i := 0 TO n-1 DO               MOV R0 R0 0
+                                     LDR R1 SB 8
+                                     SUB R1 R1 1
+                                     CMP LNK R0 R1
+                                     BGT 7
+                                     STR R0 SB 0
+    m:=2*m                           LDR R0 SB 4
+                                     LSL R0 R0 1
+                                     STR R0 SB 4
+  END                                LDR R0 SB 0
+                                     ADD R0 R0 1
+                                     B -11
+END Pattern7.                                     
+\endtt
+
+\noindent \pattern{8} \emph{Proper procedures:} Procedure bodies are surrounded by a prolog (entry code) and an epilog (exit code). They reposition the stack pointer \code{SP} (see Chapter 6), which holds the address of the procedure activation record on the stack. The immediate value of the first instruction indicates the space taken by variables local to the procedure, rounded up to the next multiple of 4.
+
+Procedure calls use a branch and link (\code{BL}) instruction. Parameters are loaded into registers prior to the call and pushed on the stack after the call. Every parameter occupies a multiple of 4 bytes. In the case of value parameters the value is loaded, and in the case of \code{VAR}-parameters, the variable's address is loaded.
+\begintt
+MODULE Pattern8;
+  VAR i: INTEGER;
+  PROCEDURE P(x: INTEGER; VAR y: INTEGER);
+  VAR z: INTEGER;
+BEGIN                               SUB SP SP 16   adjust SP
+                                    STR LNK SP 0   push ret adr
+                                    STR R0 SP 4    push x
+                                    STR R1 SP 8    push @y
+  z := x;                           LDR R0 SP 4    x
+                                    STR R0 SP 12   z
+  y := z                            LDR R0 SP 12   z
+                                    LDR R1 SP 8    @y
+                                    STR R0 R1 0    y
+END P;                              LDR LNK SP 0   pop ret adr
+                                    ADD SP SP 16
+                                    B R15
+BEGIN P(5, i)                       MOV R0 R0 5
+                                    ADD R1 SB 0    @i
+                                    BL -14         call
+
+END Pattern8.
+\endtt
+
+
 
 % \beginsubsection 12.3. INTERNAL DATA STRUCTURES AND MODULE INTERFACES.
 % \beginsubsubsection 12.3.1. Data structures.
