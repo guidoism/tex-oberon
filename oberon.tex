@@ -5783,6 +5783,76 @@ BEGIN
 END Pattern12c.
 \endtt
 
+\noindent \pattern{13} \emph{Record extensions with pointers:} Fields of a record type R1, which is declared as an extension of a type R0, are simply appended to the fields of R0, i.e. their offsets are greater than those of the fields of R0. When a record is statically declared, its type is known by the compiler. If the record is referenced via a pointer, however, this is not the case. A pointer bound to a base type R0 may well refer to a record of an extension R1 of R0. Type tests (and type guards) allow to test for the actual type. This requires that a type can be identified at the time of program execution. Because the language defines name equivalence instead of structural equivalence of types, a type may be identified by a number. We use the address of a unique type descriptor for this purpose.
+
+Therefore, type tests consist of a simple address comparison which is very fast. Type descriptors are stored in the module's area for data. Their address is called \emph{type tag}. The tag of a (dynamically allocated) variable is stored as a prefix to its record (with offset -8).
+
+A type descriptor contains---in addition to information stored for use by the garbage collector---a table of tags of all its base types. If, for instance, a type R2 is an extension of R1 which is an extension of R0, the descriptor of R2 contains the tags of R1 and R0 as shown in Fig. 12.4. The table has a fixed number of 3 entries.
+
+A type test of the form \code{p IS T} then, consists of a comparison of the type tag of \code{p^} at address \code{p-8} with the tag held in the descriptor of \code{T} at the extension level of the type of \code{p^}. A type guard \code{p(T)} is synonymous to the statement
+\begintt
+IF ~(p IS T) THEN abort END
+\endtt
+
+\figure{pdfs/fig-12.4.png}{4.3in}{12.4}{Type descriptors}
+
+\noindent The following example features 3 record types with associated pointer types, and hence also 3 type descriptors. Each descriptor is 5 words long. Their addresses, and therefore their tags, are 0, 20, and 40 respectively.
+\begintt
+     0 00000020 FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFF
+    20 00000020 00014006 FFFFFFFF FFFFFFFF FFFFFFFF
+    40 00000020 00014005 00028001 FFFFFFFF FFFFFFFF
+
+MODULE Pattern13;
+  TYPE
+    P0 = POINTER TO R0;
+    P1 = POINTER TO R1;
+    P2 = POINTER TO R2;
+    R0 = RECORD x: INTEGER END ;
+    R1 = RECORD (R0) y: INTEGER END ;
+    R2 = RECORD (R1) z: INTEGER END ;
+  VAR
+    p0: P0;                      60
+    p1: P1;                      64
+    p2: P2;                      68
+  BEGIN
+    p0.x := 0;         LDR  R0 SB 60
+                       MOV  R1 R0 0      p0.x
+                       STR  R1 R0 0      no type check
+    p1.y := 1;         LDR  R0 SB 64
+                       MOV  R1 R0 1
+                       STR  R1 R0 4      p1.y
+    p0(P1).y := 3;     LDR  R0 SB 60     p0
+                       LDR  R1 R0 -8     tag(p0)
+                       LDR  R1 R1 4      
+                       ADD  R2 SB 20     TD P1
+                       CMP  R3 R2 R1     
+                       BLNE R12
+                       MOV  R1 R0 3
+                       STR  R1 R0 4      p0.z
+    p0(P2).z := 5;     LDR  R0 SB 60     p0
+                       LDR  R1 R0 -8     tag(p0)
+                       LDR  R1 R1 8
+                       ADD  R2 SB 40     TD P2
+                       CMP  R3 R2 R1
+                       BLNE R12
+                       MOV  R1 R0 5
+                       STR  R1 R0 8      p0.z
+    IF p1 IS P2 THEN   LDR  R0 SB 64     p1
+                       LDR  R1 R0 -8     tag(p1)
+                       LDR  R1 R1 8      
+                       ADD  R2 SB 40     TD P2
+                       CMP  R3 R2 R1
+                       BNE  2
+      p0 := p2         LDR  R0 SB 68
+                       STR  R0 SB 60
+  END
+END Pattern13.
+\endtt
+
+\noindent \pattern{14} \emph{Record extensions as \code{VAR} parameters:} Records occurring as \code{VAR}-parameters may also require a type test at program execution time. This is because \code{VAR}-parameters effectively constitute hidden pointers. Type tests and type guards on \code{VAR}-parameters are handled in the same way as for variables referenced via pointers, with a slight difference, however. Statically declared record variables may be used as actual parameters, and they are not prefixed by a type tag. Therefore, the tag has to be supplied together with the variable's address when the procedure is called, i.e. when the actual parameter is established. Record structured \code{VAR}-parameters therefore consist of address and type tag. This is similar to dynamic array descriptors consisting of address and length.
+
+
+
 % \beginsubsection 12.3. INTERNAL DATA STRUCTURES AND MODULE INTERFACES.
 % \beginsubsubsection 12.3.1. Data structures.
 % \beginsubsubsection 12.3.2. Module interfaces.
