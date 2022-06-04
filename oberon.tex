@@ -5669,37 +5669,41 @@ END Pattern9.
 
 Elements of dynamic arrays are accessed like those of static arrays. However, even when the index is a constant, the check cannot be performed by the compiler.
 \begintt
-SUB  SP SP 20
-STR  LNK SP 0
-STR  R0 SP 4    x
-STR  R1 SP 8    x.len
-LDR  R0 SP 12   i
-LDR  R1 SP 8    x.len
-CMP  R2 R0 R1
-BLHI R12
-LSL  R0 R0 2
-LDR  R1 SP 4    x
-ADD  R0 R1 R0
-LDR  R0 R0 0
-STR  R0 SP 16
-LDR  R0 SP 12   i
-ADD  R0 R0 1
-LDR  R1 SP 8    x.len
-CMP  R2 R0 R1
-BLHI R12
-LSL  R0 R0 2
-LDR  R1 SP 4    x
-ADD  R0 R1 R0
-LDR  R1 SP 16   n
-ADD  R1 R1 5
-STR  R1R0 0
-LDR  LNK SP 0
-ADD  SP SP 20
-B    R15
-ADD  R0 SB 0    a
-MOV  R1 R0 12   a.len
-BL   -29
-
+MODULE Pattern10;
+  VAR a: ARRAY 12 OF INTEGER;
+  PROCEDURE P(x: ARRAY OF INTEGER);
+    VAR i, n: INTEGER;
+  BEGIN                             SUB  SP SP 20
+                                    STR  LNK SP 0
+                                    STR  R0 SP 4    x
+                                    STR  R1 SP 8    x.len
+    n := x[i];                      LDR  R0 SP 12   i
+                                    LDR  R1 SP 8    x.len
+                                    CMP  R2 R0 R1
+                                    BLHI R12
+                                    LSL  R0 R0 2
+                                    LDR  R1 SP 4    x
+                                    ADD  R0 R1 R0
+                                    LDR  R0 R0 0
+                                    STR  R0 SP 16
+    x[i+1] := n+5                   LDR  R0 SP 12   i
+                                    ADD  R0 R0 1
+                                    LDR  R1 SP 8    x.len
+                                    CMP  R2 R0 R1
+                                    BLHI R12
+                                    LSL  R0 R0 2
+                                    LDR  R1 SP 4    x
+                                    ADD  R0 R1 R0
+                                    LDR  R1 SP 16   n
+                                    ADD  R1 R1 5
+                                    STR  R1R0 0
+  END P;                            LDR  LNK SP 0
+                                    ADD  SP SP 20
+                                    B    R15
+  BEGIN P(a);                       ADD  R0 SB 0    a
+                                    MOV  R1 R0 12   a.len
+                                    BL   -29
+END Pattern10.
 \endtt
 
 % \beginsubsection 12.3. INTERNAL DATA STRUCTURES AND MODULE INTERFACES.
