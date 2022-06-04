@@ -5706,6 +5706,83 @@ MODULE Pattern10;
 END Pattern10.
 \endtt
 
+\noindent \pattern{11} \emph{Sets.} This code pattern exhibits the construction of sets. If the specified elements are constants, the set value is computed by the compiler. Otherwise, sequences of move and shift instructions are used. Since shift instructions do not check whether the shift count is within sensible bounds, the results are unpredictable, if elements outside the range 0 .. 31 are involved.
+\begintt
+MODULE Pattern11;
+  VAR s: SET; m, n: INTEGER;
+BEGIN
+  s := {m};                       LDR  R0 SB 4      m
+                                  MOV  R1 R0 1
+                                  LSL  R0 R1 R0
+                                  STR  R0 SB 0      s
+  s := {0 .. n};                  LDR  R0 SB 8      n
+                                  MOV  R1 R0 -2
+                                  LSL  R0 R1 R0
+                                  XOR  R0 R0 -1
+                                  STR  R0 SB 0
+  s := {m .. 31};                 LDR  R0 SB 4      m
+                                  MOV  R1 R0 31
+                                  MOV  R2 R0 -2
+                                  LSL  R1 R2 R1
+                                  MOV  R2 R0 -1
+                                  LSL  R0 R2 R0
+                                  XOR  R0 R0 R1
+                                  STR  R0 SB 0      s
+  s := {m .. n};                  LDR  R0 SB 4      m
+                                  LDR  R1 SB 8      n
+                                  MOV  R2 R0 -2
+                                  LSL  R1 R2 R1
+                                  MOV  R2 R0 -1
+                                  LSL  R0 R2 R0
+                                  XOR  R0 R0 R1
+                                  STR  R0 SB 0      s
+  IF n IN {2,3,5,7,11,13} THEN    MOV  R0 R0 28ACH
+                                  LDR  R1 SB 8
+                                  ADD  R1 R1 1
+                                  ASR' R0 R0 R1
+                                  BPL 2
+  m := 1                          MOV  R0 R0 1
+                                  STR  R0 SB 4      m
+  END
+END Pattern11.   
+\endtt
+
+\noindent \pattern{12} \emph{Imported variables and procedures:} When a procedure is imported from another module, its address is unavailable to the compiler. Instead, the procedure is identified by a number obtained from the imported module's \emph{symbol file}. In place of the offset, the branch instruction holds (1) the number of the imported module, (2) the number of the imported procedure, and (3) a link in the list of \code{BL} instructions calling an external procedure. This list is traversed by the linking loader, that computes the actual offset (fixup, see Chapter 6).
+
+Imported variables are also referenced by a variable's number. In general, an access required two instructions. The first loads the static base register \code{SB} from a global table with the address of that module's data section. The module number of the imported variable serves as index. The second instruction loads the address of the variable, using the actual offset fixed up by the loader.
+
+In the following example, modules \code{Pattern12a} and \code{Pattern12b} both export a procedure and a variable. They are referenced from the importing module \code{Pattern12c}.
+\begintt
+MODULE Pattern12a;
+  VAR k*: INTEGER;
+  PROCEDURE P*;
+  BEGIN k := 1
+  END P;
+END Pattern12a.
+
+MODULE Pattern12b;
+  VAR x*: REAL;
+  PROCEDURE Q*;
+  BEGIN x := 1
+  END Q;
+END Pattern12b.
+
+MODULE Pattern12c;
+  IMPORT Pattern12a, Pattern12b;
+  VAR i: INTEGER; y: REAL;
+BEGIN
+
+  i := Pattern12a.k;  8D10xxxx   LDR SB 1 link  Pattern12a
+                      80D00000   LDR R0 SB 0    Pattern12a.k
+                      8D00xxxx   LDR SB 0 link  Pattern12c
+                      A0D00000   STR R0 SB 0    Pattern12c.i
+  y := Pattern12b.x;  8D20xxxx   LDR SB 2 link  Pattern12b
+                      80D00000   LDR R0 SB 0    Pattern12b.x
+                      8D00xxxx   LDR SB 0 link  Pattern12c
+                      A0D00004   STR R0 SB 4    Pattern12c.y
+END Pattern12c.
+\endtt
+
 % \beginsubsection 12.3. INTERNAL DATA STRUCTURES AND MODULE INTERFACES.
 % \beginsubsubsection 12.3.1. Data structures.
 % \beginsubsubsection 12.3.2. Module interfaces.
