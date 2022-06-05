@@ -5918,6 +5918,70 @@ BEGIN s0 := "ABCDEF";   ADD R0 SB   0    @s0
 END Pattern15.
 \endtt
 
+\noindent \pattern{16} \emph{Predeclared procedures.}
+\begintt
+MODULE Pattern16;
+  VAR m, n: INTEGER;
+    x: REAL; u: SET;
+    a, b: ARRAY 10 OF INTEGER;
+    s, t: ARRAY 16 OF CHAR;
+BEGIN
+  INC(m);               ADD R0 SB 0     @m
+                        LDR R1 R0 0
+                        ADD R1 R1 1
+                        STR R1 R0 0
+  DEC(n, 10);           ADD R0 SB 4     @n
+                        LDR R1 R0 0
+                        SUB R1 R1 10
+                        STR R1 R0 0
+  INCL(u, 3);           ADD R0 SB 12    @u
+                        LDR R1 R0 0
+                        OR  R1 R1 8     {3}
+                        STR R1 R0 0
+  EXCL(u, 7);           ADD R0 SB 12    @u
+                        LDR R1 R0 0
+                        AND R1 R1 -129  -{7}
+                        STR R1 R0 0
+  ASSERT(m < n);        LDR R0 SB 0
+                        LDR R1 SB 4
+                        CMP R0 R0 R1
+                        BLGE R12
+  UNPK(x, n);           LDR R0 SB 8     x
+                        ASR R1 R0 23
+                        SUB R1 R1 127
+                        STR R1 SB 4     n
+                        LSL R1 R1 23
+                        SUB R0 R0 R1
+                        STR R0 SB 8     x
+  PACK(x, n);           LDR R0 SB 8     x
+                        LDR R1 SB 4     n
+                        LSL R1 R1 23
+                        ADD R0 R0 R1
+                        STR R0 SB 8     x
+  s := "0123456789";    ADD R0 SB 96    @s
+                        ADD R1 SB 128   adr of string
+                        LDB R2 R1 0     loop
+                        ADD R1 R1 4
+                        STB R2 R0 0
+                        ADD R0 R0 4
+                        ASR R2 R2 24
+                        BNE -6
+  IF s < t THEN         ADD R0 SB 96    @s
+                        ADD R1 SB 112   @t
+                        LDB R2 R0 0     loop
+                        ADD R0 R0 1
+                        LDB R3 R1 0
+                        ADD R1 R1 1
+                        CMP R4 R2 R3
+                        BNE 2
+                        CMP R4 R2 0
+                        BNE -8
+                        BGE 3
+    m := 1              MOV R0 R0 1
+                        STR R0 SB 0     m
+  END
+END Pattern16.
+\endtt
 
 % \beginsubsection 12.3. INTERNAL DATA STRUCTURES AND MODULE INTERFACES.
 % \beginsubsubsection 12.3.1. Data structures.
