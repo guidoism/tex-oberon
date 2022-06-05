@@ -6032,9 +6032,76 @@ END Pattern17.
 
 \beginsubsection 12.3. INTERNAL DATA STRUCTURES AND MODULE INTERFACES.
 
+\beginsubsubsection 12.3.1. Data structures.
 
-% \beginsubsubsection 12.3.1. Data structures.
-% \beginsubsubsection 12.3.2. Module interfaces.
+In Section 12.1 it was explained that declarations inherently constitute context-dependence of the translation process. Although parsing still proceeds on the basis of a context-free syntax and relies on contextual information only in a few isolated instances, information provided by declarations affects the generated code significantly. During the processing of declarations, their information is transferred into the ``symbol table'', a data structure of considerable complexity, from where it is retrieved for the generation of code.
+
+This dynamic data structure is defined in module \code{ORB} in terms of two record types called \code{Object} and \code{Struct}. These types pervade all other modules with the exception of the scanner. They are therefore explained before further details of the compiler are discussed (see module \code{ORB} below).
+
+For each declared identifier an instance of type \code{Object} is generated. The record holds the identifier and the properties associated with the identifier given in its declaration. Since Oberon is a \emph{statically typed} language, every object has a type. It is represented in the record by its \code{typ} field, which is a pointer to a record of type \code{Struct}. Since many objects may be of the same type, it is appropriate to record the type's attributes only once and to refer to them via a pointer. The properties of type \code{Struct} will be discussed below.
+
+The kind of object which a table entry represents is indicated by the field class. Its values are denoted by declared integer constants: \code{Var} indicates that the entry describes a variable, \code{Con} a constant, \code{Fld} a record field, \code{Par} a \code{VAR}-parameter, and \code{Proc} a procedure. Different kinds of entries carry different attributes. A variable or a parameter carries an address, a constant has a value, a record field has an offset, and a procedure has an entry address, a list of parameters, and a result type. For each class the introduction of an extended record type would seem advisable. This was not done, however, for three reasons. First, the compiler was first formulated in (a subset of) Modula-2 which does not feature type extension. Second, not making use of type extensions would make it simpler to translate the compiler into other languages for porting the language to other computers. And third, all extensions were known at the time the compiler was planned. Hence extensibility provided no argument for the introduction of a considerable variety of types. The simplest solution lies in using the multi-purpose fields \code{val} and \code{dsc} for class-specific attributes. For example, \code{val} holds an address for variables, parameters, and procedures, an offset for record fields, and a value for constants.
+
+The definition of a type yields a record of type \code{Struct}, regardless of whether it occurs within a type declaration, in which case also a record of type \code{Object} (\code{class} = \code{Typ}) is generated, or in a variable declaration, in which case the type remains anonymous. All types are characterized by a form and a size. A type is either a basic type or a constructed type. In the latter case it refers to one or more other types. Constructed types are arrays, records, pointers, and procedural types. The attribute \code{form} refers to this classification. Its value is an integer.
+
+Just as different object classes are characterized by different attributes, different forms have different attributes. Again, the introduction of extensions of type \code{Struct} was avoided. Instead, some of the fields of type \code{Struct} remain unused in some cases, such as for basic types, and others are used for form-specific attributes. For example, the attribute \code{base} refers to the element type in the case of an array, to the result type in the case of a procedural type, to the type to which a pointer is bound, or to the base type of a (extended) record type. The attribute \code{dsc} refers to the parameter list in the case of a procedural type, or to the list of fields in the case of a record type.
+
+As an example, consider the following declarations. The corresponding data structure is shown in Fig. 12.5. For details, the reader is referred to the program listing of module \code{ORB} and the respective explanations.
+\begintt
+CONST N = 100;
+TYPE Ptr = POINTER TO Rec;
+     Rec = RECORD n: INTEGER; p, q: Ptr END ;
+VAR k: INTEGER;
+    a: ARRAY N OF INTEGER;
+PROCEDURE P(x: INTEGER): INTEGER;
+\endtt
+
+\figure{pdfs/fig-12.5.png}{4.7in}{12.5}{Representation of declarations}
+
+Only entries representing constructed types are generated during compilation. An entry for each basic type is established by the compiler's initialization. It consists of an \code{Object} holding the standard type's identifier and a \code{Struct} indicating its form, denoted by one of the values \code{Byte}, \code{Bool}, \code{Char}, \code{Int}, \code{Real}, or \code{Set}. The object records of the basic types are anchored in global pointer variables in module \code{ORB} (which actually should be regarded as constants).
+
+Not only are entries created upon initialization for basic types, but also for all standard procedures. Therefore, every compilation starts out with a symbol table reflecting all standard, pervasive identifiers and the objects they stand for.
+
+We now return to the subject of Objects. Whereas objects of basic classes (\code{Const}, \code{Var}, \code{Par}, \code{Fld}, \code{Typ}, \code{SProc}, \code{SFunc} and \code{Mod}) directly reflect declared identifiers and constitute the context in which statements and expressions are compiled, compilations of expressions typically generate anonymous entities of additional, non-basic modes. Such entities reflect selectors, factors, terms, etc., i.e. constituents of expressions and statements. As such, they are of a transitory nature and hence are not represented by records allocated on the heap. Instead, they are represented by record variables local to the processing procedures and are therefore allocated on the stack. Their type is called \code{Item} and is a slight variation of the type \code{Object}. Items are not referenced via pointers.
+
+Let us assume, for instance, that a term \code{x*y} is parsed. This implies that the operator and both factors have been parsed already. The factors \code{x} and \code{y} are represented by two variables of type \code{Item} of \code{Var} mode. The resulting term is again described by an \code{Item}, and since the product is transitory, i.e. has significance only within the expression of which the term is a constituent, it is to be held in a temporary location, in a register. In order to express that an item is located in a register, a new, non-basic mode \code{Reg} is introduced.
+
+Effectively, all non-basic modes reflect the target computer's architecture, in particular its addressing modes. The more addressing modes a computer offers, the more item modes are needed to represent them. The additional item modes required by the \RISC processor are. They are declared in module \code{ORG}:
+\medskip
+\item{\code{Reg}:}  direct register mode
+\item{\code{RegI}:} indirect register mode
+\item{\code{Cond}:} condition code mode
+\medskip
+The use of the types \code{Object}, \code{Item}, and \code{Struct} for the various modes and forms, and the meaning of their attributes are explained in the following tables:
+\medskip
+Object values and the meaning of \code{val}
+\halign{#\hfil\quad&#\hfil\quad&#\hfil\cr
+Name & \code{class} & Meaning of \code{val}\cr
+\noalign{\smallskip\hrule}\cr
+\code{Const} &  1 &  value \cr
+\code{Var}   &  2 &  address \cr
+\code{Par}   &  3 &  address \cr
+\code{Fld}   &  4 &  offset \cr
+\code{Typ}   &  5 &  type descriptor (\code{TD}) address \cr
+\code{SProc} &  6 &  inline code number \cr
+\code{SFunc} &  7 &  inline code number \cr
+\code{Mod}   &  8 &  key \cr
+}\medskip
+{\bf{\tt TODO:} Add the rest of the values}
+
+Items have an attribute called \code{lev} which is part of the address of the item. Positive values denote the level of nesting of the procedure in which the item is declared; \code{lev} = 0 implies a global object. Negative values indicate that the object is imported from the module with number -\code{lev}.
+
+The three types \code{Object}, \code{Item}, and \code{Struct} are defined in module \code{ORB}, which also contains procedures for accessing the symbol table.
+
+\beginsubsubsection 12.3.2. Module interfaces.
+
+Before embarking on a presentation of the compiler's main module, the parser, an overview of its remaining modules is given in the form of their interfaces. The reader is invited to refer to them when studying the parser.
+
+The interface of the scanner module \code{ORS} is simple. It defines the numeric values of all symbols. But its chief constituent is procedure \code{Get}. Each call yields the next symbol from the source text, identified by an integer. Global variables represent attributes of the read symbol in certain cases. If a number was read, \code{ival} or \code{rval} hold its numeric value. If an identifier or a string was read, \code{str} holds the \ASCII values of the characters read.
+
+Procedure \code{Mark} serves to generate a diagnostic output indicating a brief diagnostic and the scanner's current position in the source text. This procedure is located in the scanner, because only the scanner has access to its current position. \code{Mark} is called from all other modules.
+
+
 % \beginsubsection 12.4. THE PARSER.
 % \beginsubsection 12.5. THE SCANNER.
 % \beginsubsection 12.6. SEARCHING THE SYMBOL TABLE, AND HANDLING SYMBOL FILES.
