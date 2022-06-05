@@ -1,9 +1,29 @@
-module               = 'MODULE' sp+ name:ident ';' sp+ importlist? sp* declarationsequence sp*
-                       ('BEGIN' sp+ statementsequence)? sp* 'END' sp+ ident sp* '.' sp* { return name }
+module               = 'MODULE' sp+ name:ident ';' sp+ imports:importlist? sp* declarations:declarationsequence sp*
+                       ('BEGIN' sp+ statementsequence)? sp* 'END' sp+ ident sp* '.' sp*
+{
+  return `\\input cwebmac \\B
+\\&{module} \\\\{${name}} \\1\\6
+${declarations}
+
+\\&{begin}
+
+\\&{end}
+\\bye
+`
+}
+
 declarationsequence  = ('CONST' sp+ (constdeclaration sp* ';' sp*)*)?
                        ('TYPE' sp+ (typedeclaration sp* ';' sp* )*)?
-                       ('VAR' sp+ (variabledeclaration sp* ';' sp*)*)?
+                       vars:('VAR' sp+ (variabledeclaration sp* ';' sp*)*)?
                        (proceduredeclaration ';' sp*)*
+{
+  vars = vars[2].map(v => v[0])
+  let last = vars.length - 1
+  vars = vars.map((v, i) => (v + (i == 0 ? '\\1\\6' : (i > 0 && i == last ? '\\2\\6' : '\\6'))))
+  vars = '\\&{vars} ' + vars.join('\n')
+  return [vars].join('\n')
+}
+
 importlist           = 'IMPORT' sp* import sp* ("," sp* import)* sp* ';'
 import               = ident sp* (':=' sp* ident)?
 statementsequence    = statement (sp* ';' sp* statement)*
@@ -13,8 +33,19 @@ statement            = (assignment / procedurecall / ifstatement /
 constdeclaration     = identdef sp* '=' sp* constexpression
 constexpression      = expression
 typedeclaration      = identdef sp* '=' sp* structype
-variabledeclaration  = identlist ':' sp* type
-identlist            = identdef (sp* ',' sp* identdef)*
+variabledeclaration  = i:identlist ':' sp* t:type
+{
+  i = i.map(j => `\\\\{${j[0]}}`).join(', ')
+  if (t.toUpperCase() === t) { t = `\\.{${t}}` }
+  return `${i}: ${t}`
+}
+
+identlist            = head:identdef tail:(sp* ',' sp* identdef)*
+{
+  // TODO: I think we still need to deal with the optional '*'
+  return [head[0]].concat(tail.map(o => o[3][0]))
+}
+
 identdef             = ident '*'?
 type                 = structype / qualident
 structype            = arraytype / recordtype / pointertype / proceduretype
