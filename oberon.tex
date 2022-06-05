@@ -5850,7 +5850,73 @@ END Pattern13.
 \endtt
 
 \noindent \pattern{14} \emph{Record extensions as \code{VAR} parameters:} Records occurring as \code{VAR}-parameters may also require a type test at program execution time. This is because \code{VAR}-parameters effectively constitute hidden pointers. Type tests and type guards on \code{VAR}-parameters are handled in the same way as for variables referenced via pointers, with a slight difference, however. Statically declared record variables may be used as actual parameters, and they are not prefixed by a type tag. Therefore, the tag has to be supplied together with the variable's address when the procedure is called, i.e. when the actual parameter is established. Record structured \code{VAR}-parameters therefore consist of address and type tag. This is similar to dynamic array descriptors consisting of address and length.
+\begintt
+     0 00000020 FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFF
+    20 00000020 00014006 FFFFFFFF FFFFFFFF FFFFFFFF
+MODULE Pattern14;
+  TYPE
+    R0 = RECORD a, b, c: INTEGER END ;
+    R1 = RECORD (R0) d, e: INTEGER END ;
+  VAR
+    r0: R0;                  40
+    r1: R1;                  52
+  PROCEDURE P(VAR r: R0);
+  BEGIN                      ...  
+    r.a := 1;                LDR  R1 SP 4    r
+                             STR  R0 R10     r.a
+    r(R1).d := 2             LDR  R0 SP 8    tag(r)
+                             LDR  R0 R0 4
+                             ADD  R1 SB 20   R1
+                             CMP  R2 R1 R0
+                             BLNE R12
+                             MOV  R0 R0 2
+                             LDR  R1 SP 4    r
+                             STR  R0 R1 12   r.d
+  END P;                     ...
+  BEGIN                      ...
+    P(r0);                   ADD R0 SB 40    r0
+                             ADD R1 SB 0     tag(R0)
+                             BL P
+    P(r1)                    ADD R0 SB 52    r1
+                             ADD R1 SB 20    tag(R1)
+                             BL P
+  END Pattern14.             ...
+\endtt
 
+\noindent \pattern{15} \emph{Array assignments and strings.}
+\begintt
+MODULE Pattern15;
+  VAR s0, s1: ARRAY 32 OF CHAR;
+  PROCEDURE P(x: ARRAY OF CHAR);
+  END P;
+BEGIN s0 := "ABCDEF";   ADD R0 SB   0    @s0
+                        ADD R1 SB   64   @"ABCDEF"
+                        LDR R2 R1   0 
+                        ADD R1 R1   4 
+                        STR R2 R0   0 
+                        ADD R0 R0   4 
+                        ASR R2 R2   24   test for 0X
+                        BNE -6
+  s0 := s1;             ADD R0 SB   0    @s0
+                        ADD R1 SB   32   @s1
+                        MOV R2 R0   8    len
+                        LDR R3 R1   0
+                        ADD R1 R1   4
+                        STR R3 R0   0 
+                        ADD R0 R0   4
+                        SUB R2 R2   1
+                        BNE -6
+  P(s1);                ADD R0 SB   32   @s1
+                        MOV R1 R0   32   len
+                        BL -38           P
+  P("012345");          ADD R0 SB   72   @"012345"
+                        MOV R1 R0   7    len (incl 0X)
+                        BL -42           P
+  P("%")                ADD R0 SB   80   @"%"
+                        MOV R1 R0   2    len
+                        BL -46           P
+END Pattern15.
+\endtt
 
 
 % \beginsubsection 12.3. INTERNAL DATA STRUCTURES AND MODULE INTERFACES.

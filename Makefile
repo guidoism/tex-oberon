@@ -8,8 +8,8 @@ format:
 	cat parser.js parser_stub.js > parser_highlighter.js
 	node parser_highlighter.js patterns/01.Mod > aaa.tex
 	cat aaa.tex
-	luatex aaa
-	open aaa.pdf
+	#luatex aaa
+	#open aaa.pdf
 
 
 formatpyg:

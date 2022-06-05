@@ -1,13 +1,15 @@
 module               = 'MODULE' sp+ name:ident ';' sp+ imports:importlist? sp* declarations:declarationsequence sp*
-                       ('BEGIN' sp+ statementsequence)? sp* 'END' sp+ ident sp* '.' sp*
+                       statements:('BEGIN' sp+ statementsequence)? sp* 'END' sp+ ident sp* '.' sp*
 {
+  statements = statements[2]
   return `\\input cwebmac \\B
 \\&{module} \\\\{${name}} \\1\\6
 ${declarations}
 
-\\&{begin}
-
-\\&{end}
+\\&{begin}\\6
+${statements}
+\\2\\6
+\\&{end} \\\\{${name}}.
 \\bye
 `
 }
@@ -26,7 +28,12 @@ declarationsequence  = ('CONST' sp+ (constdeclaration sp* ';' sp*)*)?
 
 importlist           = 'IMPORT' sp* import sp* ("," sp* import)* sp* ';'
 import               = ident sp* (':=' sp* ident)?
-statementsequence    = statement (sp* ';' sp* statement)*
+statementsequence    = head:statement tail:(sp* ';' sp* statement)*
+{
+  //console.warn('tail: ', tail)
+  return head
+}
+
 statement            = (assignment / procedurecall / ifstatement /
                         casestatement / whilestatement / repeatstatement /
                         forstatement)?
@@ -75,7 +82,13 @@ forstatement         = 'FOR' sp* ident sp* ':=' sp* expression sp* 'TO' sp* expr
 fieldlistsequence    = fieldlist (sp* ';' sp* fieldlist sp*)*
 fieldlist            = identlist sp* ':' sp* type
 basetype          = qualident
-assignment        = designator sp* ':=' sp* expression
+assignment        = a:designator sp* ':=' sp* b:expression
+{
+  // TODO: Make sure designator with qualident and selector works properly
+  //console.warn(b)
+  return `${a[0]} \\K ${b}`
+}
+
 designator        = qualident selector*
 qualident         = ident '.' qualident / ident
 selector          = '.' ident / '[' explist ']' / '^' / '(' qualident ')'
@@ -85,19 +98,38 @@ expression        = simpleexpression (sp* relation sp* simpleexpression)?
 simpleexpression  = ('+' / '-')? term sp* (addoperator sp* term sp*)*
 addoperator       = '+' / '-' / 'OR'
 muloperator       = '*' / '/' / 'DIV' / 'MOD' / '&'
-term              = factor (sp* muloperator sp* factor)*
-factor            = number / string / 'NIL' / 'TRUE' / 'FALSE' /
-                    set / designator actualparameters? / '(' expression ')' / '~' factor
+term              = head:factor (sp* muloperator sp* factor)*
+{
+  console.warn('term:', head)
+}
+
+
+factor            = a:(number / string / 'NIL' / 'TRUE' / 'FALSE' /
+                    set / designator actualparameters? / '(' expression ')' / '~' factor)
 actualparameters  = '(' sp* explist? sp* ')'
 formalparameters  = '(' (fpsection sp* (';' sp* fpsection)*)? sp* ')' sp* (':' sp* qualident)?
 fpsection         = 'VAR'? sp* ident sp* (',' sp* ident)* sp* ':' sp* formaltype
 formaltype        = ('ARRAY OF' sp*)* qualident
 set               = '{' sp* (element sp* (sp* ',' sp* element)*)? '}'
 element           = expression (sp* '..' sp* expression)*
-string            = '"' (!'"' character)+ '"' / digit hexdigit? 'X'
+string            = '"' inside:(!'"' character)+ '"' / digit hexdigit? 'X'
+{
+  console.warn('string:', inside)
+  return inside
+}
+
 number            = real / integer
-integer           = digit hexdigit* 'H' / digit+
-real              = digit+ '.' digit+ scalefactor?
+integer           = digit hexdigit* 'H' / digits:digit+
+{
+  return digits.join('')
+}
+
+real              = whole:digit+ '.' part:digit+ scale:scalefactor?
+{
+  TODO: scale
+  return whole.join('') + '.' + part.join('')
+}
+
 scalefactor       = 'E' ('+' / '-')? digit+
 ident             = !keyword head:alpha tail:alphanum* { return head + tail.join('') }
 alpha             = [a-zA-Z]
