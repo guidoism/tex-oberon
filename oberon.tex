@@ -6100,9 +6100,167 @@ Before embarking on a presentation of the compiler's main module, the parser, an
 The interface of the scanner module \code{ORS} is simple. It defines the numeric values of all symbols. But its chief constituent is procedure \code{Get}. Each call yields the next symbol from the source text, identified by an integer. Global variables represent attributes of the read symbol in certain cases. If a number was read, \code{ival} or \code{rval} hold its numeric value. If an identifier or a string was read, \code{str} holds the \ASCII values of the characters read.
 
 Procedure \code{Mark} serves to generate a diagnostic output indicating a brief diagnostic and the scanner's current position in the source text. This procedure is located in the scanner, because only the scanner has access to its current position. \code{Mark} is called from all other modules.
+\begintt
+DEFINITION ORS; (*Scanner*)
+  IMPORT Texts, Oberon;
+  TYPE Ident = ARRAY 32 OF CHAR;
+  VAR ival, slen: INTEGER;
+      rval: REAL;
+      id: Ident;
+      str: ARRAY 256 OF CHAR;
+      errcnt: BOOLEAN;
+  PROCEDURE Mark (msg: ARRAY OF CHAR);
+  PROCEDURE Get (VAR sym: INTEGER);
+  PROCEDURE Init (source: Texts.Text; pos: INTEGER);
+END ORS.
+\endtt
 
+\noindent Module \code{ORB} defines the basic data structures representing declared objects and their types. It also contains procedures for accessing these structures. \code{NewObj} serves to insert a new identifier, and it returns a pointer to the allocated object. \code{ThisObj} returns the pointer to the object whose name equals the global scanner variable \code{ORS.id}. \code{thisimport} and \code{thisfield} deliver imported objects and record fields with names equal to \code{ORS.id}.
 
-% \beginsubsection 12.4. THE PARSER.
+Procedure \code{Import} serves to read the specified symbol file and to enter its identifier in the symbol table (\code{class} = \code{Mod}). Finally, \code{Export} generates the symbol file of the compiled module, containing descriptions of all objects and structures marked for export.
+\begintt
+DEFINITION ORB; (*Base table handler*)
+  TYPE
+    Object = POINTER TO ObjDesc;
+    Type = POINTER TO TypeDesc;
+    ObjDesc = RECORD
+      class, lev, exnp: INTEGER;
+      expo, rdo: BOOLEAN;
+      next, dsc: Object;
+      type: Type;
+      name: ORS.Ident;
+      val: INTEGER
+    END ;
+    TypeDesc = RECORD
+      form, ref, mno: INTEGER; (*ref is used for import/export only*)
+      nofpar: INTEGER; (*for records: extension level*)
+      len: INTEGER; (*for records: address of descriptor*)
+      dsc, typobj: Object;
+      base: Type;
+      size: INTEGER
+    END ;
+  VAR topScope: Object;
+    byteType, boolType, charType, intType, realType, setType,
+    nilType, noType, strType: Type;
+  PROCEDURE Init;
+  PROCEDURE Close;
+  PROCEDURE NewObj (VAR obj: Object; id: ORS.Ident; class: INTEGER);
+  PROCEDURE thisObj (): Object;
+  PROCEDURE thisimport (mod: Object): Object;
+  PROCEDURE thisfield (rec: Type): Object;
+  PROCEDURE OpenScope;
+  PROCEDURE CloseScope;
+  PROCEDURE Import (VAR modid, modid1: ORS.Ident);
+  PROCEDURE Export (VAR modid: ORS.Ident;
+                    VAR newSF: BOOLEAN; VAR key: INTEGER);
+END ORB.
+\endtt
+
+\noindent Module \code{ORG} contains the procedures for code generation. The names of these procedures indicate the respective constructs for which code is to be produced. Note that an individual code generator procedure is provided for every standard, predefined procedure. This is necessary, because they generate in-line code.
+\begintt
+DEFINITION ORG;
+  CONST WordSize* = 4;
+  TYPE Item* = RECORD
+    mode*: INTEGER;
+    type*: ORB.Type;
+    a*, b*, r: INTEGER;
+    rdo*: BOOLEAN (*read only*)
+  END ;
+  VAR pc: INTEGER;
+  
+  PROCEDURE MakeConstItem*(VAR x: Item; typ: ORB.Type; val: INTEGER);
+  PROCEDURE MakeRealItem*(VAR x: Item; val: REAL);
+  PROCEDURE MakeStringItem*(VAR x: Item; len: INTEGER);
+  PROCEDURE MakeItem*(VAR x: Item; y: ORB.Object; curlev: INTEGER);
+  PROCEDURE Field*(VAR x: Item; y: ORB.Object); (* x := x.y *)
+  PROCEDURE Index*(VAR x, y: Item); (* x := x[y] *)
+  PROCEDURE DeRef*(VAR x: Item);
+  PROCEDURE BuildTD*(T: ORB.Type; VAR dc: INTEGER);
+  PROCEDURE TypeTest*(VAR x: Item; T: ORB.Type; varpar, isguard: BOOLEAN);
+  PROCEDURE Not*(VAR x: Item); (* x := ~x, Boolean operators *)
+  PROCEDURE And1*(VAR x: Item); (* x := x & *)
+  PROCEDURE And2*(VAR x, y: Item);
+  PROCEDURE Or1*(VAR x: Item); (* x := x OR *)
+  PROCEDURE Or2*(VAR x, y: Item);
+  PROCEDURE Neg*(VAR x: Item); (* x := -x, arithmetic operators *)
+  PROCEDURE AddOp*(op: LONGINT; VAR x, y: Item);
+  PROCEDURE MulOp*(VAR x, y: Item); (* x := x * y *)
+  PROCEDURE DivOp*(op: INTEGER; VAR x, y: Item);
+  PROCEDURE RealOp*(op: INTEGER; VAR x, y: Item);
+  (* x := x +- y *)
+  (* x := x op y *) (* x := x op y *)
+  PROCEDURE Singleton*(VAR x: Item); (* x := {x}, set operators *)
+  PROCEDURE Set*(VAR x, y: Item); (* x := {x .. y} *)
+  PROCEDURE In*(VAR x, y: Item); (* x := x IN y *)
+  PROCEDURE SetOp*(op: INTEGER; VAR x, y: Item); (* x := x op y *)
+  PROCEDURE IntRelation*(op: INTEGER; VAR x, y: Item); (* x := x < y *)
+  PROCEDURE SetRelation*(op: INTEGER; VAR x, y: Item);
+  PROCEDURE RealRelation*(op: INTEGER; VAR x, y: Item);
+  PROCEDURE StringRelation*(op: INTEGER; VAR x, y: Item);
+  PROCEDURE StrToChar*(VAR x: Item); (*assinments*)
+  PROCEDURE Store*(VAR x, y: Item); (* x := y *)
+  PROCEDURE StoreStruct*(VAR x, y: Item); (* x := y *)
+  PROCEDURE CopyString*(VAR x, y: Item); (*from x to y*)
+  (* x := x < y *) (* x := x < y *)
+  (* x := x < y *)
+  PROCEDURE VarParam*(VAR x: Item; ftype: ORB.Type); (*parameters*)
+  PROCEDURE ValueParam*(VAR x: Item);
+  PROCEDURE OpenArrayParam*(VAR x: Item);
+  PROCEDURE StringParam*(VAR x: Item);
+  PROCEDURE For0*(VAR x, y: Item); (*For Statements*)
+  PROCEDURE For1*(VAR x, y, z, w: Item; VAR L: LONGINT);
+  PROCEDURE For2*(VAR x, y, w: Item);
+  (* Branches, procedure calls, procedure prolog and epilog *)
+  PROCEDURE Here*(): LONGINT;
+  PROCEDURE FJump*(VAR L: LONGINT);
+  PROCEDURE CFJump*(VAR x: Item);
+  PROCEDURE BJump*(L: LONGINT);
+  PROCEDURE CBJump*(VAR x: Item; L: LONGINT);
+  PROCEDURE Fixup*(VAR x: Item);
+  PROCEDURE PrepCall*(VAR x: Item; VAR r: LONGINT);
+  PROCEDURE Call*(VAR x: Item; r: LONGINT);
+  PROCEDURE Enter*(parblksize, locblksize: LONGINT; int: BOOLEAN);
+  PROCEDURE Return*(form: INTEGER; VAR x: Item; size: LONGINT; int: BOOLEAN);
+  (* In-line code procedures*)
+  PROCEDURE Increment*(upordown: LONGINT; VAR x, y: Item);
+  PROCEDURE Include*(inorex: LONGINT; VAR x, y: Item);
+  PROCEDURE Assert*(VAR x: Item);
+  PROCEDURE New*(VAR x: Item);
+  PROCEDURE Pack*(VAR x, y: Item);
+  PROCEDURE Unpk*(VAR x, y: Item);
+  PROCEDURE Led*(VAR x: Item);
+  PROCEDURE Get*(VAR x, y: Item);
+  PROCEDURE Put*(VAR x, y: Item);
+  PROCEDURE Copy*(VAR x, y, z: Item);
+  PROCEDURE LDPSR*(VAR x: Item);
+  PROCEDURE LDREG*(VAR x, y: Item);
+  (*In-line code functions*)
+  PROCEDURE Abs*(VAR x: Item);
+  PROCEDURE Odd*(VAR x: Item);
+  PROCEDURE Floor*(VAR x: Item);
+  PROCEDURE Float*(VAR x: Item);
+  PROCEDURE Ord*(VAR x: Item);
+  PROCEDURE Len*(VAR x: Item);
+  PROCEDURE Shift*(fct: LONGINT; VAR x, y: Item);
+  PROCEDURE ADC*(VAR x, y: Item);
+  PROCEDURE SBC*(VAR x, y: Item);
+  PROCEDURE UML*(VAR x, y: Item);
+  PROCEDURE Bit*(VAR x, y: Item);
+  PROCEDURE Register*(VAR x: Item);
+  PROCEDURE H*(VAR x: Item);
+  PROCEDURE Adr*(VAR x: Item);
+  PROCEDURE Condition*(VAR x: Item);
+  PROCEDURE Open*(v: INTEGER);
+  PROCEDURE SetDataSize*(dc: LONGINT);
+  PROCEDURE Header*;
+  PROCEDURE Close*(VAR modid: ORS.Ident; key, nofent: LONGINT);
+END ORG.
+\endtt
+
+\beginsubsection 12.4. THE PARSER.
+
+The main module \code{ORP} constitutes the parser. Its single command \code{Compile}---at the end of the program listing---identifies the source text according to the Oberon command conventions. It then calls procedure \code{Module} with the identified source text as parameter. The command forms are:
+
 % \beginsubsection 12.5. THE SCANNER.
 % \beginsubsection 12.6. SEARCHING THE SYMBOL TABLE, AND HANDLING SYMBOL FILES.
 % \beginsubsubsection 12.6.1. The structure of the symbol table.
