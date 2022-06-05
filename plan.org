@@ -158,6 +158,7 @@
     - [X] Works on Pattern 17 (from Section 12.2)
  - [X] Add support for comments
  - [X] Go back and confirm that it still works on all of snippets
+ - [X] Confirm that it works on at least one full module (Kernel)
  - [ ] Tweak to output typeset code
 
 
