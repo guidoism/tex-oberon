@@ -19,14 +19,27 @@ declarationsequence  = ('CONST' sp+ (constdeclaration sp* ';' sp*)*)?
                        vars:('VAR' sp+ (variabledeclaration sp* ';' sp*)*)?
                        (proceduredeclaration ';' sp*)*
 {
-  console.warn('vars:', vars)
+  let ret = []
   if (vars) {
-  vars = vars[2].map(v => v[0])
-  let last = vars.length - 1
-  vars = vars.map((v, i) => (v + (i == 0 ? '\\1\\6' : (i > 0 && i == last ? '\\2\\6' : '\\6'))))
-  vars = '\\&{vars} ' + vars.join('\n')
-  return [vars].join('\n')
+    vars.shift() // VAR keyword
+    vars.shift() // space
+    vars = vars[0]
+    vars = vars.map(v => v[0])
+    console.warn('vars:', vars)
+    if (vars.length == 2) {
+      ret.push('\\&{var} ' + vars[0] + ';\\1\\6\n' + vars[1] + ';\\2\n')
+    }
+    if (vars.length > 2) {
+      let first = '\\&{var} ' + vars[0] + ';\\1\\6\n'
+      let middle = vars.slice(1, -1).map(s => s + ';\\6\n').join('')
+      let last = vars[vars.length-1] + ';\\2\n'
+      ret.push(first + middle + last)
+    }
+    else {
+      ret.push('\\&{var} ' + vars[0] + ';\n')
+    }
   }
+  return ret.join('\n')
 }
 
 importlist           = 'IMPORT' sp* import sp* ("," sp* import)* sp* ';'
@@ -45,16 +58,15 @@ constexpression      = expression
 typedeclaration      = identdef sp* '=' sp* structype
 variabledeclaration  = i:identlist ':' sp* t:type
 {
-  i = i.map(j => `\\\\{${j[0]}}`).join(', ')
-  console.warn('variabledeclaration:', t)
-  if (t.toUpperCase() === t) { t = `\\.{${t}}` }
+  console.warn('variabledeclaration:', i, t)
   return `${i}: ${t}`
 }
 
 identlist            = head:identdef tail:(sp* ',' sp* identdef)*
 {
   // TODO: I think we still need to deal with the optional '*'
-  return [head[0]].concat(tail.map(o => o[3][0]))
+  let all = [head[0]].concat(tail.map(o => o[3][0]))
+  return all.join(', ')
 }
 
 identdef             = ident '*'?
@@ -171,7 +183,21 @@ real              = whole:digit+ '.' part:digit+ scale:scalefactor?
 }
 
 scalefactor       = 'E' ('+' / '-')? digit+
-ident             = !keyword head:alpha tail:alphanum* { return head + tail.join('') }
+ident             = s:(!keyword alpha alphanum*)
+{
+  let allcaps = x => (x.toUpperCase() === x)
+  s.shift() // Discard negative rule
+  s = [s[0]].concat(s[1]).join('')
+  if (allcaps(s))
+    s = '\\.{' + s + '}'
+  else
+    s = '\\\\{' + s + '}'
+  console.warn('ident:', s)
+  return s
+}
+
+
+
 alpha             = [a-zA-Z]
 digit             = [0-9]
 hexdigit          = [0-9a-fA-F]
