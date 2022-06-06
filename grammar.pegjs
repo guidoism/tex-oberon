@@ -15,17 +15,24 @@ ${statements}
 }
 
 declarationsequence  = ('CONST' sp+ (constdeclaration sp* ';' sp*)*)?
-                       ('TYPE' sp+ (typedeclaration sp* ';' sp* )*)?
+                       types:('TYPE' sp+ (typedeclaration sp* ';' sp* )*)?
                        vars:('VAR' sp+ (variabledeclaration sp* ';' sp*)*)?
                        (proceduredeclaration ';' sp*)*
 {
   let ret = []
+  if (types) {
+    types.shift() // TYPE keyword
+    types.shift() // space
+    types = types[0]
+    types = types.map(v => v[0])
+    console.warn('types:', types)
+    ret.push('\\&{type} ' + types[0] + ';\n')
+  }
   if (vars) {
     vars.shift() // VAR keyword
     vars.shift() // space
     vars = vars[0]
     vars = vars.map(v => v[0])
-    console.warn('vars:', vars)
     if (vars.length == 2) {
       ret.push('\\&{var} ' + vars[0] + ';\\1\\6\n' + vars[1] + ';\\2\n')
     }
@@ -55,7 +62,12 @@ statement            = (assignment / procedurecall / ifstatement /
                         forstatement)?
 constdeclaration     = identdef sp* '=' sp* constexpression
 constexpression      = expression
-typedeclaration      = identdef sp* '=' sp* structype
+typedeclaration      = i:identdef sp* '=' sp* t:structype
+{
+  console.warn('typedeclaration:', i, t)
+  return `${i} = ${t}`
+}
+
 variabledeclaration  = i:identlist ':' sp* t:type
 {
   console.warn('variabledeclaration:', i, t)
@@ -65,17 +77,28 @@ variabledeclaration  = i:identlist ':' sp* t:type
 identlist            = head:identdef tail:(sp* ',' sp* identdef)*
 {
   // TODO: I think we still need to deal with the optional '*'
-  let all = [head[0]].concat(tail.map(o => o[3][0]))
+  let all = [head].concat(tail.map(o => o[3]))
   return all.join(', ')
 }
 
-identdef             = ident '*'?
+identdef             = i:(ident '*'?)
+{
+  // TODO: Add * for export
+  console.warn('ident:', i[0])
+  return i[0]
+}
+
 type                 = structype / qualident
 structype            = arraytype / recordtype / pointertype / proceduretype
 arraytype            = 'ARRAY' sp* length (sp* ',' sp* length)* sp* 'OF' sp+ type
 length               = constexpression
 recordtype           = 'RECORD' sp* ('(' sp* basetype sp* ')')? sp* fieldlistsequence? sp* 'END'
-pointertype          = 'POINTER' sp* 'TO' sp* type
+pointertype          = 'POINTER TO' sp* t:type
+{
+  console.warn('pointertype:', t)
+  return '\\&{pointer to} ' + t
+}
+
 proceduretype        = 'PROCEDURE' sp* formalparameters?
 proceduredeclaration = procedureheading sp* ';' sp* procedurebody sp* ident
 procedureheading     = 'PROCEDURE' sp* identdef sp* formalparameters?
