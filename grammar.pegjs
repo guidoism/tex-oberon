@@ -27,6 +27,7 @@ declarationsequence  = ('CONST' sp+ (constdeclaration sp* ';' sp*)*)?
   }
   let ret = []
   if (types) {
+    let s = ''
     types.shift() // TYPE keyword
     types.shift() // space
     types = types[0]
@@ -35,13 +36,13 @@ declarationsequence  = ('CONST' sp+ (constdeclaration sp* ';' sp*)*)?
     if (types.length == 2) {
       s = '\\&{type} ' +
           types[0] + newline(types, 0) +
-          types[1] + newline(types, 1))
+          types[1] + newline(types, 1)
     }
     else if (types.length > 2) {
       s = '\\&{type} ' +
           types[0] + newline(types, 0) +
           types.slice(1, -1).map(s => s + newline(types, 1)).join('') +
-          types[types.length-1] + newline(types, types.length-1))
+          types[types.length-1] + newline(types, types.length-1)
     }
     else {
       s = '\\&{type} ' + types[0] + ';\\6'
