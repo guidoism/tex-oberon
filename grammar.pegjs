@@ -76,8 +76,7 @@ declarationsequence  = consts:('CONST' sp+ (constdeclaration sp* ';' sp*)*)?
     }
   }
   if (procs) {
-    console.warn('proc:', procs)
-    ret.push(procs.join('; '))
+    ret.push(procs.map(x => x[0]).join(';\\6\n'))
   }
   return ret.join('\n')
 }
@@ -151,11 +150,13 @@ proceduredeclaration = a:procedureheading sp* ';' sp* b:procedurebody sp* c:iden
 {
   // TODO: body
   //return a + '; ' + b + c
+  //console.warn('proceduredeclaration', a)
   return a
 }
 
 procedureheading     = 'PROCEDURE' sp* a:identdef sp* b:formalparameters?
 {
+  if (b) console.warn('procedureheading:', b)
   if (b) return '\\&{procedure} ' + a + b
   return '\\&{procedure} ' + a
 }
@@ -215,7 +216,7 @@ explist           = expression (sp* ',' sp* expression)*
 relation          = '=' / '#' / '<=' / '<' / '>=' / '>' / 'IN' / 'IS'
 expression        = head:simpleexpression tail:(sp* relation sp* simpleexpression)?
 {
-  console.warn('expression:', head)
+  //console.warn('expression:', head)
   // TODO: tail
   return head
 }
@@ -247,19 +248,21 @@ actualparameters  = '(' sp* explist? sp* ')'
 formalparameters  = '(' a:(fpsection sp* (';' sp* fpsection)*)? sp* ')' sp* b:(':' sp* qualident)?
 {
   let parts = ['(']
+  console.warn('formalparameters(a):', a)
   if (a) {
-    let params = a[0]
+    let params = [a[0]]
     if (a[2].length > 0) params = params.concat(a[2].map(x => x[2]))
     console.warn('formalparameters:', params)
+    parts.push(params.join(', '))
   }
-  if (b) parts.push(' : ' + b[2])
   parts.push(')')
+  if (b) parts.push(' : ' + b[2])
   return parts.join('')
 }
 
 fpsection         = v:'VAR'? sp* idents:ident sp* tail:(',' sp* ident)* sp* ':' sp* t:formaltype
 {
-  v = v ? '\\&{var}' : ''
+  v = v ? '\\&{var} ' : ''
   if (tail) idents = [idents].concat(tail)
   return v + idents.join(', ') + ' : ' + t
 }
