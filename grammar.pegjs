@@ -14,10 +14,10 @@ ${statements}
 `
 }
 
-declarationsequence  = ('CONST' sp+ (constdeclaration sp* ';' sp*)*)?
+declarationsequence  = consts:('CONST' sp+ (constdeclaration sp* ';' sp*)*)?
                        types:('TYPE' sp+ (typedeclaration sp* ';' sp* )*)?
                        vars:('VAR' sp+ (variabledeclaration sp* ';' sp*)*)?
-                       (proceduredeclaration ';' sp*)*
+                       procs:(proceduredeclaration ';' sp*)*
 {
   let newline = (a, i) => {
     if (a.length == 1) return ';\\6\n'
@@ -26,6 +26,13 @@ declarationsequence  = ('CONST' sp+ (constdeclaration sp* ';' sp*)*)?
     return ';\\6\n'
   }
   let ret = []
+
+  if (consts) {
+    consts = consts[2].map(x => x[0])
+    console.warn('consts:', consts)
+    ret.push('\\&{const} \\1 ' + consts.join(';\\5') + ';\\2\\6')
+  }
+
   if (types) {
     let s = ''
     types.shift() // TYPE keyword
@@ -68,6 +75,10 @@ declarationsequence  = ('CONST' sp+ (constdeclaration sp* ';' sp*)*)?
       ret.push('\\&{var} ' + vars[0] + ';\n')
     }
   }
+  if (procs) {
+    console.warn('proc:', procs)
+    ret.push(procs.join('; '))
+  }
   return ret.join('\n')
 }
 
@@ -82,7 +93,11 @@ statementsequence    = head:statement tail:(sp* ';' sp* statement)*
 statement            = (assignment / procedurecall / ifstatement /
                         casestatement / whilestatement / repeatstatement /
                         forstatement)?
-constdeclaration     = identdef sp* '=' sp* constexpression
+constdeclaration     = a:identdef sp* '=' sp* b:constexpression
+{
+  return a + ' = ' + b
+}
+
 constexpression      = expression
 typedeclaration      = i:identdef sp* '=' sp* t:structype
 {
@@ -109,7 +124,13 @@ identdef             = i:(ident '*'?)
 
 type                 = structype / qualident
 structype            = arraytype / recordtype / pointertype / proceduretype
-arraytype            = 'ARRAY' sp* length (sp* ',' sp* length)* sp* 'OF' sp+ type
+arraytype            = 'ARRAY' sp* head:length tail:(sp* ',' sp* length)* sp* 'OF' sp+ type:type
+{
+  console.warn('arraytype:', head)
+  let size = (tail.length > 0) ? [head].concat(tail).join(', ') : head
+  return '\\&{array} ' + size + ' \\&{of} ' + type
+}
+
 length               = constexpression
 recordtype           = 'RECORD' sp* base:('(' sp* basetype sp* ')')? sp* fields:fieldlistsequence? sp* 'END'
 {
@@ -126,8 +147,19 @@ pointertype          = 'POINTER TO' sp* t:type
 }
 
 proceduretype        = 'PROCEDURE' sp* formalparameters?
-proceduredeclaration = procedureheading sp* ';' sp* procedurebody sp* ident
-procedureheading     = 'PROCEDURE' sp* identdef sp* formalparameters?
+proceduredeclaration = a:procedureheading sp* ';' sp* b:procedurebody sp* c:ident
+{
+  // TODO: body
+  //return a + '; ' + b + c
+  return a
+}
+
+procedureheading     = 'PROCEDURE' sp* a:identdef sp* b:formalparameters?
+{
+  if (b) return '\\&{procedure} ' + a + b
+  return '\\&{procedure} ' + a
+}
+
 procedurebody        = declarationsequence ('BEGIN' sp* statementsequence)?
                        sp* ('RETURN' sp* expression)? sp* 'END'
 procedurecall        = designator sp* actualparameters?
@@ -165,7 +197,12 @@ assignment        = a:designator sp* ':=' sp* b:expression
   return `${a[0]} \\K\\ ${b}`
 }
 
-designator        = qualident selector*
+designator        = a:qualident b:selector*
+{
+  if (b) return a + b
+  return a
+}
+
 qualident         = s:(ident '.' qualident / ident)
 {
   if (typeof s === 'object') { s = s.join('') }
@@ -178,6 +215,7 @@ explist           = expression (sp* ',' sp* expression)*
 relation          = '=' / '#' / '<=' / '<' / '>=' / '>' / 'IN' / 'IS'
 expression        = head:simpleexpression tail:(sp* relation sp* simpleexpression)?
 {
+  console.warn('expression:', head)
   // TODO: tail
   return head
 }
@@ -199,11 +237,39 @@ term              = head:factor (sp* muloperator sp* factor)*
 
 
 factor            = hexascii / number / string / 'NIL' / 'TRUE' / 'FALSE' /
-                    set / designator actualparameters? / '(' expression ')' / '~' factor
+                    set / designatorwithparams / '(' expression ')' / '~' factor
+designatorwithparams = a:designator b:actualparameters?
+{
+  return a
+}
+
 actualparameters  = '(' sp* explist? sp* ')'
-formalparameters  = '(' (fpsection sp* (';' sp* fpsection)*)? sp* ')' sp* (':' sp* qualident)?
-fpsection         = 'VAR'? sp* ident sp* (',' sp* ident)* sp* ':' sp* formaltype
-formaltype        = ('ARRAY OF' sp*)* qualident
+formalparameters  = '(' a:(fpsection sp* (';' sp* fpsection)*)? sp* ')' sp* b:(':' sp* qualident)?
+{
+  let parts = ['(']
+  if (a) {
+    let params = a[0]
+    if (a[2].length > 0) params = params.concat(a[2].map(x => x[2]))
+    console.warn('formalparameters:', params)
+  }
+  if (b) parts.push(' : ' + b[2])
+  parts.push(')')
+  return parts.join('')
+}
+
+fpsection         = v:'VAR'? sp* idents:ident sp* tail:(',' sp* ident)* sp* ':' sp* t:formaltype
+{
+  v = v ? '\\&{var}' : ''
+  if (tail) idents = [idents].concat(tail)
+  return v + idents.join(', ') + ' : ' + t
+}
+
+formaltype        = a:('ARRAY OF' sp*)* b:qualident
+{
+  if (a) return '\\&{array of} ' + b
+  return b
+}
+
 set               = '{' sp* s:(element sp* (sp* ',' sp* element)*)? '}'
 {
   let head = s[0]
