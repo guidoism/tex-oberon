@@ -19,6 +19,12 @@ declarationsequence  = ('CONST' sp+ (constdeclaration sp* ';' sp*)*)?
                        vars:('VAR' sp+ (variabledeclaration sp* ';' sp*)*)?
                        (proceduredeclaration ';' sp*)*
 {
+  let newline = (a, i) => {
+    if (a.length == 1) return ';\\6\n'
+    if (a.length == i+1) return ';\\2\\6\n' // dedent after last
+    if (i == 0) return ';\\1\\6\n' // indent after first
+    return ';\\6\n'
+  }
   let ret = []
   if (types) {
     types.shift() // TYPE keyword
@@ -26,7 +32,21 @@ declarationsequence  = ('CONST' sp+ (constdeclaration sp* ';' sp*)*)?
     types = types[0]
     types = types.map(v => v[0])
     console.warn('types:', types)
-    ret.push('\\&{type} ' + types[0] + ';\n')
+    if (types.length == 2) {
+      s = '\\&{type} ' +
+          types[0] + newline(types, 0) +
+          types[1] + newline(types, 1))
+    }
+    else if (types.length > 2) {
+      s = '\\&{type} ' +
+          types[0] + newline(types, 0) +
+          types.slice(1, -1).map(s => s + newline(types, 1)).join('') +
+          types[types.length-1] + newline(types, types.length-1))
+    }
+    else {
+      s = '\\&{type} ' + types[0] + ';\\6'
+    }
+    ret.push(s.trim())
   }
   if (vars) {
     vars.shift() // VAR keyword
@@ -34,13 +54,15 @@ declarationsequence  = ('CONST' sp+ (constdeclaration sp* ';' sp*)*)?
     vars = vars[0]
     vars = vars.map(v => v[0])
     if (vars.length == 2) {
-      ret.push('\\&{var} ' + vars[0] + ';\\1\\6\n' + vars[1] + ';\\2\n')
+      ret.push('\\&{var} ' +
+               vars[0] + newline(vars, 0) +
+               vars[1] + newline(vars, 1))
     }
-    if (vars.length > 2) {
-      let first = '\\&{var} ' + vars[0] + ';\\1\\6\n'
-      let middle = vars.slice(1, -1).map(s => s + ';\\6\n').join('')
-      let last = vars[vars.length-1] + ';\\2\n'
-      ret.push(first + middle + last)
+    else if (vars.length > 2) {
+      ret.push('\\&{var} ' +
+               vars[0] + newline(vars, 0) +
+               vars.slice(1, -1).map(s => s + newline(vars, 1)).join('') +
+               vars[vars.length-1] + newline(vars, vars.length-1))
     }
     else {
       ret.push('\\&{var} ' + vars[0] + ';\n')
@@ -92,7 +114,13 @@ type                 = structype / qualident
 structype            = arraytype / recordtype / pointertype / proceduretype
 arraytype            = 'ARRAY' sp* length (sp* ',' sp* length)* sp* 'OF' sp+ type
 length               = constexpression
-recordtype           = 'RECORD' sp* ('(' sp* basetype sp* ')')? sp* fieldlistsequence? sp* 'END'
+recordtype           = 'RECORD' sp* base:('(' sp* basetype sp* ')')? sp* fields:fieldlistsequence? sp* 'END'
+{
+  // TODO: console.log('record(base):', base)
+  console.warn('record(fields):', fields)
+  if (fields) return fields.join('\n')
+}
+
 pointertype          = 'POINTER TO' sp* t:type
 {
   console.warn('pointertype:', t)
@@ -118,8 +146,18 @@ whilestatement       = 'WHILE' sp* expression sp* 'DO' sp* statementsequence
 repeatstatement      = 'REPEAT' sp* statementsequence sp* 'UNTIL' sp* expression
 forstatement         = 'FOR' sp* ident sp* ':=' sp* expression sp* 'TO' sp* expression sp*
                        ('BY' sp* constexpression)? sp* 'DO' sp* statementsequence sp* 'END'
-fieldlistsequence    = fieldlist (sp* ';' sp* fieldlist sp*)*
-fieldlist            = identlist sp* ':' sp* type
+fieldlistsequence    = head:fieldlist tail:(sp* ';' sp* fieldlist sp*)*
+{
+  tail = tail[0][3]
+  console.warn('fieldlistsequence:', tail)
+  return [head].concat(tail)
+}
+
+fieldlist            = a:identlist sp* ':' sp* b:type
+{
+  return a + ' : ' + b
+}
+
 basetype          = qualident
 assignment        = a:designator sp* ':=' sp* b:expression
 {
