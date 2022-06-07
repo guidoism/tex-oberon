@@ -117,9 +117,12 @@ arraytype            = 'ARRAY' sp* length (sp* ',' sp* length)* sp* 'OF' sp+ typ
 length               = constexpression
 recordtype           = 'RECORD' sp* base:('(' sp* basetype sp* ')')? sp* fields:fieldlistsequence? sp* 'END'
 {
-  // TODO: console.log('record(base):', base)
-  console.warn('record(fields):', fields)
-  if (fields) return fields.join('\n')
+  let parts = ['\\&{record}']
+  console.warn('record(base):', base)
+  if (base) parts.push(' (' + base[2] + ') ')
+  if (fields) parts.push(fields.join('; '))
+  parts.push('\\&{end}')
+  return parts.join(' ')
 }
 
 pointertype          = 'POINTER TO' sp* t:type
@@ -149,9 +152,11 @@ forstatement         = 'FOR' sp* ident sp* ':=' sp* expression sp* 'TO' sp* expr
                        ('BY' sp* constexpression)? sp* 'DO' sp* statementsequence sp* 'END'
 fieldlistsequence    = head:fieldlist tail:(sp* ';' sp* fieldlist sp*)*
 {
-  tail = tail[0][3]
-  console.warn('fieldlistsequence:', tail)
-  return [head].concat(tail)
+  if (tail.length > 0) {
+    tail = tail[0][3]
+    return [head].concat(tail)
+  }
+  return [head]
 }
 
 fieldlist            = a:identlist sp* ':' sp* b:type
