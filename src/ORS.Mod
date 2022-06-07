@@ -1,14 +1,6 @@
 MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
   IMPORT SYSTEM, Texts, Oberon;
-
-(* Oberon Scanner does lexical analysis. Input is Oberon-Text, output is
-  sequence of symbols, i.e identifiers, numbers, strings, and special symbols.
-  Recognises all Oberon keywords and skips comments. The keywords are
-  recorded in a table.
-  Get(sym) delivers next symbol from input text with Reader R.
-  Mark(msg) records error and delivers error message with Writer W.
-  If Get delivers ident, then the identifier (a string) is in variable id, if int or char
-  in ival, if real in rval, and if string in str (and slen) *)
+(* Oberon Scanner does lexical analysis. Input is Oberon-Text, output is sequence of symbols, i.e identifiers, numbers, strings, and special symbols. Recognises all Oberon keywords and skips comments. The keywords are recorded in a table. Get(sym) delivers next symbol from input text with Reader R. Mark(msg) records error and delivers error message with Writer W. If Get delivers ident, then the identifier (a string) is in variable id, if int or char in ival, if real in rval, and if string in str (and slen) *)
   
   CONST IdLen* = 32;
     NKW = 34;  (*nof keywords*)

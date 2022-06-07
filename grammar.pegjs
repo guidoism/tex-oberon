@@ -32,7 +32,6 @@ declarationsequence  = ('CONST' sp+ (constdeclaration sp* ';' sp*)*)?
     types.shift() // space
     types = types[0]
     types = types.map(v => v[0])
-    console.warn('types:', types)
     if (types.length == 2) {
       s = '\\&{type} ' +
           types[0] + newline(types, 0) +
@@ -87,13 +86,11 @@ constdeclaration     = identdef sp* '=' sp* constexpression
 constexpression      = expression
 typedeclaration      = i:identdef sp* '=' sp* t:structype
 {
-  console.warn('typedeclaration:', i, t)
   return `${i} = ${t}`
 }
 
 variabledeclaration  = i:identlist ':' sp* t:type
 {
-  console.warn('variabledeclaration:', i, t)
   return `${i}: ${t}`
 }
 
@@ -107,7 +104,6 @@ identlist            = head:identdef tail:(sp* ',' sp* identdef)*
 identdef             = i:(ident '*'?)
 {
   // TODO: Add * for export
-  console.warn('ident:', i[0])
   return i[0]
 }
 
@@ -118,7 +114,6 @@ length               = constexpression
 recordtype           = 'RECORD' sp* base:('(' sp* basetype sp* ')')? sp* fields:fieldlistsequence? sp* 'END'
 {
   let parts = ['\\&{record}']
-  console.warn('record(base):', base)
   if (base) parts.push(' (' + base[2] + ') ')
   if (fields) parts.push(fields.join('; '))
   parts.push('\\&{end}')
@@ -127,7 +122,6 @@ recordtype           = 'RECORD' sp* base:('(' sp* basetype sp* ')')? sp* fields:
 
 pointertype          = 'POINTER TO' sp* t:type
 {
-  console.warn('pointertype:', t)
   return '\\&{pointer to} ' + t
 }
 
@@ -204,7 +198,7 @@ term              = head:factor (sp* muloperator sp* factor)*
 }
 
 
-factor            = number / string / 'NIL' / 'TRUE' / 'FALSE' /
+factor            = hexascii / number / string / 'NIL' / 'TRUE' / 'FALSE' /
                     set / designator actualparameters? / '(' expression ')' / '~' factor
 actualparameters  = '(' sp* explist? sp* ')'
 formalparameters  = '(' (fpsection sp* (';' sp* fpsection)*)? sp* ')' sp* (':' sp* qualident)?
@@ -216,7 +210,6 @@ set               = '{' sp* s:(element sp* (sp* ',' sp* element)*)? '}'
   let tail = s[2].map(c => c[3])
   let list = [head].concat(tail)
   let ret = ' $\\lbrace ' + list.join(', ') + ' \\rbrace$ '
-  console.warn(ret)
   return ret
 }
 
@@ -226,10 +219,10 @@ element           = head:expression tail:(sp* '..' sp* expression)*
   return head
 }
 
+hexascii          = a:digit b:hexdigit? 'X'
 
-string            = s:('"' (!'"' character)+ '"' / digit hexdigit? 'X')
+string            = s:('"' (!'"' character)+ '"')
 {
-  // TODO: hex char
   return '\\.{"' + s[1].map(c => c[1]).join('') + '"}'
 }
 
@@ -259,7 +252,6 @@ ident             = s:(!keyword alpha alphanum*)
     s = '\\.{' + s + '}'
   else
     s = '\\\\{' + s + '}'
-  console.warn('ident:', s)
   return s
 }
 

@@ -6,7 +6,8 @@ all:
 format:
 	pegjs -o parser.js grammar.pegjs
 	cat parser.js parser_stub.js > parser_highlighter.js
-	node parser_highlighter.js patterns/fmt_test_01.Mod > aaa.tex
+	#node parser_highlighter.js patterns/fmt_test_01.Mod > aaa.tex
+	node parser_highlighter.js src/ORS.Mod > aaa.tex
 	cat aaa.tex
 	luatex aaa
 	open aaa.pdf
