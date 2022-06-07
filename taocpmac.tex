@@ -73,6 +73,83 @@
 
 \font\manfnt=manfnt % special symbols from the TeX project
 
+
+%%%%%%%%%%% GUIDO
+\font\tenrm=rm-mlmr10 % roman text
+\font\preloaded=rm-mlmr9
+\font\preloaded=rm-mlmr8
+\font\sevenrm=rm-mlmr7
+\font\preloaded=rm-mlmr6
+\font\fiverm=rm-mlmr5
+\font\teni=mlmmi10 % math italic
+\font\preloaded=mlmmi9
+\font\preloaded=mlmmi8
+\font\seveni=mlmmi7
+\font\preloaded=mlmmi6
+\font\fivei=mlmmi5
+\font\tensy=mlmsy10 % math symbols
+\font\preloaded=mlmsy9
+\font\preloaded=mlmsy8
+\font\sevensy=mlmsy7
+\font\preloaded=mlmsy6
+\font\fivesy=mlmsy5
+\font\tenex=mlmex10 % math extension
+\font\preloaded=rm-mlmss10 % sans serif
+%\font\preloaded=rm-mlmssq8
+\font\preloaded=rm-mlmsso10 % sans serif italic
+%\font\preloaded=rm-mlmssqi8
+\font\tenbf=rm-mlmbx10 % boldface extended
+\font\preloaded=rm-mlmbx9
+\font\preloaded=rm-mlmbx8
+\font\sevenbf=rm-mlmbx7
+\font\preloaded=rm-mlmbx6
+\font\fivebf=rm-mlmbx5
+\font\tentt=rm-mlmtt10 % typewriter
+\font\preloaded=rm-mlmtt9
+\font\preloaded=rm-mlmtt8
+\font\preloaded=rm-mlmtto10 % slanted typewriter
+\font\tensl=rm-mlmro10 % slanted roman
+\font\preloaded=rm-mlmro9
+\font\preloaded=rm-mlmro8
+\font\tenit=rm-mlmri10 % text italic
+\font\preloaded=rm-mlmri9
+\font\preloaded=rm-mlmri8
+\font\preloaded=rm-mlmri7
+\font\preloaded=rm-mlmu10 % unslanted text italic
+\font\preloaded=mlmmib10 % bold math italic
+\font\preloaded=mlmbsy10 % bold math symbols
+\font\preloaded=rm-mlmcsc10 % caps and small caps
+%\font\preloaded=rm-mlmssbx10 % sans serif bold extended
+%\font\preloaded=rm-mlmdunh10 % Dunhill style
+\font\preloaded=rm-mlmr7 scaled \magstep4 % for titles
+\font\preloaded=rm-mlmtt10 scaled \magstep2
+\font\preloaded=rm-mlmssbx10 scaled \magstep2
+
+\let\preloaded=\undefined % preloaded fonts must be declared anew later.
+
+\skewchar\teni='177 \skewchar\seveni='177 \skewchar\fivei='177
+\skewchar\tensy='60 \skewchar\sevensy='60 \skewchar\fivesy='60
+
+\textfont0=\tenrm \scriptfont0=\sevenrm \scriptscriptfont0=\fiverm
+\def\rm{\fam\z@\tenrm}
+\textfont1=\teni \scriptfont1=\seveni \scriptscriptfont1=\fivei
+\def\mit{\fam\@ne} \def\oldstyle{\fam\@ne\teni}
+\textfont2=\tensy \scriptfont2=\sevensy \scriptscriptfont2=\fivesy
+\def\cal{\fam\tw@}
+\textfont3=\tenex \scriptfont3=\tenex \scriptscriptfont3=\tenex
+\newfam\itfam \def\it{\fam\itfam\tenit} % \it is family 4
+\textfont\itfam=\tenit
+\newfam\slfam \def\sl{\fam\slfam\tensl} % \sl is family 5
+\textfont\slfam=\tensl
+\newfam\bffam \def\bf{\fam\bffam\tenbf} % \bf is family 6
+\textfont\bffam=\tenbf \scriptfont\bffam=\sevenbf
+\scriptscriptfont\bffam=\fivebf
+\newfam\ttfam \def\tt{\fam\ttfam\tentt} % \tt is family 7
+\textfont\ttfam=\tentt
+%%%%%%%%%%% GUIDO
+
+
+
 \let\realtentt=\tentt
 \def\tenpoint{\def\rm{\fam0\let\tentt=\realtentt\tenrm}%
   \clearance=4.175 pt

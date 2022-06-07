@@ -29,7 +29,7 @@ declarationsequence  = consts:('CONST' sp+ (constdeclaration sp* ';' sp*)*)?
 
   if (consts) {
     consts = consts[2].map(x => x[0])
-    console.warn('consts:', consts)
+    //console.warn('consts:', consts)
     ret.push('\\&{const} \\1 ' + consts.join(';\\5') + ';\\2\\6')
   }
 
@@ -76,7 +76,7 @@ declarationsequence  = consts:('CONST' sp+ (constdeclaration sp* ';' sp*)*)?
     }
   }
   if (procs) {
-    ret.push(procs.map(x => x[0]).join(';\\6\n'))
+    ret.push(procs.map(x => x[0]).join(' '))
   }
   return ret.join('\n')
 }
@@ -125,7 +125,7 @@ type                 = structype / qualident
 structype            = arraytype / recordtype / pointertype / proceduretype
 arraytype            = 'ARRAY' sp* head:length tail:(sp* ',' sp* length)* sp* 'OF' sp+ type:type
 {
-  console.warn('arraytype:', head)
+  //console.warn('arraytype:', head)
   let size = (tail.length > 0) ? [head].concat(tail).join(', ') : head
   return '\\&{array} ' + size + ' \\&{of} ' + type
 }
@@ -148,21 +148,27 @@ pointertype          = 'POINTER TO' sp* t:type
 proceduretype        = 'PROCEDURE' sp* formalparameters?
 proceduredeclaration = a:procedureheading sp* ';' sp* b:procedurebody sp* c:ident
 {
-  // TODO: body
-  //return a + '; ' + b + c
-  //console.warn('proceduredeclaration', a)
-  return a
+  return a + '\\6\n' + b + c + ';\\2\\6\n'
 }
 
 procedureheading     = 'PROCEDURE' sp* a:identdef sp* b:formalparameters?
 {
-  if (b) console.warn('procedureheading:', b)
   if (b) return '\\&{procedure} ' + a + b
   return '\\&{procedure} ' + a
 }
 
-procedurebody        = declarationsequence ('BEGIN' sp* statementsequence)?
-                       sp* ('RETURN' sp* expression)? sp* 'END'
+procedurebody        = a:declarationsequence b:('BEGIN' sp* statementsequence)?
+                       sp* c:('RETURN' sp* expression)? sp* 'END'
+{
+  let parts = []
+  if (a) parts.push(a + '\\6')
+  if (b) parts.push('\\&{begin}\\1\\6\n' + b[2])
+  if (c) parts.push('\\&{return}' + c[2] + '\\6\n')
+  //console.warn('procedurebody', b)
+  parts.push(' \\&{end}')
+  return parts.join('')
+}
+
 procedurecall        = designator sp* actualparameters?
 ifstatement          = 'IF' sp* expression sp* 'THEN' sp* statementsequence 
                        (sp* 'ELSIF' sp* expression sp* 'THEN' sp* statementsequence)*
@@ -241,6 +247,7 @@ factor            = hexascii / number / string / 'NIL' / 'TRUE' / 'FALSE' /
                     set / designatorwithparams / '(' expression ')' / '~' factor
 designatorwithparams = a:designator b:actualparameters?
 {
+  if (b) return a + b
   return a
 }
 
