@@ -248,11 +248,9 @@ actualparameters  = '(' sp* explist? sp* ')'
 formalparameters  = '(' a:(fpsection sp* (';' sp* fpsection)*)? sp* ')' sp* b:(':' sp* qualident)?
 {
   let parts = ['(']
-  console.warn('formalparameters(a):', a)
   if (a) {
     let params = [a[0]]
     if (a[2].length > 0) params = params.concat(a[2].map(x => x[2]))
-    console.warn('formalparameters:', params)
     parts.push(params.join(', '))
   }
   parts.push(')')
