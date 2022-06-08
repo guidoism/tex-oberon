@@ -178,11 +178,25 @@ procedurecall        = a:designator sp* b:actualparameters?
 }
 
 ifstatement          = 'IF' sp* a:expression sp* 'THEN' sp* b:statementsequence 
-                       (sp* 'ELSIF' sp* expression sp* 'THEN' sp* statementsequence)*
-                       (sp* 'ELSE' sp* statementsequence)? sp* 'END'
+                       c:(sp* 'ELSIF' sp* expression sp* 'THEN' sp* statementsequence)*
+                       d:(sp* 'ELSE' sp* statementsequence)? sp* 'END'
 {
-  let parts = ['\\&{if} ', a, ' \\&{then} ', b]
-  
+  let parts = ['\\&{if} ', a, ' \\&{then}\\1\\6 ', b]
+  if (c.length > 0) {
+    console.warn('GUIDO:', c.length)
+    c.map(x => {
+      parts.push('\\2\\6 \\&{elsif} ')
+      parts.push(x[3])
+      parts.push(' \\&{then}\\1\\6')
+      parts.push(x[7])
+      parts.push('\\2\\6')
+    })
+  }
+  if (d) {
+    parts.push(' \\&{else} ')
+    parts.push(d[3])
+  } 
+  parts.push('\\2\\6\\&{end}')
   return parts.join('')
 }
 casestatement        = 'CASE' sp* expression sp* 'OF' sp* case (sp* "|" sp* case sp*)* 'END'
@@ -288,8 +302,13 @@ term              = head:factor (sp* muloperator sp* factor)*
 }
 
 
-factor            = hexascii / number / string / 'NIL' / 'TRUE' / 'FALSE' /
+factor            = hexascii / number / string / factor_bool /
                     set / designatorwithparams / factor_parenexpr / '~' factor
+
+factor_bool = a:('NIL' / 'TRUE' / 'FALSE')
+{
+  return '\\&{' + a.toLowerCase() + '}'
+}
                     
 factor_parenexpr  = '(' a:expression ')'
 {
@@ -351,6 +370,10 @@ element           = head:expression tail:(sp* '..' sp* expression)*
 }
 
 hexascii          = a:digit b:hexdigit? 'X'
+{
+  if (b) return `\\.{${a}${b}X}`
+  return `\\.{${a}X}`
+}
 
 string            = s:('"' (!'"' character)+ '"')
 {
