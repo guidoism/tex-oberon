@@ -183,7 +183,6 @@ ifstatement          = 'IF' sp* a:expression sp* 'THEN' sp* b:statementsequence
 {
   let parts = ['\\&{if} ', a, ' \\&{then}\\1\\6 ', b]
   if (c.length > 0) {
-    console.warn('GUIDO:', c.length)
     c.map(x => {
       parts.push('\\2\\6 \\&{elsif} ')
       parts.push(x[3])
@@ -204,10 +203,21 @@ case                 = (caselabellist ':' statementsequence)?
 caselabellist        = labelrange (sp* ',' sp* labelrange)*
 labelrange           = label (sp* ".." sp* label)?
 label                = integer / string / qualident
-whilestatement       = 'WHILE' sp* a:expression sp* 'DO' sp* statementsequence
-                       ('ELSIF' sp* expression sp* 'DO' sp* statementsequence)* sp* 'END' sp*
+whilestatement       = 'WHILE' sp* a:expression sp* 'DO' sp* b:statementsequence
+                       c:('ELSIF' sp* expression sp* 'DO' sp* statementsequence)* sp* 'END' sp*
 {
-  console.warn('WHILE:', a)
+  let parts = ['\\&{while} ', a, ' \\&{do}\\1\\6 ', b]
+  if (c.length > 0) {
+    c.map(x => {
+      parts.push('\\2\\6 \\&{elsif} ')
+      parts.push(x[2])
+      parts.push(' \\&{then}\\1\\6')
+      parts.push(x[6])
+      parts.push('\\2\\6')
+    })
+  }
+  parts.push('\\2\\6\\&{end}')
+  return parts.join('')
 }
 repeatstatement      = 'REPEAT' sp* a:statementsequence sp* 'UNTIL' sp* expression
 {
@@ -235,14 +245,12 @@ fieldlist            = a:identlist sp* ':' sp* b:type
 basetype          = qualident
 assignment        = a:designator sp* ':=' sp* b:expression
 {
-  // TODO: Make sure designator with qualident and selector works properly
-  //console.warn('GUIDO(assignment):', a)
   return `${a} \\K\\ ${b}`
 }
 
 designator        = a:qualident b:selector*
 {
-  if (b) return a + b
+  if (b) return a + b.join('')
   return a
 }
 
@@ -279,11 +287,24 @@ explist           = head:expression tail:(sp* ',' sp* expression)*
   return [head].concat(tail).join(', ')
 }
 
-relation          = '=' / '#' / '<=' / '<' / '>=' / '>' / 'IN' / 'IS'
+relation          = a:('=' / '#' / '<=' / '<' / '>=' / '>' / 'IN' / 'IS')
+{
+  if (a === '=') return ' \\K\\ '
+  if (a === '#') return ' \\ne\\ '
+  if (a === '<=') return ' \\ge\\ '
+  if (a === '>=') return ' \\le\\ '
+  if (a === '<') return ' $<$\\ '
+  if (a === '>') return ' $>$\\ '
+  if (a === 'IN') return ' \\in\\ '
+  if (a === 'IS') return ' \\&{is}\\ '
+}
+
+
 expression        = head:simpleexpression tail:(sp* relation sp* simpleexpression)?
 {
-  //console.warn('expression:', head)
-  // TODO: tail
+  if (tail) {
+    return head + tail[1] + tail[3]
+  }
   return head
 }
 
@@ -303,7 +324,12 @@ term              = head:factor (sp* muloperator sp* factor)*
 
 
 factor            = hexascii / number / string / factor_bool /
-                    set / designatorwithparams / factor_parenexpr / '~' factor
+                    set / designatorwithparams / factor_parenexpr / factor_not
+
+factor_not = '~' a:factor
+{
+  return `\\neg ${a}`
+}
 
 factor_bool = a:('NIL' / 'TRUE' / 'FALSE')
 {
