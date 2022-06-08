@@ -177,11 +177,13 @@ procedurecall        = a:designator sp* b:actualparameters?
   return a
 }
 
-ifstatement          = 'IF' sp* a:expression sp* 'THEN' sp* statementsequence 
+ifstatement          = 'IF' sp* a:expression sp* 'THEN' sp* b:statementsequence 
                        (sp* 'ELSIF' sp* expression sp* 'THEN' sp* statementsequence)*
                        (sp* 'ELSE' sp* statementsequence)? sp* 'END'
 {
-  console.warn('IF:', a)
+  let parts = ['\\&{if} ', a, ' \\&{then} ', b]
+  
+  return parts.join('')
 }
 casestatement        = 'CASE' sp* expression sp* 'OF' sp* case (sp* "|" sp* case sp*)* 'END'
 case                 = (caselabellist ':' statementsequence)?
