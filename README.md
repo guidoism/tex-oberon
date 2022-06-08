@@ -27,7 +27,7 @@ PDF and code taken from http://www.projectoberon.com
 
     luatex oberon.tex
 
-The last in-progress PDF can be found [here](https://github.com/guidoism/tex-oberon/raw/main/oberon.pdf)
+A recent in-progress PDF can be found in the Releases
 
 ## Quotes
 
