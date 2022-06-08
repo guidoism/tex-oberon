@@ -188,7 +188,6 @@ ifstatement          = 'IF' sp* a:expression sp* 'THEN' sp* b:statementsequence
       parts.push(x[3])
       parts.push(' \\&{then}\\1\\6')
       parts.push(x[7])
-      parts.push('\\2\\6')
     })
   }
   if (d) {
@@ -219,14 +218,18 @@ whilestatement       = 'WHILE' sp* a:expression sp* 'DO' sp* b:statementsequence
   parts.push('\\2\\6\\&{end}')
   return parts.join('')
 }
-repeatstatement      = 'REPEAT' sp* a:statementsequence sp* 'UNTIL' sp* expression
+repeatstatement      = 'REPEAT' sp* a:statementsequence sp* 'UNTIL' sp* b:expression
 {
-  console.warn('REPEAT:', a)
+  console.warn('GUIDO(a):', a)
+  return ['\\&{repeat}\\1\\6\n', a].join('')
+  //return ['\\&{repeat}\\1\\6\n', a, '\\2\\6\n\\&{until} ', b].join('')
 }
-forstatement         = 'FOR' sp* a:ident sp* ':=' sp* expression sp* 'TO' sp* expression sp*
-                       ('BY' sp* constexpression)? sp* 'DO' sp* statementsequence sp* 'END'
+forstatement         = 'FOR' sp* a:ident sp* ':=' sp* b:expression sp* 'TO' sp* c:expression sp*
+                       d:('BY' sp* constexpression)? sp* 'DO' sp* statementsequence sp* 'END'
 {
-  console.warn('FOR:', a)
+  let parts = ['\\&{forTODO} ', a, ' \\K\\ ', b, ' \\&{to} ', c]
+  // TODO: d
+  return parts.join('')
 }
 fieldlistsequence    = head:fieldlist tail:(sp* ';' sp* fieldlist sp*)*
 {
@@ -403,7 +406,15 @@ hexascii          = a:digit b:hexdigit? 'X'
 
 string            = s:('"' (!'"' character)+ '"')
 {
-  return '\\.{"' + s[1].map(c => c[1]).join('') + '"}'
+  return '\\.{"' + s[1].map(c => c[1]).join('')
+     .replace('#', '\\#')
+     .replace('$', '\\$')
+     .replace('&', '\\&')
+     .replace('^', '\\^')
+     .replace('{', '\\{')
+     .replace('}', '\\}')
+     .replace('|', '$\\mid$')
+     + '"}'
 }
 
 number            = n:(real / integer)
