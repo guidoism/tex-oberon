@@ -2,7 +2,7 @@ module               = 'MODULE' sp+ name:ident ';' sp+ imports:importlist? sp* d
                        statements:('BEGIN' sp+ statementsequence)? sp* 'END' sp+ ident sp* '.' sp*
 {
   statements = statements[2]
-  return `\\input cwebmac \\B
+  return `\\input taocpmac\n\\input cwebmac\n\\B
 \\&{module} \\\\{${name}} \\1\\6
 ${declarations}
 
@@ -148,7 +148,7 @@ pointertype          = 'POINTER TO' sp* t:type
 proceduretype        = 'PROCEDURE' sp* formalparameters?
 proceduredeclaration = a:procedureheading sp* ';' sp* b:procedurebody sp* c:ident
 {
-  return a + '\\6\n' + b + c + ';\\2\\6\n'
+  return a + '\\6\n' + b + c + ';\\7\n'
 }
 
 procedureheading     = 'PROCEDURE' sp* a:identdef sp* b:formalparameters?
@@ -161,28 +161,47 @@ procedurebody        = a:declarationsequence b:('BEGIN' sp* statementsequence)?
                        sp* c:('RETURN' sp* expression)? sp* 'END'
 {
   let parts = []
-  if (a) parts.push(a + '\\6')
+  if (a) parts.push(a + '\\6\n')
   if (b) parts.push('\\&{begin}\\1\\6\n' + b[2])
-  if (c) parts.push('\\&{return}' + c[2] + '\\6\n')
-  //console.warn('procedurebody', b)
-  parts.push(' \\&{end}')
+  else   parts.push('\\1\\6\n')
+  if (c) parts.push('\\&{return}' + c[2] + '\\2\\6')
+  else parts.push('\\2\\6')
+  parts.push(' \\&{end} ')
   return parts.join('')
 }
 
-procedurecall        = designator sp* actualparameters?
-ifstatement          = 'IF' sp* expression sp* 'THEN' sp* statementsequence 
+procedurecall        = a:designator sp* b:actualparameters?
+{
+  //if (b) console.warn('GUIDO(procedurecall):', b)
+  if (b) return a + b
+  return a
+}
+
+ifstatement          = 'IF' sp* a:expression sp* 'THEN' sp* statementsequence 
                        (sp* 'ELSIF' sp* expression sp* 'THEN' sp* statementsequence)*
                        (sp* 'ELSE' sp* statementsequence)? sp* 'END'
+{
+  console.warn('IF:', a)
+}
 casestatement        = 'CASE' sp* expression sp* 'OF' sp* case (sp* "|" sp* case sp*)* 'END'
 case                 = (caselabellist ':' statementsequence)?
 caselabellist        = labelrange (sp* ',' sp* labelrange)*
 labelrange           = label (sp* ".." sp* label)?
 label                = integer / string / qualident
-whilestatement       = 'WHILE' sp* expression sp* 'DO' sp* statementsequence
+whilestatement       = 'WHILE' sp* a:expression sp* 'DO' sp* statementsequence
                        ('ELSIF' sp* expression sp* 'DO' sp* statementsequence)* sp* 'END' sp*
-repeatstatement      = 'REPEAT' sp* statementsequence sp* 'UNTIL' sp* expression
-forstatement         = 'FOR' sp* ident sp* ':=' sp* expression sp* 'TO' sp* expression sp*
+{
+  console.warn('WHILE:', a)
+}
+repeatstatement      = 'REPEAT' sp* a:statementsequence sp* 'UNTIL' sp* expression
+{
+  console.warn('REPEAT:', a)
+}
+forstatement         = 'FOR' sp* a:ident sp* ':=' sp* expression sp* 'TO' sp* expression sp*
                        ('BY' sp* constexpression)? sp* 'DO' sp* statementsequence sp* 'END'
+{
+  console.warn('FOR:', a)
+}
 fieldlistsequence    = head:fieldlist tail:(sp* ';' sp* fieldlist sp*)*
 {
   if (tail.length > 0) {
@@ -201,7 +220,8 @@ basetype          = qualident
 assignment        = a:designator sp* ':=' sp* b:expression
 {
   // TODO: Make sure designator with qualident and selector works properly
-  return `${a[0]} \\K\\ ${b}`
+  //console.warn('GUIDO(assignment):', a)
+  return `${a} \\K\\ ${b}`
 }
 
 designator        = a:qualident b:selector*
@@ -216,9 +236,33 @@ qualident         = s:(ident '.' qualident / ident)
   return s
 }
 
+selector           = selector_ident / selector_explist / selector_pointer / selector_qualident
+selector_ident     = '.' a:ident
+{
+  return `.${a}`
+}
 
-selector          = '.' ident / '[' explist ']' / '^' / '(' qualident ')'
-explist           = expression (sp* ',' sp* expression)*
+selector_explist   = '[' a:explist ']'
+{
+  return `[${a}]`
+}
+
+selector_pointer   = '^'
+{
+  return '\\uparrow'
+}
+
+selector_qualident = '(' a:qualident ')'
+{
+  return `(${a})`
+}
+
+explist           = head:expression tail:(sp* ',' sp* expression)*
+{
+  tail = tail.map(x => x[3])
+  return [head].concat(tail).join(', ')
+}
+
 relation          = '=' / '#' / '<=' / '<' / '>=' / '>' / 'IN' / 'IS'
 expression        = head:simpleexpression tail:(sp* relation sp* simpleexpression)?
 {
@@ -226,7 +270,6 @@ expression        = head:simpleexpression tail:(sp* relation sp* simpleexpressio
   // TODO: tail
   return head
 }
-
 
 simpleexpression  = ('+' / '-')? head:term sp* tail:(addoperator sp* term sp*)*
 {
@@ -244,14 +287,26 @@ term              = head:factor (sp* muloperator sp* factor)*
 
 
 factor            = hexascii / number / string / 'NIL' / 'TRUE' / 'FALSE' /
-                    set / designatorwithparams / '(' expression ')' / '~' factor
+                    set / designatorwithparams / factor_parenexpr / '~' factor
+                    
+factor_parenexpr  = '(' a:expression ')'
+{
+  if (a) return `(${a})`
+  return '()'
+}
+
 designatorwithparams = a:designator b:actualparameters?
 {
   if (b) return a + b
   return a
 }
 
-actualparameters  = '(' sp* explist? sp* ')'
+actualparameters  = '(' sp* a:explist? sp* ')'
+{
+  if (a) return `(${a})`
+  return '()'
+}
+
 formalparameters  = '(' a:(fpsection sp* (';' sp* fpsection)*)? sp* ')' sp* b:(':' sp* qualident)?
 {
   let parts = ['(']
