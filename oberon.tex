@@ -6328,8 +6328,142 @@ There exists one case in the language Oberon, where a look-ahead of a single cha
 
 \beginsubsubsection 12.6.1. The structure of the symbol table.
 
-% \beginsubsubsection 12.6.2. Symbol files.
-% \beginsubsection 12.7. THE CODE GENERATOR.
+The symbol table constitutes the context in which statements and expressions are parsed. Each procedure establishes a scope of visibility of local identifiers. The records registering identifiers belonging to a scope are linked as a linear list. They are of type \code{Object}. Each object has a type.
+
+Types are represented by records of type \code{Type}. These two types pervade the entire compiler, and they are defined as follows:
+\begintt
+TYPE Object = POINTER TO ObjDesc;
+  Type = POINTER TO TypeDesc;
+  ObjDesc = RECORD
+    class, lev, exno: INTEGER;
+    expo, rdo: BOOLEAN; next, dsc: Object; type: Type;
+    name: ORS.Ident; val: INTEGER
+  END ;
+  (*exported / read-only*)
+  TypeDesc = RECORD
+    form, ref, mno: INTEGER; (*ref is only used for import/export*)
+    nofpar: INTEGER; (*for procedures; extension level for records*)
+    len: INTEGER; (*for arrays, len < 0 => open array; for records: adr of descriptor*)
+    dsc, typobj: Object;
+    base: Type; (*for arrays, records, pointers*)
+    size: INTEGER; (*in bytes; always multiple of 4, except for Byte, Bool and Char*)
+  END ;
+\endtt
+
+\noindent Procedures for generating and searching the lists are contained in module \code{ORB}. If a new identifier is to be added, procedure \code{NewObj} first searches the list, and if the identifier is already present, a double definition is diagnosed. Otherwise the new element is appended, thereby preserving the order given by the source text.
+
+Procedures, and therefore also scopes, may be nested. Each scope is represented by the list of its declared identifiers, and the list of the currently visible scopes are again connected as a list. Procedure \code{OpenScope} appends an element and procedure \code{CloseScope} removes it. The list of scopes is anchored in the global variable topScope and linked by the field \code{dsc}. It is treated like a stack. It consists of elements of type \code{Object}, each one being the header (\code{class} = \code{Head}) of the list of declared entities. As an example, the procedure for searching an object (with name \code{ORS.id}) is shown here:
+\begintt
+PROCEDURE thisObj*(): Object;
+  VAR s, x: Object;
+BEGIN
+  s := topScope;
+  REPEAT x := s.next;
+  WHILE (x # NIL) & (x.name # ORS.id)
+  DO x := x.next END ;
+  s := s.dsc
+  UNTIL (x # NIL) OR (s = NIL); RETURN x
+END thisObj;
+\endtt
+A snapshot of a symbol table for an example with nested scopes is shown in Fig. 12.6. It is taken
+when the following declarations are parsed and when the statement S is reached.
+\begintt
+VAR x: INTEGER;
+PROCEDURE P(u: INTEGER);
+BEGIN ... END P;
+PROCEDURE Q(v: INTEGER);
+PROCEDURE R(w: INTEGER);
+BEGIN S END R;
+BEGIN ... END Q;
+\endtt
+
+\figure{pdfs/fig-12.7.png}{4.7in}{12.7}{Snapshot of a symbol table}
+
+A search of an identifier proceeds first through the scope list, and for each header its list of object records is scanned. This mirrors the scope rule of the language and guarantees that if several entities carry the same identifier, the most local one is selected. The linear list of objects represents the simplest implementation by far. A tree structure would in many cases be more efficient for searching, and would therefore seem more recommendable. Experiments have shown, however, that the gain in speed is marginal. The reason is that the lists are typically quite short. The superiority of a tree structure becomes manifest only when a large number of global objects is declared. We emphasize that when a tree structure is used for each scope, the linear lists must still be present, because the order of declarations is sometimes relevant in interpretation, e.g. in parameter lists.
+
+Not only procedures, but also record types establish their own local scope. The list of record fields is anchored in the type record's field \code{dsc}, and it is searched by procedure \code{thisField}. If a record type \code{R1} is an extension of \code{R0}, then \code{R1}'s field list contains only the fields of the extension proper. The base type \code{R0} is referenced by the \code{BaseTyp} field of \code{R1}. Hence, a search for a field may have to proceed through the field lists of an entire sequence of record base types.
+
+\beginsubsubsection 12.6.2. Symbol files.
+
+The major part of module \code{ORB} is devoted to input and output of symbol files. A symbol file is a linearized form of an excerpt of the symbol table containing descriptions of all exported (marked) objects. All exports are declared in the global scope. Procedure \code{Export} traverses the list of global objects and outputs them to the symbol file.
+
+The structure of a symbol file is defined by the syntax specified below. The following terminal symbols are class and form specifiers or reference numbers for basic types with fixed values:
+\begintt
+Classes: Con=1,Var=2,Par=3,Fld=4;Typ=5
+Forms: Byte=1,Bool=2,Char=3,Int=4,LInt=5,Set=6, Pointer = 7, NoTyp = 9, ProcTyp = 10, Array = 12, Record = 13
+Syntax:
+SymFile = null key name versionkey {object}.
+object = (CON name type (value | exno) | TYP name type [{fix} 0] | VAR name type expno). type = ref (PTR type | ARR type len | REC type {field} 0 | PRO type {param} 0].
+dsc
+39
+field = FLD name type offset. param = (VAR | PAR) type.
+\endtt
+
+\noindent A procedure type description is contains a parameter list. Similarly, a record type description with form specifier \code{Record} contains the list of field descriptions. Note that a procedure is considered as a constant of a procedure type.
+
+Objects have types, and types are referenced by pointers. These cannot be written on a file. The straight-forward solution would be to use the type identifiers as they appear in the program to denote types. However, this would be rather crude and inefficient, and second, there are anonymous types, for which artificial identifiers would have to be generated.
+
+An elegant solution lies in consecutively numbering types. Whenever a type is encountered the first time, it is assigned a unique reference number. For this purpose, records (in the compiler) of type Type contain the field ref. Following the number, a description of the type is then written to the symbol file. When the type is encountered again during the traversal of the data structure, only the reference number is issued, with negative sign. The global variable \code{ORB.Ref} functions as the running reference number.
+
+When reading a symbol file, a positive reference number is followed by the type's description. A pointer to the type read is assigned to the global table \code{typtab} with the reference number as index. When a negative reference number is read (it is not followed by a type description), then the type is identified by \code{typtab[-ref]} (see procedure \code{InType}). In the following example, types are identified by their reference number (e.g. \code{R \#14}), and later referenced by this number (\code{^14}).
+\begintt
+MODULE A;
+CONST Ten* = 10; Dollar* = "$";
+TYPE R* = RECORD u*: INTEGER; v*: SET END ;
+S* = RECORD w*: ARRAY 4 OF R END ; P* = POINTER TO R;
+A* = ARRAY 8 OF INTEGER;
+B* = ARRAY 4, 5 OF REAL;
+C* = ARRAY 10 OF S;
+D* = ARRAY OF CHAR;
+VAR x*: INTEGER;
+PROCEDURE Q0*;
+BEGIN END Q0;
+PROCEDURE Q1*(x, y: INTEGER): INTEGER; BEGIN RETURN x+y END Q1;
+END A.
+class = CON Ten [^4] 10
+class = CON Dollar [^3] 36
+class=TYPR[#14 form=REC[^9] exno=1 extlev=0 size=8{v[^6] 4u[^4] 0}]()
+class=TYPS[#15 form=REC[^9] exno=2 extlev=0 size=32{w[#0 form=ARR[^14] len=4 size=32] 0}]() class = TYP P [#16 form = PTR [^14]]()
+class=TYPA[#17 form=ARR[^4] len=8 size=32]()
+class=TYPB[#18 form=ARR[#0 form=ARR[^5] len=5 size=20] len=4 size=80]()
+class = TYP C [#19 form = ARR [^15] len = 10 size = 320]()
+class=TYPD[#20 form=ARR[^3] len=-1 size=8]()
+class = VAR x [^4] 3
+class = CON Q0 [#0 form = PRO [^9]()] 4
+class = CON Q1 [#0 form = PRO [^4]( class = VAR [^4] class = VAR [^4])] 5
+\endtt
+After a symbol file has been generated, it is compared with the file from a previous compilation of the same module, if one exists. Only if the two files differ and if the compiler's s-option is enabled, is the old file replaced by the new version. The comparison is made by comparing byte after byte without consideration of the file's structure. This somewhat crude approach was chosen because of its simplicity and yielded good results in practice.
+
+A symbol file must not contain addresses (of variables or procedures). If they did, most changes in the program would result in a change of the symbol file. This must be avoided, because changes in the implementation (rather than the interface) of a module are supposed to remain invisible to the clients. Only changes in the interface are allowed to effect changes in the symbol file, requiring recompilation of all clients. Therefore, addresses are replaced by export numbers. The variable exno (global in ORP) serves as running number (see \code{ORP.Declarations} and \code{ORP.ProcedureDecl}). The translation from export number to address is performed by the loader. Every code file contains a list (table) of addresses (of variables and entry points for procedures). The export number serves as index in this table to obtain the requested address. Export numbers are generated by the parser.
+
+Objects exported from some module M1 may refer in their declaration to some other module \code{M0} imported by \code{M1}. It would be unacceptable, if an import of \code{M1} would then also require the import of \code{M0}, i.e. imply the automatic reading of \code{M01}'s symbol file. It would trigger a chain reaction of imports that must be avoided. Fortunately, such a chain reaction can be avoided by making symbol files self-contained, i.e. by including in every symbol file the description of entities that stem from other modules. Such entities are always types.
+
+The inclusion of types imported from other modules seems simple enough to handle: type descriptions must include a reference to the module from which the type was imported. This reference is the name and key of the respective module. However, there exists one additional complication that cannot be ignored. Consider a module \code{M1} importing a variable \code{x} from a module \code{M0}. Let the type \code{T} of x be defined in module \code{M0}. Also, assume \code{M1} to contain a variable \code{y} of type \code{M0.T}. Evidently, \code{x} and \code{y} are of the same type, and the compiler compiling \code{M2} must recognize this fact. Hence, when importing \code{M0} during compilation of \code{M1}, the imported element \code{T} must not only be registered in the symbol table, but it must also be recognized as being identical to the \code{T} already imported from \code{M2} directly. It is rather fortunate that the language definition specifies equivalence of types on the basis of names rather than structure, because it allows type tests at execution time to be implemented by a simple address comparison.
+
+The measures to be taken to satisfy the new requirements are as follows:
+
+\item{1.} Every type element in a symbol file is given a module number. Before a type description is emitted to the file.
+\item{2.} If a type to be exported has a name and stems from another, imported module, then also the name and key of the module are attached, from which the type stems (see end of procedure \code{ORB.OutType} and end of \code{ORB.InType}).
+
+An additional detail is worth being mentioned here: Hidden pointers. We recall that individual fields of exported record types may be hidden. If marked (by an asterisk) they are exported and therefore visible in importing modules. If not marked, they are not exported and remain invisible, and evidently seem to be omissible in symbol files. However, this is a fallacy. They need to be included in symbol files, although without name, because of meta information to be provided for garbage collection. This is elucidated as follows:
+
+Assume that a module \code{M1} declares a global pointer variables of a type imported from module \code{M0}.
+\begintt
+MODULE M0;
+TYPE Ptr = POINTER TO Rec0;
+Rec0* = RECORD p*, q: Ptr ... END ; END M0.
+MODULE M1; VAR p: M0.Ptr;
+r: RECORD f: M0.Ptr; ... END ; END M1.
+\endtt
+Here \code{p} and \code{r.f} are roots of data structures that must be visited by the garbage collector. If they are not, they will not be marked, and therefore collected with disastrous and entirely unpredictable consequences. The crux is that not only exported pointers (\code{p.p}) must be listed, but also hidden ones (\code{p.q}), although they are not accessible in module \code{M1}.
+
+We chose to include hidden pointers in symbol files without their names, but with their type being of the form \code{ORB.NilTyp}. This must be considered in procedure \code{ORG.FindPtrs}, where the condition \code{typ.form} = \code{ORB.Pointer} must be extended to (\code{typ.form} = \code{ORB.Pointer}) \lor\ (\code{typ.form} = \code{ORB.NilTyp}).
+
+But the story does not end here. Assume that in the example above module \code{M1} declares a type \code{Rec1} as a \code{n} extension of \code{M0.Rec0}. This requires the generation of a type descriptor. And this descriptor must include not only field \code{p}, but also the hidden field \code{q}. This is achieved by also extending the condition \code{typ.form} = \code{ORB.Pointer} in \code{ORG.FindPtrFlds} to (\code{typ.form} = \code{ORB.Pointer}) \lor\ (\code{typ.form} = \code{ORB.NilTyp}).
+
+\beginsubsection 12.7. THE CODE GENERATOR.
+
+
 % \beginsubsubsection 12.7.1. Expressions.
 % \beginsubsubsection 12.7.2. Relations.
 % \beginsubsubsection 12.7.3. Set operations.
