@@ -6261,9 +6261,73 @@ END ORG.
 
 The main module \code{ORP} constitutes the parser. Its single command \code{Compile}---at the end of the program listing---identifies the source text according to the Oberon command conventions. It then calls procedure \code{Module} with the identified source text as parameter. The command forms are:
 
-% \beginsubsection 12.5. THE SCANNER.
-% \beginsubsection 12.6. SEARCHING THE SYMBOL TABLE, AND HANDLING SYMBOL FILES.
-% \beginsubsubsection 12.6.1. The structure of the symbol table.
+\item{} \code{ORP.Compile} The most recent selection identifies the beginning of the source text.
+\item{} \code{@ ORP.Compile} The most recent selection identifies the name of the source file.
+\item{} \code{^ ORP.Compile f0 f1 ... ~} \code{f0, f1, ...} are the names of source files.
+
+\noindent File names and the characters \code{@} and \code{^} may be followed by an option specification \code{/s}. Option \code{s} enables the compiler to overwrite an existing symbol file, thereby invalidating clients.
+
+The parser is designed according to the proven method of top-down, recursive descent parsing with a look-ahead of a single symbol. The last symbol read is represented by the global variable \code{sym}. Syntactic entities are mirrored by procedures of the same name. Their goal is to recognize the specified construct in the source text. The start symbol and corresponding procedure is \code{Module}. The principal parser procedures are shown in Fig.~12.6., which also exhibits their calling hierarchy. Loops in the diagram indicate recursion in the syntactic definition.
+
+\figure{pdfs/fig-12.6.png}{4.7in}{12.6}{Parser procedure hierarchy}
+
+The rule of parsing strictly based on a single-symbol look-ahead and without reference to context is violated in three places. The prominent violation occurs in statements. If the first symbol of a statement is an identifier, the decision of whether an assignment or a procedure call is to be recognized is based on contextual information, namely the class of the identified object. The second violation occurs in qualident; if the identifier \code{x} preceding a period denotes a module, it is recognized together with the subsequent identifier as a qualified identifier. Otherwise \code{x} supposedly denotes a record variable. The third violation is made in procedure selector; if an identifier is followed by a left parenthesis, the decision of whether a procedure call or a type guard is to be recognized is again made on the basis of contextual information, namely the mode of the identified object.
+
+A fairly large part of the program is devoted to the discovery of errors. Not only should they be properly diagnosed. A much more difficult requirement is that the parsing process should continue on the basis of a good guess about the structure that the text should most likely have. The parsing process must continue with some assumption and possibly after skipping a short piece of the source text. Hence, this aspect of the parser is mostly based on heuristics. Incorrect assumptions about the nature of a syntactic error lead to secondary error diagnostics. There is no way to avoid them. A reasonably good result is obtained by the fact that procedure \code{ORS.Mark} inhibits an error report, if it lies less than 10 characters ahead of the last one. Also, the language Oberon is designed with the property that most large constructs begin with a unique symbol, such as \code{IF}, \code{WHILE}, \code{CASE}, \code{RECORD}, etc. These symbols facilitate the recovery of the parsing process in the erroneous text. More problematic are open constructs which neither begin nor end with key symbols, such as types, factors, and expressions. Relying on heuristics, the source text is skipped up to the first occurrence of a symbol which may begin a construct that follows the one being parsed. The employed scheme may not be the best possible, but it yields quite acceptable results and keeps the amount of program devoted to the handling of erroneous texts within justifiable bounds.
+
+Besides the parsing of text, the Parser also performs the checking for type consistency of objects. This is based on type information held in the global table, gained during the processing of declarations, which is also handled by the routines which parse. Thereby an unjustifiably large number of very short procedures is avoided. However, the strict target-computer independence of the parser is violated slightly: Information about variable allocation strategy including alignment, and about the sizes of basic types is used in the parser module. Whereas the former violation is harmless, because the allocation strategy is hardly controversial, the latter case constitutes a genuine target-dependence embodied in a number of explicitly declared constants. Mostly these constants are contained in the respective type definitions, represented by records of type Type initialized by \code{ORB}. The following procedures allocate objects and generate elements of the symbol table:
+\medskip
+\item{Declarations} Object(Con), Object(Typ), Object(Var) 
+\item{ProcedureDeclaration} Object(xProc)
+\item{FormalType} Object(Var), Object(Par)
+\item{ORB.Import} Object(Mod)
+\item{RecordType} Object(Fld), Type(Record) 
+\item{ArrayType} Type(Array) 
+\item{ProcedureType} Type(ProcTyp) 
+\item{Type} Type(Pointer) 
+\item{FormalType} Type(Array)
+\medskip
+
+\noindent An inherently nasty subject is the treatment of forward references in a single-pass compiler. In Oberon, there are two such cases:
+
+\item{1.} Forward declarations of procedures. They have been eliminated from the revision of the Oberon language in the year 2007 as they should be avoided if ever possible. If it is impossible, a remedy is to declare a variable of the given procedure type, and assign the procedure to be forwarded to this variable. The nastiness of procedure forward declarations originates in the necessity to specify parameters and result type in the forward declaration. These must be repeated in the actual procedure declaration, and one expects that a compiler verifies the equality (or equivalence) of the two declarations. This is a heavy burden for a case that very rarely occurs.
+
+\item{2.} Forward declarations of pointer types also constitutes a nasty exception, but its exclusion would be difficult to justify. If in a pointer declaration the base type (to which the pointer is bound) is not found in the symbol table, a forward reference is therefore automatically assumed. An entry for the pointer type is generated anyway (see procedure \code{Type}) and an element is inserted in the list of pointer base types to be fixed up. This list is headed by the global variable pbsList. When later in the text a declaration of a record type is encountered with the same identifier, the forward entry is recognized and the proper link is established (see procedure \code{Declarations}).
+
+\noindent The compiler must check for undefined forward references when the current declaration scope is closed. This check is performed at the end of procedure \code{Declarations}.
+
+The with statement had been eliminated from the language in its revision of 2007. Here it reappears in the form of a case statement, whose cases are not labelled by integers, but rather by types. What formerly was written as
+\begintt
+IF x IS T1 THEN
+  WITH x: T1 DO ... x ... END
+ELSIF x IS T2 THEN
+  WITH x: T2 DO ... x ... END
+ELSIF ... END
+\endtt
+is now written more simply and more efficiently as
+\begintt
+CASE x OF
+  T1: ... x ... |
+  T2: ... x ... |
+  ...
+END
+\endtt
+where \code{T1} and \code{T2} are extensions of the type \code{T0} of the case variable \code{x}. Compilation of this form of \code{case} statement merges the regional type guard of the former \code{with} statements with the type test of the former \code{if} statements. This \code{case} statement represents the only case where a symbol table entry---the type of \code{x}---is modified during compilation of statements. When the end of the \code{with} statement is reached, the change must be reverted.
+
+\beginsubsection 12.5. THE SCANNER.
+
+The scanner module \code{ORS} embodies the lexicographic definitions of the language, i.e. the definition of abstract symbols in terms of characters. The scanner's substance is procedure \code{Get}, which scans the source text and, for each call, identifies the next symbol and yields the corresponding integer code. It is most important that this process be as efficient as possible. Procedure \code{Get} recognizes letters indicating the presence of an identifier (or reserved word), and digits signalling the presence of a number. Also, the scanner recognizes comments and skips them. The global variable \code{ch} stands for the last character read.
+
+A sequence of letters and digits may either denote an identifier or a key word. In order to determine which is the case, a search is made in a table containing all key words for each would-be identifier. This table is sorted alphabetically and according to the length of reserved words. It is initialized when the compiler is loaded.
+
+The presence of a digit signals a number. Procedure \code{Number} first scans the subsequent digits (and letters) and stores them in a buffer. This is necessary, because hexadecimal numbers are denoted by the postfix letter \code{H} (rather than a prefix character). The postfix letter \code{X} specifies that the digits denote a character.
+
+There exists one case in the language Oberon, where a look-ahead of a single character does not suffice to identify the next symbol. When a sequence of digits is followed by a period, this period may either be the decimal point of a real number, or it may be the first element of a range symbol ( \code{..} ). Fortunately, the problem can be solved locally as follows: \code{If}, after reading digits and a period, a second period is present, the number symbol is returned, and the look-ahead variable ch is assigned the special value \code{7FX}. A subsequent call of \code{Get} then delivers the range symbol. Otherwise the period after the digit sequence belongs to the (real) number.
+
+\beginsubsection 12.6. SEARCHING THE SYMBOL TABLE, AND HANDLING SYMBOL FILES.
+
+\beginsubsubsection 12.6.1. The structure of the symbol table.
+
 % \beginsubsubsection 12.6.2. Symbol files.
 % \beginsubsection 12.7. THE CODE GENERATOR.
 % \beginsubsubsection 12.7.1. Expressions.
