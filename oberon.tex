@@ -14,7 +14,7 @@
 \centerline{\ninepoint{\bf Fig.\ #3}\enspace #4}\medskip
 }
 \def\pattern#1{{\bf Pattern #1:}}
-\def\RISC{\acro{RISC} }
+\def\RISC{\acro{RISC}}
 \def\MMU{\acro{MMU} }
 \def\ASCII{\acro{ASCII} }
 
@@ -6462,6 +6462,42 @@ We chose to include hidden pointers in symbol files without their names, but wit
 But the story does not end here. Assume that in the example above module \code{M1} declares a type \code{Rec1} as a \code{n} extension of \code{M0.Rec0}. This requires the generation of a type descriptor. And this descriptor must include not only field \code{p}, but also the hidden field \code{q}. This is achieved by also extending the condition \code{typ.form} = \code{ORB.Pointer} in \code{ORG.FindPtrFlds} to (\code{typ.form} = \code{ORB.Pointer}) \lor\ (\code{typ.form} = \code{ORB.NilTyp}).
 
 \beginsubsection 12.7. THE CODE GENERATOR.
+
+The routines for generating instructions are contained in a single module: \code{ORG}. They are fairly numerous, and therefore the interface of \code{ORG} is quite large. It is a procedural interface. This implies that there is no ``intermediate code'' or ``intermediate data structure'' between parser and code generator. This is one reason for the compactness of the code generator. The other is the regularity and simplicity of the processor architecture. In order to understand the following material, the reader is supposed to be familiar with this architecture (Appendix 2) and the generated code patterns for individual language constructs (Section 12.2).
+
+A distinguishing feature of this compiler is that parsing proceeds top-down according to the principle of recursive descent in the parsing tree. This implies that for every syntactic construct a specific procedure is called. It carries the same name as the construct. It also implies that properties of the parsed construct can be represented by parameters of the parsing procedures. Consider, for example, the construct of simple expression:
+\begintt
+  SimpleExpression = term {"+" term}.
+\endtt
+
+\noindent The corresponding parsing procedure is
+\begintt
+PROCEDURE SimpleExpression(VAR x: Item);
+  VAR y: Item;
+BEGIN term(x);
+  WHILE sym = plus DO ORS.Get(sym); term(y); ORG.AddOp(x, y) END
+END SimpleExpression
+\endtt
+
+\noindent The generating procedure \code{AddOp} receives two parameters representing the operands, and returns the result through the first parameter. This scheme carries the invaluable advantage of using operands efficiently allocated on the stack rather than dynamically allocated on the heap and subject to automatic storage retrieval (garbage collection). Here the processed operands quietly disappear from the stack upon exit from the parser procedure.
+
+The parameters representing syntactic constructs are of type \code{Item} defined in \code{ORG}. This data type is rather similar to the type \code{Object} (in \code{ORB}). After all, it serves the same purpose; but it represents internal items rather than declared objects.
+\begintt
+TYPE Item = RECORD
+  mode: INTEGER;
+  type: ORB.Type;
+  a, b, r: INTEGER;
+  rdo: BOOLEAN (*read only*)
+END
+\endtt
+
+\noindent The attribute class of \code{Object} is renamed mode in \code{Item}. In fact, in some sense different classes evoke different (corresponding) addressing modes as featured by the processor architecture. According to the architecture, additional modes may have to be introduced. Thanks to the simplicity of \RISC, only three are needed:
+
+\item{\bullet} \code{Reg} = 10; The item \code{x} is located in register \code{x.r}
+\item{\bullet} \code{RegI} = 11; The item \code{x} is addressed indirectly through register \code{x.r} plus offset \code{x.a}
+\item{\bullet} \code{Cond} = 12; The item is represented by the condition bit registers
+
+\noindent Instructions are emitted sequentially and emitted by the four procedures \code{Put0}, \code{Put1}, \code{Put2}, \code{Put3}. They directly correspond to the instruction formats of the \RISC processor (see Chapter 11). The instructions are stored in the array code and the compiler variable \code{pc} serves as running index.
 
 
 % \beginsubsubsection 12.7.1. Expressions.
