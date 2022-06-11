@@ -6563,9 +6563,24 @@ XOR R0, R0, R1
 
 Statements have an effect, but no result like expressions. Statements are executed, not evaluated. Assignments alter the value of variables through store instructions. The computation of the address of the affected variable follows the same scheme as for loading. The value to be assigned must be in a register.
 
-Assignments of arrays (and records) are an exceptional case in so far as they are performed not by a single store instruction, but by a repetition. Consider \code{y := x}, where \code{x}, and \code{y} are both arrays of n integers. Assuming that the address of \code{y} is in register \code{R0}, that of \code{x} in \code{R1}, and the value \code{n} in \code{R2}. Then the resulting code is
+Assignments of arrays (and records) are an exceptional case in so far as they are performed not by a single store instruction, but by a repetition. Consider \code{y~:=~x}, where \code{x}, and \code{y} are both arrays of n integers. Assuming that the address of \code{y} is in register \code{R0}, that of \code{x} in \code{R1}, and the value \code{n} in \code{R2}. Then the resulting code is
+\begintt
+L  LDR R3, R1, 0 source
+   ADD R1, R1, 4
+   STR R3, R0, 0 destination
+   ADD R0, R0, 4
+   SUB R2, R2, 1 counter
+   BNE L
+\endtt
 
-% \beginsubsubsection 12.7.5. Conditional and repetitive statements.
+\beginsubsubsection 12.7.5. Conditional and repetitive statements.
+
+These statements are implemented using branch instructions (jumps) as shown in Section 12.2, Patterns 5 - 7. In all repetitive statements, backward jumps occur. Here, at the point of return the value of the global variable \code{ORG.pc} is saved in a local (!) variable of the involved parsing procedure. It is retrieved when the backward jump is emitted. We note that branch instructions use a displacement rather than an absolute destination address. It is the difference between the branch instruction and the destination of the jump.
+
+A difficulty, however, arises in the case of forward jumps, a difficulty inherent in all single-pass compilers: When the branch is issued, its destination is still unknown. It follows that the branch displacement must be later inserted when it becomes known, when the destination is reached. This is called a fixup. Here the method of fixup lists is used. The place of the instruction with still unknown destination is held in a variable \code{L} local to the respective parsing procedure. If several branches have the same destination, \code{L} is the heading of a list of the instructions to be fixed up, with its links placed in the instructions themselves in the place of the eventual jump displacement. This shown for the if statement by an excerpt of \code{ORP.StatSequence} with local variable \code{L0}:
+
+
+
 % \beginsubsubsection 12.7.6. Boolean expressions.
 % \beginsubsubsection 12.7.7. Procedures.
 % \beginsubsubsection 12.7.8. Type extension.
