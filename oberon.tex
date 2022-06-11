@@ -6513,7 +6513,7 @@ Before an operator can be applied to operands, these must first be transferred (
 
 Base address \code{SB} is, as the name suggests, static. But this holds only within a module. It implies that on every transfer to a procedure in another module, the static base must be adjusted. The simplest way is to load \code{SB} before every external call, and to restore it to its old value after return from the procedure. We chose a different strategy: loading on demand (see below: global variables).
 
-If a variable is indexed, has a field selector, is dereferenced, or has a type guard, this is detected in the parser by procedure selector. It calls generators \code{Index}, \code{Field}, \code{DeRef}, or \code{TypeTest} accordingly (see Section 12.3.2. and patterns 1 - 4 in Section 12.2). These procedures cause item modes to change as follows:
+If a variable is indexed, has a field selector, is dereferenced, or has a type guard, this is detected in the parser by procedure selector. It calls generators \code{Index}, \code{Field}, \code{DeRef}, or \code{TypeTest} accordingly (see Section 12.3.2. and patterns 1--4 in Section 12.2). These procedures cause item modes to change as follows:
 
 TODO: table
 
@@ -6575,7 +6575,7 @@ L  LDR R3, R1, 0 source
 
 \beginsubsubsection 12.7.5. Conditional and repetitive statements.
 
-These statements are implemented using branch instructions (jumps) as shown in Section 12.2, Patterns 5 - 7. In all repetitive statements, backward jumps occur. Here, at the point of return the value of the global variable \code{ORG.pc} is saved in a local (!) variable of the involved parsing procedure. It is retrieved when the backward jump is emitted. We note that branch instructions use a displacement rather than an absolute destination address. It is the difference between the branch instruction and the destination of the jump.
+These statements are implemented using branch instructions (jumps) as shown in Section 12.2, Patterns 5--7. In all repetitive statements, backward jumps occur. Here, at the point of return the value of the global variable \code{ORG.pc} is saved in a local (!) variable of the involved parsing procedure. It is retrieved when the backward jump is emitted. We note that branch instructions use a displacement rather than an absolute destination address. It is the difference between the branch instruction and the destination of the jump.
 
 A difficulty, however, arises in the case of forward jumps, a difficulty inherent in all single-pass compilers: When the branch is issued, its destination is still unknown. It follows that the branch displacement must be later inserted when it becomes known, when the destination is reached. This is called a fixup. Here the method of fixup lists is used. The place of the instruction with still unknown destination is held in a variable \code{L} local to the respective parsing procedure. If several branches have the same destination, \code{L} is the heading of a list of the instructions to be fixed up, with its links placed in the instructions themselves in the place of the eventual jump displacement. This shown for the if statement by an excerpt of \code{ORP.StatSequence} with local variable \code{L0}:
 
