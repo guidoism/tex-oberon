@@ -23,6 +23,12 @@ up-to-date with the running source code.
 
 PDF and code taken from http://www.projectoberon.com
 
+## Progress
+
+- [🌕🌕🌕🌕🌕🌕🌕🌕🌕🌕🌕🌕🌕🌕🌕🌕🌑🌑🌑🌑🌑🌑] (82%) -  Copying over text with basic typesetting
+- [🌕🌕🌕🌕🌕🌕🌕🌕🌕🌕🌕🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑] (50%) - First proofreading pass
+- [🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑] (00%) - Second proofreading pass
+
 ## Building
 
     luatex oberon.tex

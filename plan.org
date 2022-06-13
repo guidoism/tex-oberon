@@ -1,3 +1,8 @@
+- System: 114 pages
+- Applications: 86 pages
+- Computer: 21 pages 
+- Total: 221 pages
+
 * Proofreading
 
 - [X] Proofread until CHAPTER 1: HISTORY AND MOTIVATION.
