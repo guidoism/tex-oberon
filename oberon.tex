@@ -6766,10 +6766,27 @@ BLR 7, 0CH        branch and link unconditionally through R12 (MT), trap number 
 
 \beginchapter CHAPTER 13: A GRAPHICS EDITOR.
 
+\beginsubsection 13.1. HISTORY AND GOAL.
+
+The origin of graphics systems as they are in use at this time was intimately tied to the advent of the high-resolution bit-mapped display and of the mouse as pointing device. The author's first contact with such equipment dates back to 1976. The Alto computer at the Xerox Palo Alto Research Center is justly termed the first workstation featuring those characteristics. The designer of its first graphics package was Ch. Thacker who perceived the usefulness of the high-resolution screen for drawing and processing schematics of electronic circuits. This system was cleverly tailored to the needs encountered in this activity, and it was remarkable in its compactness and effectiveness due to the lack of unnecessary facilities. Indeed, its acronym was SIL, for Simple ILlustrator.
+
+After careful study of the used techniques, the author designed a variant, programmed in Modula-2 (instead of \acro{BCPL}) for the \acro{PDP-11} Computer, thereby ordering and exhibiting the involved data structures more explicitly. In intervals of about two years, that system was revised and grew gradually into the present Draw system. The general goal remained a simple line drawing system: emphasis was placed on a clear structure and increase of flexibility through generalization of existing rather than indiscriminate addition of new features.
+
+In the history of this evolution, three major transitions can be observed. The first was the move from a single ``window'', the screen, to multiple windows including windows showing different excerpts of the same graphic. This step was performed on the Lilith computer which resembled the Alto in many ways. The second major transition was the application of the object-oriented style of programming, which allowed the addition of new element types to the basic system, making it extensible. The third step concerned the proper integration of the Draw system with Oberon's text system. The last two steps were performed using Oberon and the Ceres computer.
+
+We refrain from exhibiting this evolution and merely present the outcome, although the history might be an interesting reflection of the evolution of programming techniques in general, containing many useful lessons. We stress the fact, however, that the present system rests on a long history of development, during which many features and techniques were introduced and later discarded or revised. The size of the system's description is a poor measure of the effort that went into its construction; deletion of program text sometimes marks bigger progress than addition.
+
+The goal of the original \acro{SIL} program was to support the design of electronic circuit diagrams. Primarily, \acro{SIL} was a line drawing system. This implies that the drawings remain uninterpreted. However, in a properly integrated system, the addition of modules containing operators that interpret the drawings is a reasonably straight-forward proposition. In fact, the Oberon system is ideally suited for such steps, particularly due to its command facility.
+
+At first, we shall ignore features specially tailored to circuit design. The primary one is a macro facility to be discussed in a later chapter.
+
+The basic system consists of the modules \code{Draw}, \code{GraphicFrames}, and \code{Graphics}. These modules contain the facilities to generate and handle horizontal and vertical lines, text captions, and macros. Additional modules serve to introduce other elements, such as rectangles and circles, and the system is extensible, i.e. further modules may be introduced to handle further types of elements.
+
+\beginsubsection 13.2. A BRIEF USER GUIDE.
 
 
-% \beginsubsection 13.1. HISTORY AND GOAL.
-% \beginsubsection 13.2. A BRIEF USER GUIDE.
+
+
 % \beginsubsubsection 13.2.1. Basic commands.
 % \beginsubsubsection 13.2.2. Menu commands.
 % \beginsubsubsection 13.2.3. Further commands.
