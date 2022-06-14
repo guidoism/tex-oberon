@@ -7024,7 +7024,87 @@ The foregoing deliberations suggest the system's modular structure shown in Figu
 
 \figure{pdfs/fig-13.3.png}{4.7in}{13.3}{Clients of module \code{Graphics}}
 
-% \beginsubsection 13.4. DISPLAYING GRAPHICS.
+The modules in the top row implement the individual object types' methods, and additionally provide commands, in particular \code{Make} for creating new objects. The base module specifies the base types and procedures operating on graphics as a whole.
+
+Our system, however, deviates from this scheme somewhat for several reasons:
+
+\item{1.} Implementation of the few methods requires relatively short programs for the basic objects. Although a sensible modularization is desirable, we wish to avoid an atomization, and therefore merge parts that would result in tiny modules with the base module.
+\item{2.} The elements of a graphic refer to fonts used in captions and to libraries used in macros. The writing and reading procedures therefore carry a context consisting of fonts and libraries as an additional parameter. Routines for mapping a font (library) to a number according to a given context on output, and a number to a font (library) on input are contained in module \code{Graphics}.
+\item{3.} In the design of the Oberon System, a hierarchy of four modules has proven to be most appropriate:
+\itemitem{0.} Module with base type handling the abstract data structure.
+\itemitem{1.} Module containing procedures for the representation of objects in frames (display handling).
+\itemitem{2.} Module containing the primary command interpreter and connecting frames with a viewer.
+\itemitem{3.} A command module scanning command lines and invoking the appropriate interpreters.
+
+The module hierarchy of the Graphics System is here shown together with its analogy, with the Text System:
+TODO: table
+
+Function
+3. Command Scanner 2. Viewer Handler
+1. Frame Handler
+0. Base
+Graphics
+Draw MenuViewers GraphicFrames Graphics
+Text
+Edit MenuViewers TextFrames Texts
+
+As a result, module \code{Graphics} does not only contain the base type \code{Object}, but also its extensions \code{Line} and \code{Caption} (and \code{Macro}). Their methods are also defined in \code{Graphics}, with the exception of drawing methods, which are defined in \code{GraphicFrames}, because they refer to frames.
+
+So far, we have discussed operations on individual objects and the structure resulting from the desire to be able to add new object types without affecting the base module. We now turn our attention briefly to operations on graphics as a whole. They can be grouped into two kinds, namely operations involving a graphic as a set, and those applying to the selection, i.e. to a subset only.
+
+The former kind consists of procedures \code{Add}, which inserts a new object, \code{Draw}, which traverses the set of objects and invokes their drawing methods, \code{ThisObj}, which searches for an object at a given position, \code{SelectObj}, which marks an object to be selected, \code{SelectArea}, which identifies all objects lying within a given rectangular area and marks them, \code{Selectable}, a Boolean function, and \code{Enumerate}, which applies the parametric procedure handle to all objects of a graphic. Furthermore, the procedures \code{Load}, \code{Store}, \code{Print}, and \code{WriteFile} belong to this kind.
+
+The set of operations applying to selected objects only consist of the following procedures: \code{Deselect}, \code{DrawSel} (drawing the selection according to a specified mode), \code{Change} (changing certain attributes of selected objects like width, font, color), \code{Move}, \code{Copy}, \code{CopyOver} (copying from one graphic into another), and finally \code{Delete}. Also, there exists the important procedure \code{Open} which creates a new graphic, either loading a graphic stored as a file, or generating an empty graphic.
+
+The declaration of types and procedures that have emerged so far are summarized in the following excerpt of the module's interface definition.
+\begintt
+DEFINITION Graphics; (*excerpt without macros*) IMPORT Files, Fonts, Texts, Modules, Display;
+CONST NameLen = 32;
+TYPE Graph = POINTER TO GraphDesc; Object = POINTER TO ObjectDesc; Method = POINTER TO MethodDesc;
+ObjectDesc = RECORD
+x, y, w, h: INTEGER;
+col: BYTE;
+selected, marked: BOOLEAN; do: Method
+END ;
+Msg = RECORD END ;
+WidMsg = RECORD (Msg) w: INTEGER END ; ColorMsg = RECORD (Msg) col: INTEGER END ; FontMsg = RECORD (Msg) fnt: Fonts.Font END ; Name = ARRAY NameLen OF CHAR;
+GraphDesc = RECORD sel: Object; time: INTEGER
+END ;
+Context = RECORD END ;
+MethodDesc = RECORD
+module, allocator: Name;
+new: Modules.Command;
+copy: PROCEDURE (obj, to: Object);
+draw, change: PROCEDURE (obj: Object; VAR msg: Msg);
+selectable: PROCEDURE (obj: Object; x, y: INTEGER): BOOLEAN;
+read: PROCEDURE (obj: Object; VAR R: Files.Rider; VAR C: Context);
+write: PROCEDURE (obj: Object; cno: INTEGER; VAR R: Files.Rider; VAR C: Context);
+END ;
+Line = POINTER TO LineDesc;
+LineDesc = RECORD (ObjectDesc) END ;
+Caption = POINTER TO CaptionDesc;
+CaptionDesc = RECORD (ObjectDesc) pos, len: INTEGER END ;
+VAR width, res: INTEGER;
+T: Texts.Text;
+LineMethod, CapMethod, MacMethod: Method;
+PROCEDURE New(obj: Object);
+PROCEDURE Add (G: Graph; obj: Object);
+PROCEDURE Draw (G: Graph; VAR M: Msg);
+PROCEDURE ThisObj (G: Graph; x, y: INTEGER): Object; PROCEDURE SelectObj (G: Graph; obj: Object);
+PROCEDURE SelectArea (G: Graph; x0, y0, x1, y1: INTEGER);
+PROCEDURE Deselect (G: Graph); PROCEDURE DrawSel (G: Graph; VAR M: Msg);
+PROCEDURE Change (G: Graph; VAR M: Msg); PROCEDURE Move (G: Graph; dx, dy: INTEGER); PROCEDURE Copy (Gs, Gd: Graph; dx, dy: INTEGER); PROCEDURE Delete (G: Graph);
+PROCEDURE FontNo (VAR W: Files.Rider; VAR C: Context; fnt: Fonts.Font): INTEGER; PROCEDURE WriteObj (VAR W: Files.Rider; cno: INTEGER; obj: Object); PROCEDURE Store (G: Graph; VAR W: Files.Rider);
+PROCEDURE WriteFile (G: Graph; name: ARRAY OF CHAR);
+PROCEDURE Font (VAR R: Files.Rider; VAR C: Context): Fonts.Font; PROCEDURE Load (G: Graph; VAR R: Files.Rider);
+PROCEDURE Open (G: Graph; name: ARRAY OF CHAR);
+END Graphics.
+\endtt
+
+\beginsubsection 13.4. DISPLAYING GRAPHICS.
+
+
+
 % \beginsubsection 13.5. THE USER INTERFACE.
 % \beginsubsection 13.6. MACROS.
 % \beginsubsection 13.7. OBJECT CLASSES.
