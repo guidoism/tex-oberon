@@ -6768,7 +6768,7 @@ BLR 7, 0CH        branch and link unconditionally through R12 (MT), trap number 
 
 \beginsubsection 13.1. HISTORY AND GOAL.
 
-The origin of graphics systems as they are in use at this time was intimately tied to the advent of the high-resolution bit-mapped display and of the mouse as pointing device. The author's first contact with such equipment dates back to 1976. The Alto computer at the Xerox Palo Alto Research Center is justly termed the first workstation featuring those characteristics. The designer of its first graphics package was Ch. Thacker who perceived the usefulness of the high-resolution screen for drawing and processing schematics of electronic circuits. This system was cleverly tailored to the needs encountered in this activity, and it was remarkable in its compactness and effectiveness due to the lack of unnecessary facilities. Indeed, its acronym was SIL, for Simple ILlustrator.
+The origin of graphics systems as they are in use at this time was intimately tied to the advent of the high-resolution bit-mapped display and of the mouse as pointing device. The author's first contact with such equipment dates back to 1976. The Alto computer at the Xerox Palo Alto Research Center is justly termed the first workstation featuring those characteristics. The designer of its first graphics package was Ch. Thacker who perceived the usefulness of the high-resolution screen for drawing and processing schematics of electronic circuits. This system was cleverly tailored to the needs encountered in this activity, and it was remarkable in its compactness and effectiveness due to the lack of unnecessary facilities. Indeed, its acronym was \acro{SIL}, for Simple ILlustrator.
 
 After careful study of the used techniques, the author designed a variant, programmed in Modula-2 (instead of \acro{BCPL}) for the \acro{PDP-11} Computer, thereby ordering and exhibiting the involved data structures more explicitly. In intervals of about two years, that system was revised and grew gradually into the present Draw system. The general goal remained a simple line drawing system: emphasis was placed on a clear structure and increase of flexibility through generalization of existing rather than indiscriminate addition of new features.
 
@@ -6796,15 +6796,234 @@ The system called \code{Draw} serves to prepare line drawings. They contain line
 
 \beginsubsubsection 13.2.1. Basic commands.
 
+The command \code{Draw.Open} opens a new viewer and displays the graph with the name given as parameter. We suggest that file names use the extension \code{Graph}.
 
-% \beginsubsubsection 13.2.2. Menu commands.
-% \beginsubsubsection 13.2.3. Further commands.
-% \beginsubsubsection 13.2.4. Macros.
-% \beginsubsubsection 13.2.5. Rectangles.
-% \beginsubsubsection 13.2.6. Oblique lines and circles.
-% \beginsubsubsection 13.2.7. Spline curves.
-% \beginsubsubsection 13.2.8. Constructing new macros.
-% \beginsubsection 13.3. THE CORE AND ITS STRUCTURE.
+Drawing a line. In order to draw a horizontal or vertical line from $P_0$ to $P_1$, the left key is pressed with the cursor at $P_0$ and, while the key is held, the mouse and cursor is moved to $P_1$. Then the key is released. If $P_0$ and $P_1$ differ in both their $x$ and $y$ coordinates, the end point is adjusted so that the line is either horizontal or vertical.
+
+Writing a caption. First the cursor is positioned where the caption is to appear. Then the left key is clicked, causing a crosshair to appear. It is called the caret. Then the text is typed. Only single lines of texts are accepted. The \acro{DEL} key may be used to retract characters (backspace).
+
+Selecting. Most commands require the specification of operands, and many implicitly assume the previously selected elements---the selection---to be their operands. A single element is selected by pointing at it with the cursor and then clicking the right mouse button. This also causes previously selected elements to be deselected. If the left key is also clicked, their selection is retained. This action is called an interclick. To select several elements at once, the cursor is moved from $P_0$ to $P_1$ while the right key is held. Then all elements lying within the rectangle with diagonally opposite corners at $P_0$ and $P_1$ are selected. Selected lines are displayed as dotted lines, selected captions (and macros) by inverse video mode. A macro is selected by pointing at its lower left corner. The corner is called sensitive area.
+
+Moving. To move (displace) a set of elements, the elements are first selected and then the cursor is moved from $P_0$ to $P_1$ while the middle key is held. The vector from $P_0$ to $P_1$ specifies the movement and is called the displacement vector. $P_0$ and $P_1$ may lie in different viewers displaying the same graph. Small displacements may be achieved by using the keyboard's cursor keys.
+
+Copying. Similarly, the selected elements may be copied (duplicated). In addition to pressing the middle key while indicating the displacement vector, the left key is interclicked. The copy command may also be used to copy elements from one graph into another graph by moving the cursor from one viewer into another viewer displaying the destination graph. A text caption may be copied from a text frame into a graphic frame and vice-versa. There exist two ways to accomplish this: 1. First the caret is placed at the destination position, then the text is selected and the middle key is interclicked. 2. First the text is selected, then the caret is placed at the destination position and the middle key is interclicked.
+
+Shifting the plane. You may shift the entire drawing plane behind the viewer by specifying a displacement vector pressing the middle button (like in a move command) and interclicking the right button.
+
+The following table shows a summary of the mouse actions:
+
+TODO: Table
+left draw line left (no motion) set caret
+left + middle left + right
+middle middle + left middle + right
+right
+right (no motion) right + middle right + left
+copy selected caption to caret set secondary caret
+move selection copy selection shift drawing plane
+select area
+select object
+copy caption to caret select without deselection
+
+\beginsubsubsection 13.2.2. Menu commands.
+
+The following commands are displayed in the menu (title bar) of every graphic viewer. They are activated by being pointed at and by clicking the middle button.
+
+TODO: Table for list
+Draw.Delete Draw.Store
+Draw.Restore Draw.Ticks
+The selected elements are deleted.
+The drawing is written as file with the name shown in the title bar. The original file is renamed by appending ".Bak".
+The entire frame is redrawn
+The frame displays a pattern of dots (ticks) to facilitate positioning.
+
+The two viewers in Fig. 13.1. display different parts of the same graphic. The second view was obtained from the generic \code{System.Copy} command and a subsequent shift of the drawing plane.
+
+\figure{pdfs/fig-13.1.png}{4.7in}{13.1}{Display with graphics duplicated viewers}
+
+\beginsubsubsection 13.2.3. Further commands.
+
+The following commands are listed in the text Draw.Tool, but may appear in any text.
+
+TODO: list
+Draw.Store name The drawing in the marked viewer is stored as a file with the specified name.
+
+The subsequent commands change attributes of drawing elements, such as line width, text font, and color, and they apply to the most recent selection.
+
+TODO: list
+Draw.SetWidth w default = 1, 0 < w < 7.
+Draw.ChangeFont fontname
+Draw.ChangeColor c
+Draw.ChangeWidth w (0 < w < 7)
+
+The \code{ChangeColor} command either take a color number in the range 1..15 or a string as parameter. It serves to copy the color from the selected character.
+
+\beginsubsubsection 13.2.4. Macros.
+
+A macro is a (small) drawing that can be identified as a whole and be used as an element within a (larger) drawing. Macros are typically stored in collections called libraries, from where they can be selected and copied individually.
+
+\code{Draw.Macro lib mac} --- The macro mac is selected from the library named \code{lib} and inserted in the drawing at the caret's position.
+
+An example for the use of macros is drawing electronic circuit diagrams. The basic library file containing frequently used \code{TTL} components is called \code{TTL0.Lib}, and a drawing showing its elements is called \code{TTL0.Graph} (see Figure 13.2).
+
+\figure{pdfs/fig-13.2.png}{4.7in}{13.2}{Viewer with circuit macros of \code{TTL0} library}
+
+\beginsubsubsection 13.2.5. Rectangles.
+
+Rectangles can be created as individual elements. They are frequently used for framing sets of elements. Rectangles consist of four lines which are selectable as a unit. The attribute commands \code{Draw.SetWidth}, \code{System.SetColor}, \code{Draw.ChangeWidth}, and \code{Draw.ChangeColor} also apply to rectangles. Rectangles are selected by pointing at their lower left corner and are created by the following steps:
+
+\item{1.} The caret is placed where the lower left corner of the new rectangle is to lie.
+\item{2.} A secondary caret is placed where the opposite corner is to lie (\code{ML + MR}).
+\item{3.} The command \code{Rectangles.Make} is activated.
+
+\beginsubsubsection 13.2.6. Oblique lines and circles.
+TODO: lists
+Further graphic elements are (oblique) lines, circles, and ellipses. The sensitive area of circles and ellipses is at their lowest point. They are created by the following steps:
+Lines: Circles: Ellipses:
+1. The caret is placed where the starting point is to lie. 2. A secondary caret is placed at the position of the end. 3. The command Curves.MakeLine is activated.
+1. The caret is placed where the circle's center is to lie.
+2. A secondary caret is placed, its distance from the center specifying the radius. 3.The command Curves.MakeCircle is activated.
+1. The caret is placed where the center is to lie.
+2. A second caret is placed. Its horizontal distance from the first caret specifies one axis. 3. A third caret is placed. Its vertical distance from the first caret specifies the other axis. 4. The command Curves.MakeEllipse is activated.
+
+\beginsubsubsection 13.2.7. Spline curves.
+TODO: lists
+Spline curves are created by the following steps:
+1. The caret is placed where the starting point is to lie.
+2. Secondary carets are placed at the spline's fixed points (at most 20).
+3. The command Splines.MakeOpen or Splines.MakeClosed is activated.
+
+\beginsubsubsection 13.2.8. Constructing new macros.
+TODO: lists
+A new macro is constructed and inserted in the library lib under the name mac as follows:
+
+1. All elements which belong to the new macro are selected.
+2. The caret is placed at the lower left corner of the area to be spanned by the macro.
+3. A secondary caret is placed at the upper right corner of the area to be spanned.
+4. The command \code{MacroTool.MakeMacro} lib mac is activated.
+
+An existing macro can be decomposed (opened) into its parts as follows:
+
+1. The macro is selected.
+2. The caret is placed at the position where the decomposition is to appear.
+3. The command \code{MacroTool.OpenMacro} is activated.
+
+The command \code{MacroTool.StoreLibrary} lib file stores the library lib on the specified file. Only the macros presently loaded are considered as belonging to the library. If one wishes to add some macros to an existing library file, all of its elements must first be loaded. This is best done by opening a graph containing all macros of the desired library file.
+
+\beginsubsection 13.3. THE CORE AND ITS STRUCTURE.
+
+Like a text, a graphic consists of elements, subsequently to be called \emph{objects}. Unlike a text, which is a sequence of elements, a graphic is an unordered set of objects. In a text, the position of an element need not be explicitly indicated (stored); it is recomputed from the position of its predecessor each time it is needed, for example for displaying or selecting an element. In a graphic, each object must carry its position explicitly, as it is independent of any other object in the set. This is an essential difference, requiring a different treatment and much more storage space for an equal number of objects.
+
+Although this is an important consideration in the choice of a representation of a data structure, the primary determinants are the kind of objects to be included, and the set of operations to be applied to them. Here \acro{SIL} set a sensible starting point. To begin with, there exist only two kinds of objects, namely straight, horizontal and vertical lines, and short texts for labelling lines, called \emph{captions}. It is surprising how many useful task can be fulfilled with only these two types of objects.
+
+The typical operations to be performed on objects are creating, drawing, moving, copying, and erasing. Those performed on a graphic are inserting, searching, and deleting an object. For the operations on objects, data indicating an object's position (and possibly color), its length and width in the case of lines, and the character string in the case of captions suffice. For the operations on the graphic, some data structure representing the set of objects must be chosen. Without question, a dynamic structure is most appropriate, and it requires the addition of some linking fields to the record representing an object. Without further deliberation, and with the idea that graphics to be handled with this system contain hundreds rather than tens of thousands of objects, we chose the simplest solution, the linear list. A proper modularization in connection with information hiding will make it possible to alter this choice without affecting client modules.
+
+Although in general the nature of a user interface should not influence the representation chosen for the abstract data structure, we need to take note of the manner in which parameters of certain operations are denoted. It is, for example, customary in interactive graphics systems to select the objects to which an operation is to apply \emph{before} invoking that operation. Their \emph{selection} is reflected in their visual appearance in some way, and gives the user an opportunity to verify the selection (and to change it, if necessary) before applying the operation (such as deletion). For an object to be selectable means that it must record a state (selected/unselected). We note that it is important that this state is reflected by visual appearance.
+
+As a consequence, the property \code{selected} is added to every object record. We now specify the data types representing lines and captions as follows and note that both types must be extensions of the same base type in order to be members of one and the same data structure.
+\begintt
+TYPE Object =   POINTER TO ObjectDesc;
+  ObjectDesc =  RECORD
+                  x, y, w, h, col: INTEGER;
+                  selected: BOOLEAN;
+                  next: Object
+                END ;
+  Line =        POINTER TO LineDesc;
+  LineDesc =    RECORD (Object) END ;
+  Caption =     POINTER TO CaptionDesc
+  CaptionDesc = RECORD (Object)
+                  pos, len: INTEGER
+                END
+\endtt
+
+\noindent Selection of a single element is typically achieved by pointing at the object with mouse and cursor. Selection of a set of objects is achieved by specifying a rectangular area, implying selection of all objects lying within it. In both cases, the search for selected elements proceeds through the linked list and relies on the position and size stored in each object's descriptor. As a consequence, the rule was adopted that every object not only specify a position through its coordinates \code{x}, \code{y}, but also the rectangular area within which it lies (width \code{w}, height \code{h}). It is thus easy to determine whether a given point identifies an object, as well as whether an object lies fully within a rectangular area.
+
+In principle, each caption descriptor carries the sequence of characters (string) representing the caption. The simplest realization would be an array structured field, limiting the length of captions to some fixed, predetermined value. First, this is highly undesirable (although used in early versions of the system). And second, texts carry attributes (\code{color}, \code{font}). It is therefore best to use a global ``scratch text'', and to record a caption by the position and length of the string in this immutable text.
+
+A procedure \code{drawGraphic} to draw all objects of a graphic now assumes the following form:
+\begintt
+PROCEDURE drawObj(obj: Object); BEGIN
+IF obj IS Line THEN drawLine(obj(Line))
+ELSIF obj IS Caption THEN drawCaption(obj(Caption)) ELSE (*other object types, if any*)
+END
+END drawObj;
+PROCEDRE drawGraphic(first: Object); VAR obj: Object;
+BEGIN obj := first;
+WHILE obj # NIL DO drawObj(obj); obj := obj.next END
+END drawGraphic
+\endtt
+
+\noindent The two procedures typically are placed in different modules, one containing operations on objects, the other those on graphics. Here the former is the service module, the latter the former's client. Procedures for, e.g, copying elements, or determining whether an object is selectable, follow the same pattern as \code{drawGraphic}.
+
+This solution has the unpleasant property that all object types are anchored in the base module. If any new types are to be added, the base module has to be modified (and all clients are to be---at least---recompiled). The object-oriented paradigm eliminates this difficulty by inverting the roles of the two modules. It rests on binding the operations pertaining to an object type to each object individually in the form of procedure-typed record fields as shown in the following sample declaration:
+\begintt
+ObjectDesc =
+RECORD
+x, y, w, h, col: INTEGER; selected: BOOLEAN;
+draw: PROCEDURE (obj: Object);
+write: PROCEDURE (obj: Object; VAR R: Files.Rider); next: Object
+END
+\endtt
+The procedure drawGraphic is now formulated as follows:
+\begintt
+PROCEDURE drawGraphic(first: Object); VAR obj : Object;
+BEGIN obj := first;
+WHILE obj 9 NIL DO obj.draw(obj); obj := obj.next END
+END drawGraphic;
+\endtt
+
+The individual procedures---in object-oriented terminology called \emph{methods}---are assigned to the record's fields upon its creation. They need no further discrimination of types, as this role is assumed by the assignment of the procedures upon their installation. We note here that the procedure fields are never changed; they assume the role of \emph{constants} rather than variables associated with each object.
+
+This example exhibits in a nutshell the essence of object-oriented programming, \emph{extensibility} as its purpose and the \emph{procedure-typed} record field as the technique.
+
+The given solution, as it stands, has the drawback that each object (instance, variable) contains several procedures (of which three are listed), and therefore leads to a storage requirement that should be avoided. Furthermore, it defines once and for all the number of operations applicable to objects, and also their parameters and result types. A different approach with the same underlying principle removes these drawbacks. It employs a single installed procedure which itself discriminates among the operations according to different types of parameters. The parameters of the preceding solution are merged into a single record called a \emph{message}. The unified procedure is called a \emph{handler}, and messages are typically extensions of a single base type \code{Msg}.
+\begintt
+TYPE Msg = DrawMsg =
+WriteMsg = ObjectDesc =
+RECORD END;
+RECORD (Msg) END;
+RECORD (Msg) R: Files.Rider END ;
+RECORD
+x, y, w, h, col: INTEGER; selected: BOOLEAN;
+handle: PROCEDURE (obj: Object; VAR M: Msg);
+next: Object END ;
+PROCEDURE Handler (obj: Object; VAR M: Msg);
+(*this procedure is assigned to the handle field of every line object*)
+BEGIN
+IF M IS DrawMsg THEN drawLine(obj(Line))
+ELSIF M IS WriteMsg THEN writeLine(obj(Line), M(WriteMsg).R) ELSE ...
+END
+END ;
+PROCEDURE drawGraphic(first: Objec; VAR M: Msg); VAR obj: Object;
+BEGIN obj := first;
+WHILE obj 9 NIL DO obj.handle(obj, M); obj := obj.next END
+END drawGraphics
+\endtt
+
+In the present system, a combination of the two schemes presented so far is used. It eliminates the need for individual method fields in each object record as well as the cascaded \code{IF} statement for discriminating among the message types. Yet it allows further addition of new methods for later extensions without the need to change the object's declaration. The technique used is to include a single field (called \code{do}) in each record (analogous to the handler). This field is a pointer to a method record containing the procedures declared for the base type. At least one of them uses a message parameter, i.e. a parameter of record structure that is extensible.
+\begintt
+TYPE Method = Msg =
+Context =
+Object = ObjectDesc =
+MethodDesc =
+POINTER TO MethodDesc; RECORD END;
+RECORD END;
+POINTER TO ObjectDesc; RECORD
+x, y, w, h, col: INTEGER; selected: BOOLEAN;
+do: Method; next: Object END;
+RECORD
+new: Modules.Command;
+copy: PROCEDURE (obj, to: Object);
+draw, handle: PROCEDURE (obj: Object; VAR M: Msg);
+selectable: PROCEDURE (obj: Object; x, y: INTEGER): BOOLEAN; read: PROCEDURE (obj: Object; VAR R: Files.Rider; VAR C: Context); write: PROCEDURE (obj: Object; cno: INTEGER;
+VAR R: Files.Rider; VAR C: Context); END
+\endtt
+
+A single method instance is generated when a new object type is created, typically in the initialization sequence of the concerned module. When a new object is created, a pointer to this record is assigned to the do field of the new object descriptor. A call then has the form \code{obj.do.write(obj, R)}. This example exhibits the versatility of Oberon's type extension and procedure variable features very well, and it does so without hiding the data structures involved in a dispensible, built-in run-time mechanism.
+
+The foregoing deliberations suggest the system's modular structure shown in Figure 13.3.:
+
+\figure{pdfs/fig-13.3.png}{4.7in}{13.3}{Clients of module \code{Graphics}}
+
 % \beginsubsection 13.4. DISPLAYING GRAPHICS.
 % \beginsubsection 13.5. THE USER INTERFACE.
 % \beginsubsection 13.6. MACROS.
