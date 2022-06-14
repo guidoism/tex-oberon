@@ -6629,7 +6629,7 @@ x.a := merged(y.a, x.a); x.b := y.b; x.r := y.r END And2;
 
 Before embarking on an explanation of procedure calls, entries and exits, we need to know how recursion is handled and how storage for local variables is allocated. Procedure calls cause a sequence of frames to be allocated in a stack fashion. These frames are the storage space for local variables. Each frame is headed by a single word containing the return address of the call. This address is deposited in \code{R15} by the call instructions (\code{BL}, branch and link). The compiler ``knows'' the size of the frame to be allocated, and thus merely decrements the stack pointer \code{SP} (\code{R14}) by this amount. Upon return, \code{SP} is incremented by the same amount, and \code{PC} is restored by a branch instruction. In the following example, a procedure \code{P} is called, calling itself \code{Q}, and \code{Q} calling \code{P} again (recursion). The stack then contains 3 frames (see Figure 12.7).
 % Note: The original 2013 text had two figure 12.7s.
-\figure{pdfs/fig-12.7.2.png}{1.7in}{12.7}{Stack frames}
+\figure{pdfs/fig-12.7.2.png}{1.7in}{12.7(2)}{Stack frames}
 
 Scheme and layout determine the code sequences for call, entry and exit of procedures. Here is an example of a procedure P with 2 parameters:
 \begintt
@@ -6687,6 +6687,28 @@ Furthermore, we introduce the type guard. In the present example, the designator
 It is important to mention that this technique also applies to formal variable parameters of record type, as they also represent a pointer to the actual parameter. Its type may be any extension of the type specified for the formal parameter in the procedure heading.
 
 How are type test and type guard efficiently implemented? Our first observation is that they must consist of a single comparison only, similar to index checks. This in turn implies that types must be identified by a single word. The solution lies in using the unique address of the type descriptor of the (record) type. Which data must this descriptor hold? Essentially, type descriptors (\code{TD}) must identify the base types of a given type. Consider the following hierarchy:
+\begintt
+TYPE T  = RECORD...END;
+     T0 = RECORD (T) ... END ;
+     T1 = RECORD (T) ... END ;
+     T00 = RECORD (T0) ... END ;
+     T01 = RECORD (T0) ... END ;
+     T10 = RECORD (T1) ... END ;
+     T11 = RECORD (T1) ... END ;
+\endtt
+
+\figure{pdfs/fig-12.8.png}{4.7in}{12.8}{A type hierarchy}
+
+\noindent In the symbol table, the field base refers to the ancestor of a given record type. Thus base of the type representing \code{T11} points to \code{T1}, etc. Run-time checks, however, must be fast, and hence cannot proceed through chains of pointers. Instead, each \code{TD} contains an array with references to the ancestor \code{TD}s (including itself). For the example above, the \code{TD}s are as follows:
+
+\item{} TD(T) = [T]
+\item{} TD(T0) = [T, T0]
+\item{} TD(T1) = [T, T1]
+\item{} TD(T00) = [T, T0, T00]
+\item{} TD(T01) = [T, T0, T01]
+\item{} TD(T10) = [T, T1, T10]
+\item{} TD(T11) = [T, T1, T11]
+
 
 % \beginsubsubsection 12.7.9. Import and export, global variables.
 % \beginsubsubsection 12.7.10. Traps.
