@@ -6631,7 +6631,63 @@ Before embarking on an explanation of procedure calls, entries and exits, we nee
 % Note: The original 2013 text had two figure 12.7s.
 \figure{pdfs/fig-12.7.2.png}{1.7in}{12.7}{Stack frames}
 
-% \beginsubsubsection 12.7.8. Type extension.
+Scheme and layout determine the code sequences for call, entry and exit of procedures. Here is an example of a procedure P with 2 parameters:
+\begintt
+Call:    LDR R0, param0 
+         LDR R1, param1
+         BL P
+
+Prolog:  SUB SP, SP, size   decrement SP
+         STR LNK, SP, 0     push return adr 
+         STR R0, SP, 4      push parameter 0 
+         STR R1, SP, 8      push parameter1 ....
+
+Epilog:  LDR LNK, SP, 0     pop return adr
+         ADD SP, SP, size   increment SP
+         BR LNK
+\endtt
+
+\noindent When the call instruction is executed, parameters reside in registers, starting with \code{R0}. For function procedures, the result is passed in register \code{R0}. This scheme is very efficient; storing the parameters occurs only in a single place, namely at procedure entry, and not before each call. However, it has severe consequences for the entire register allocation strategy. Throughout the compiler, registers must be allocated in strict stack fashion. Furthermore, parameter allocation must start with \code{R0}. This is a distinct drawback for function calls. If registers are occupied by other values loaded prior to the call, they must be cleared, i.e. the parameters must be saved and reloaded after return. This is rather cumbersome (see procedures \code{ORG.SaveRegisters} and \code{ORG.RestoreRegisters}).
+\smallskip
+\item{} \code{F(x)} no register saving
+\item{} \code{x + F(x)}
+\item{} \code{F(F(x))}
+\item{} \code{(x+1) + F(x)} register saving necessary
+\smallskip
+
+\beginsubsubsection 12.7.8. Type extension.
+
+Static typing is an important principle in programming languages. It implies that every constant, variable or function is of a certain data type, and that this type can be derived by reading the program text without executing it. It is the key principle to introduce important redundancy in languages in such a form that a compiler can detect inconsistencies. It is therefore the key element for reducing the number of errors in programs.
+
+However, it also acts as a restriction. It is, for example, impossible to construct data structures (arrays, trees) with different types of elements. In order to relax the rule of strictly static typing, the notion of type extension was introduced in Oberon. It makes it possible to construct in homogeneous data structures without abandoning type safety. The price is that the checking of type consistency must in certain instances be deferred to run-time. Such checks are called type tests. The challenge is to defer to run-time as few checks as possible and as many as needed.
+
+The solution in Oberon is to introduce families of types, and compatibility among their members. Their members are thus related, and a family forms a hierarchy. The principle idea is the following: Any record type \code{T0} can be extended into a new type \code{T1} by additional record fields (attributes). \code{T1} is then called an extension of \code{T0}, which in turn is said to be \code{T1}’s base type. \code{T1} is then type compatible with \code{T0}, but not vice-versa. This property ensures that in many cases static type checking is still possible. Furthermore, it turns out that run-time tests can be made very efficient, thus minimizing the overhead for maintaining type safety.
+
+For example, given the declarations
+\begintt
+TYPE R0 = RECORD u, v: INTEGER END ;
+     R1 = RECORD (R0) w: INTEGER END
+\endtt
+
+\noindent we say that \code{R1} is an \emph{extension} of \code{R0}. \code{R0} has the fields \code{u} and \code{v}, \code{R1} has \code{u}, \code{v}, and \code{w}. The concept becomes useful in combination with pointers. Let
+\begintt
+TYPE P0 = POINTER TO R0;
+     P1 = POINTER TO R1;
+VAR p0: P0; p1: P1;
+\endtt
+
+\noindent Now it is possible to assign \code{p1} to \code{p0} (because a \code{P1} is always also a \code{P0}), but not \code{p0} to \code{p1}, because a \code{P0} need not be a \code{P1}. This has the simple consequence that a variable of type \code{P0} may well point to an extension of \code{R0}. Therefore, data structures can be declared with a base type, say \code{P0}, as common element type, but in fact they can individually differ, they can be any extension of the base type.
+
+Obviously, it must be possible to determine the actual, current type of an element even if the base type is statically fixed. This is possible through a \emph{type test}, syntactically a Boolean factor:
+
+\code{p0 IS P1} (short for \code{p0\^\ IS R1})
+
+Furthermore, we introduce the type guard. In the present example, the designator \code{p0.w} is illegal, because there is no field \code{w} in a record of type \code{R0}, even if the current value of \code{p0\^} is a \code{R1}. As this case occurs frequently, we introduce the short notation \code{p0(P1).w}, implying a test \code{p0 IS P1} and an abort if the test is not met.
+
+It is important to mention that this technique also applies to formal variable parameters of record type, as they also represent a pointer to the actual parameter. Its type may be any extension of the type specified for the formal parameter in the procedure heading.
+
+How are type test and type guard efficiently implemented? Our first observation is that they must consist of a single comparison only, similar to index checks. This in turn implies that types must be identified by a single word. The solution lies in using the unique address of the type descriptor of the (record) type. Which data must this descriptor hold? Essentially, type descriptors (\code{TD}) must identify the base types of a given type. Consider the following hierarchy:
+
 % \beginsubsubsection 12.7.9. Import and export, global variables.
 % \beginsubsubsection 12.7.10. Traps.
 % \beginchapter CHAPTER 13: A GRAPHICS EDITOR.
