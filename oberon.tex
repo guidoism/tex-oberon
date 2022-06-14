@@ -6721,14 +6721,53 @@ A type test then consists of a test for equality of two type tags. In \code{p IS
 \medskip
 When declaring a record type, it is not known how many extensions, nor how many levels will be built on this type. Therefore \code{TD}’s should actually be infinite arrays. We decided to restrict them to 3 levels only. The first entry, which is never used for checking, is replaced by the size of the record.
 
+\beginsubsubsection 12.7.9. Import and export, global variables.
+
+Addresses of imported objects are not available to the compiler. Their computation must be left to the module loader (see Chapter 6). Similar to handling addresses of forward jumps, the compiler puts the necessary information in place of the actual address into the instruction itself. In the case of procedure calls, this is quite feasible, because the \code{BL} instruction features an offset field of 24 bits. The information consists of the module number and the export number of the imported object. In addition, there is a link to the previous instruction referring to an imported procedure. The origin of the list of procedure call fixups is rooted in the compiler variable \code{fixorgP}, and of the 24 bits in each \code{BL} instruction 4 bits are used for the module number, 8 bits for the object's export number, and 12 for the link. The loader need only scan this list to fix up the addresses (jump offsets).
+
+Matters are more complex in the case of data. \code{Object} records in the symbol table have a field \code{lev}. It indicates the nesting level of variables local to procedures. It is also used for the module number in the case of variables of imported modules. Note that when importing, objects designating modules are inserted in the symbol table, and the list of their own objects are attached in the field dsc. In this latter case, the module numbers have an inverted sign (are negative). Such imported objects are static, i.e. have a fixed address. In principle their absolute address could be computed (fixed) by the module loader. However, this is not practicable, because \RISC\ instructions have an address offset of 16 bits only. It is therefore necessary in the general case to use a base address in conjunction with the offset. We use a single register for holding the static base (\code{SB}, \code{R13}). This register need be reloaded for every access to an imported variable. However, the compiler keeps track of external accesses; if a variable is to be accessed from the same module as the previous case, then reloading is avoided (see procedure \code{GetSB} and global compiler variable \code{curSB}).
+
+This base address is fetched from a table global to the entire system. This module table contains one entry for every module loaded, namely the address of the module's data section. The address of the table is permanently in register \code{MT} (= \code{R12}). An access to an imported variable therefore always requires two instructions:
+\begintt
+LDR SB, MT, modno*4 base address of data section
+LDR R0, SB, offset offset computed by the loader from object's export number
+\endtt
+
+\noindent Considering the fact that references to external variables are (or should be) rare, this circumstance is of no great concern. (Note also that such accesses are read-only). More severe is the fact that we also treat global variables contained in the same module by the same technique. Their level number is 0. One might use a specific base register for the base of the current module. Its content would then have to be reloaded upon every procedure call and after every return. This is common technique, but we have here chosen to reload only when necessary, i.e. only when an access is at hand. This strategy rewards the programmer who sensibly uses global variables rarely.
+
+\beginsubsubsection 12.7.10. Traps.
+
+This compiler provides an extensive system of safeguard by providing run-time checks (aborts) in several cases:
+
+TODO: table
+trap number
+1 2 3 4 5 6 7
+trap cause
+array index out of range type guard failure
+array or string copy overflow access via NIL pointer illegal procedure call
+integer division by zero assertionviolated
+
+These checks are implemented very efficiently in order not to downgrade a program's performance. Involved is typically a single compare instruction, plus a conditional branch (\code{BLR MT}). It is assumed that entry 0 of the module table contain not a base address (module numbers start with 1), but a branch instruction to an appropriate trap routine. The trap number is encoded in bits 4:7 of the branch instruction.
+
+The predefined procedure \code{Assert} generates a conditional trap with trap number 7. For example, the statement \code{Assert(m = n)} generates
+\begintt
+LDR R0, m
+LDR R1, n
+CMP R0, R0, R1
+BLR 1, 7CH      branch and link if unequal through R12, trap number 7
+\endtt
+
+\noindent Procedure \code{New}, representing the operator \code{NEW}, has been implemented with the aid of the trap mechanism. (This is in order to omit in \code{ORG} any reference to module \code{Kernel}, which contains the allocation procedure \code{New}). The generated code for the statement \code{NEW(p}) is
+\begintt
+ADD R0, SP, p     address of p
+ADD R1, SB, tag   type tag
+BLR 7, 0CH        branch and link unconditionally through R12 (MT), trap number 0
+\endtt
+
+\beginchapter CHAPTER 13: A GRAPHICS EDITOR.
 
 
 
-
-
-% \beginsubsubsection 12.7.9. Import and export, global variables.
-% \beginsubsubsection 12.7.10. Traps.
-% \beginchapter CHAPTER 13: A GRAPHICS EDITOR.
 % \beginsubsection 13.1. HISTORY AND GOAL.
 % \beginsubsection 13.2. A BRIEF USER GUIDE.
 % \beginsubsubsection 13.2.1. Basic commands.
