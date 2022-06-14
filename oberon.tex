@@ -6625,9 +6625,12 @@ x.a := merged(y.a, x.a); x.b := y.b; x.r := y.r END And2;
 
 \noindent A negative consequence of this scheme having condition flags in the processor is that when an item with mode \code{Cond} has to be transferred into mode \code{Reg}, as in a Boolean assignment, an unpleasantly complex instruction sequence must be generated. Fortunately, this case occurs quite rarely.
 
+\beginsubsubsection 12.7.7. Procedures.
 
+Before embarking on an explanation of procedure calls, entries and exits, we need to know how recursion is handled and how storage for local variables is allocated. Procedure calls cause a sequence of frames to be allocated in a stack fashion. These frames are the storage space for local variables. Each frame is headed by a single word containing the return address of the call. This address is deposited in \code{R15} by the call instructions (\code{BL}, branch and link). The compiler ``knows'' the size of the frame to be allocated, and thus merely decrements the stack pointer \code{SP} (\code{R14}) by this amount. Upon return, \code{SP} is incremented by the same amount, and \code{PC} is restored by a branch instruction. In the following example, a procedure \code{P} is called, calling itself \code{Q}, and \code{Q} calling \code{P} again (recursion). The stack then contains 3 frames (see Figure 12.7).
+% Note: The original 2013 text had two figure 12.7s.
+\figure{pdfs/fig-12.7.2.png}{1.7in}{12.7}{Stack frames}
 
-% \beginsubsubsection 12.7.7. Procedures.
 % \beginsubsubsection 12.7.8. Type extension.
 % \beginsubsubsection 12.7.9. Import and export, global variables.
 % \beginsubsubsection 12.7.10. Traps.
