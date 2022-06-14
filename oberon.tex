@@ -6784,10 +6784,19 @@ The basic system consists of the modules \code{Draw}, \code{GraphicFrames}, and 
 
 \beginsubsection 13.2. A BRIEF USER GUIDE.
 
+In order to provide the necessary background for the subsequent description of the Draw system's implementation, a brief overview is provided in the style of a user's guide. It summarizes the facilities offered by the system and gives an impression of its versatility.
+
+The system called \code{Draw} serves to prepare line drawings. They contain lines, text captions, and other items, and are displayed in graphic viewers (more precisely: in menu viewers' graphic frames). A graphic viewer shows an excerpt of the drawing plane, and several viewers may show different parts of a drawing. The most frequently used commands are built-in as mouse clicks and combinations of clicks. Additional commands are selectable from texts, either in viewer menus (title bars) or in the text called \code{Draw.Tool}. Fig. 13.1. shows the display with two graphic viewers at the left and the draw tool text at the right. The mouse buttons have the following principal functions whenever the cursor lies in a graphic frame:
+{ \medskip \narrower
+\item{left:} draw / set caret
+\item{middle:} move / copy
+\item{right:} select
+\medskip }
+\noindent A mouse command is identified (1) by the key $k_0$ pressed initially, (2) by the initial position $P_0$ of the cursor, (3) by the set of pressed keys $k_1$ until the last one is released, and (4) the cursor position $P_1$ at the time of release.
+
+\beginsubsubsection 13.2.1. Basic commands.
 
 
-
-% \beginsubsubsection 13.2.1. Basic commands.
 % \beginsubsubsection 13.2.2. Menu commands.
 % \beginsubsubsection 13.2.3. Further commands.
 % \beginsubsubsection 13.2.4. Macros.
