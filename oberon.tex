@@ -6701,6 +6701,7 @@ TYPE T  = RECORD...END;
 
 \noindent In the symbol table, the field base refers to the ancestor of a given record type. Thus base of the type representing \code{T11} points to \code{T1}, etc. Run-time checks, however, must be fast, and hence cannot proceed through chains of pointers. Instead, each \code{TD} contains an array with references to the ancestor \code{TD}s (including itself). For the example above, the \code{TD}s are as follows:
 
+\smallskip
 \item{} TD(T) = [T]
 \item{} TD(T0) = [T, T0]
 \item{} TD(T1) = [T, T1]
@@ -6708,6 +6709,21 @@ TYPE T  = RECORD...END;
 \item{} TD(T01) = [T, T0, T01]
 \item{} TD(T10) = [T, T1, T10]
 \item{} TD(T11) = [T, T1, T11]
+\smallskip
+
+Evidently, the first element can be omitted, as it always refers to the common base of the type hierarchy. The last element always points to the \code{TD}’s owner. \code{TD}s are allocated in the data area, the area for variables.
+
+References to \code{TD}s are called type tags. They are required in two cases. The first is for records referenced by pointers. Such dynamically allocated records carry an additional, hidden field holding their type tag. (A second additional word is reserved for use by the garbage collector. The offset of the tag field is therefore -8). The second case is that of record-typed \code{VAR}-parameters. In this case the type tag is explicitly passed along with the address of the actual parameter. Such parameters therefore require two words/registers.
+
+A type test then consists of a test for equality of two type tags. In \code{p IS T} the first tag is that of the n’th entry of the \code{TD} of \code{p\^ }, where \code{n} is the extension level of \code{T}. The second tag is that of type \code{T}. This is shown in Pattern13 in Section 12.2 (see also Fig. 12.4). The test then is as follows:
+\medskip
+\code{p\^{}.tag\^{}[n] = adr(T)}, where \code{n} is the extension level of \code{T}
+\medskip
+When declaring a record type, it is not known how many extensions, nor how many levels will be built on this type. Therefore \code{TD}’s should actually be infinite arrays. We decided to restrict them to 3 levels only. The first entry, which is never used for checking, is replaced by the size of the record.
+
+
+
+
 
 
 % \beginsubsubsection 12.7.9. Import and export, global variables.
