@@ -7327,8 +7327,50 @@ Module \code{GraphicFrames} contains all routines concerned with displaying, vis
 The frame handler receiving a consume message interprets the request through procedure \code{InsertChar}, and receiving a track message through procedure \code{Edit}. If no mouse key is depressed, the cursor is simply drawn, and thereby the mouse is tracked. Instead of the regular arrow, a crosshair is used as cursor pattern. Thereby immediate visual feedback is provided to indicate that now mouse actions are interpreted by the graphics handler (instead of, e.g., a text handler). Such feedback is helpful when graphic frames appear not only in a menuviewer, but as subframes of a more highly structured document frame.
 
 Procedure \code{Edit} first tracks the mouse while recording further key activities (interclicks) until all keys are released. The subsequent action is determined by the perceived key clicks. The actions are (the second key denotes the interclick):
+TODO: table
 
-% \beginsubsubsection 13.8.3. Module Graphics.
+keys = left
+keys = left, middle keys = left, right keys = middle
+keys = middle, left keys = middle, right keys = right
+keys = right, middle
+
+set caret, if mouse was not moved, otherwise draw new line, copy text selection to caret position
+set secondary caret (mark)
+move selection
+copy selection
+shift origin of graph
+select (either object, or objects in area) copy selected text to caret position
+
+When copying or moving a set of selected objects, it must be distinguished between the cases where the source and the destination graphics are the same or are distinct. In the former case, source and destination positions may lie in the same or in different frames.
+
+Procedure \code{InsertChar} handles the creation of new captions. The actual character string is appended to the global text \code{T}, and the new object records its position within \code{T} and its length.
+
+A complication arises because the input process consists of as many user actions as there are characters, and because other actions may possibly intervene between the typing. It is therefore unavoidable to record an insertion state, which is embodied by the global variable \code{newcap}. When a character is typed, and \code{newcap} = \code{NIL}, then a new caption is created consisting of the single typed character. Subsequent typing results in appending characters to the string (and newcap). The variable is reset to \code{NIL}, when the caret is repositioned. The \code{BS} character is interpreted as a backspace by procedure \code{DeleteChar}.
+
+Since the caption being generated may be visible simultaneously in several frames, its display must be handled by a message. For this reason, the special message \code{DispMsg} is introduced, and as a result, the process of character insertion turns out to be a rather complex action. To avoid even further complexity, the restriction is adopted that all characters of a caption must use the same attributes (font, color).
+
+The definition of the interface of \code{GraphicFrames} is listed in Section 13.3.
+
+\beginsubsubsection 13.8.3. Module Graphics.
+
+The preceding presentations of the interface definitions have explained the framework of the graphics system and set the goals for their implementation. We recall that the core module \code{Graphics} handles the data structures representing sets of objects without reliance on the specifications of individual objects. Even the structural aspects of the object sets are not fixed by the interface. Several solutions, and hence several implementations are imaginable.
+
+Here we present the simplest solution for representing an abstract, unordered set: the linear, linked list. It is embodied in the object record's additional, hidden field \code{next}. Consequently, a graphic is represented by the head of the list. The type \code{GraphDesc} contains the hidden field \code{first} (see listing of \code{Graphics}). In addition, the descriptor contains the exported field \code{sel} denoting a selected element, and the field \code{time} indicating the time of its selection. The latter is used to determine the most recent selection in various viewers.
+
+Additional data structures become necessary through the presence of macros and classes. Macros are represented by the list of their elements, like graphics. Their header is of type \code{MacHeadDesc} in analogy to \code{GraphDesc}. In addition to a macro's name, width, and height, it contains the field \code{first}, pointing to the list's first element, and the field \code{lib}, referring to the library from which the macro stems.
+
+A library descriptor is similarly structured: In addition to its name, the field \code{first} points to the list of elements (macros) of the library, which are themselves linked through the field next. Fig. 13.6. shows the data structure containing two libraries. It is anchored in the global variable \code{firstLib}.
+
+\figure{pdfs/fig-13.6.png}{4in}{13.6}{Data structure for two libraries, each with three macros}
+
+Libraries are permanently stored as files. It is evidently unacceptable that file access be required upon every reference to a macro, e.g. each time a macro is redrawn. Therefore a library is loaded into primary store, when one of its elements is referenced for the first time. Procedure \code{ThisMac} searches the data structure representing the specified library and locates the header of the requested macro.
+
+We emphasize that the structures employed for macro and library representation remain hidden from clients, just like the structure of graphics remains hidden within module \code{Graphics}. Thus, none of the linkage fields of records (\code{first}, \code{next}, \code{sel}) are exported from the base module. This measure retains the possibility to change the structural design decisions without affecting the client modules. But partly it is also responsible for the necessity to include macros in the base module.
+
+A large fraction of module \code{Graphics} is taken up by procedures for reading and writing files representing graphics and libraries. They convert their internal data structure into a sequential form and vice-versa. This would be a rather trivial task, were it not for the presence of pointers referring to macros and classes. These pointers must be converted into descriptions that are position-independent, such as names. The same problem is posed by fonts (which are also represented by pointers).
+
+Evidently, the replacement of every pointer by an explicit name would be an uneconomical solution with respect to storage space as well as speed of reading and writing. Therefore, pointers to fonts
+
 % \beginsubsection 13.9. RECTANGLES AND CURVES.
 % \beginsubsubsection 13.9.1. Rectangles.
 % \beginsubsubsection 13.9.2. Oblique lines and circles.
