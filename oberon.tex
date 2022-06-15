@@ -7578,10 +7578,55 @@ TODO: table
 
 \beginsubsection 14.3. MAINTENANCE TOOLS.
 
+An important prerequisite for Stage 2 (and the following stages) in the boot process has not been mentioned above. Recall that the initialization of module \code{FileDir} constructs the disk sector reservation table in the \code{Kernel} from information contained on the disk. Obviously, its prerequisite is an intact, consistent file directory. A single unreadable, corrupted file directory or file header sector lets this process fail, and booting becomes impossible. To cope with this (fortunately rare) situation, a maintenance tool has been designed: module \code{DiskCheck}.
+
+\code{DiskCheck} is organized similarly to Oberon0 as a simple command interpreter, but it imports only \code{Kernel} and \code{RS232}. Hence, booting involves only Stages 1 and 2 without any access to the disk. Operating \code{DiskCheck} requires care and knowledge of the structure of the file system (Chapter 7). The available commands are the following:
+
+TODO: table
+
+The essential command is the file directory traversal (5). It lists all faulty directory sectors, showing their numbers. It also lists faulty header sectors. No changes are made to the file system.
+
+If a faulty header is encountered, it can subsequently be cleared (6). Thereby the file is lost. It is not removed from the directory, though. But its length will be zero.
+
+Program \code{DiskCheck} must be extremely robust. No data read can be assumed to be correct, no index can be assumed to lie within its declared bounds, no sector number can be assumed to be valid, and no directory or header page may be assumed to have the expected format. Guards and error diagnostics take a prominent place.
+
+Whereas a faulty sector in a file in the worst case leads to the loss of that file, a fault in a sector carrying a directory page is quite disastrous. Not only because the files referenced from that page, but also those referenced from descendant pages become inaccessible. A fault in the root page even causes the loss of all files. The catastrophe is of such proportions, that measures should be taken even if the case is very unlikely. After all, it may happen, and it indeed has occurred.
+
+The only way to recover files that are no longer accessible from the directory is by scanning the entire disk. In order to make a search at all possible, every file header carries a mark field that is given a fixed, constant value. It is very unlikely, but not entirely impossible, that data sectors which happen to have the same value at the location corresponding to that of the mark, may be mistaken to be headers.
+
+The tool performing such a scan is called \code{Scavenger}. It is, like \code{DiskCheck}, a simple command interpreter with the following available commands:
+
+TODO: table
+
+During the scan, a new directory is gradually built up in primary store. Sectors marked as headers are recorded by their name and creation date. The scavenger is the reason for recording the file name in the header, although it remains unused there by the Oberon System. Recovery of the date is essential, because several files with the same name may be found. If one is found with a newer creation date, the older entry is overwritten.
+
+Command \code{W} transfers the new directory to the disk. For this purpose, it is necessary to have free sectors available. These have been collected during the scan: both old directory sectors (identified by a directory mark similar to the header mark) and overwritten headers are used as free locations.
+
+The scavenger has proven its worth on more than one occasion. Its main drawback is that it may rediscover files that had been deleted. The deletion operation by definition affects only the directory, but not the file. Therefore, the header carrying the name remains unchanged and is discovered by the scan. All in all, however, it is a small deficiency.
+
+\beginchapter CHAPTER 15: TOOL AND SERVICE MODULES.
+
+In this chapter, a few modules are presented that do not belong to Oberon's system core. However, they belong to the system in the sense of being basic, and of assistance in some way, either to construct application programs, to communicate with external computers, or to analyze existing programs.
+
+\beginsubsection 15.1. BASIC MATHEMATICAL FUNCTIONS.
+
+Module \code{Math} contains the basic standard functions that had been postulated already in 1960 by Algol 60. They are
+
+sqrt(x) the square root
+exp(x) the exponential function
+ln(x) the natural logarithm
+sin(x) the sine function
+cos(x) the cosine function
+
+They are presented here only briefly without discussing their approximation methods. However, we point out how advantage can be taken from knowledge about the internal representation of floating-point numbers.
+
+\beginsubsubsection 15.1.1. Conversion between integers and floating-point numbers.
+\beginsubsubsection 15.1.2. The square root function.
+\beginsubsubsection 15.1.3. The exponential function.
+\beginsubsubsection 15.1.4. The logarithm.
+\beginsubsubsection 15.1.5. The sine function.
 
 
-% \beginchapter CHAPTER 15: TOOL AND SERVICE MODULES.
-% \beginsubsection 15.1. BASIC MATHEMATICAL FUNCTIONS.
 % \beginsubsection 15.2. A DATA LINK.
 % \beginsubsection 15.3. A GENERATOR OF GRAPHIC MACROS.
 % \beginchapter CHAPTER 16: IMPLEMENTATION OF THE RISC PROCESSOR.
