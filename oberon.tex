@@ -7621,15 +7621,174 @@ cos(x) the cosine function
 They are presented here only briefly without discussing their approximation methods. However, we point out how advantage can be taken from knowledge about the internal representation of floating-point numbers.
 
 \beginsubsubsection 15.1.1. Conversion between integers and floating-point numbers.
+
+The Oberon System adopts the standard format postulated by IEEE. Here we restrict it to the 32- bit variant. A floating-point number x consists of 3 parts
+s the sign
+e the exponent m the mantissa
+1 bit
+8 bits 23 bits
+Its value is defined as x = (-1)s × 2 e+127 × (1.m). A number is in normalized form, if its mantissa satisfies 1.0 ≤ m < 2.0. It is assumed that numbers are always normalized, and therefore the leading 1-bit is omitted. The exception is the singular value 0, which cannot be normalized. It must therefore be treated as a special case.
+It follows that integers and floating-point numbers are represented quite differently, and that conversion operations are necessary to transfer a number from one format to the other. This is the reason why the Oberon language keeps the two types INTEGER and REAL separate. Conversion must be explicitly specified by using the two predefined functions
+n := FLOOR(x) REAL→ INTEGER x := FLT(n) INTEGER → REAL
+Note: FLOOR(x) rounds toward -inf. For example FLOOR(1.5) = 1, FLOOR(-1.5) = -2.
+The RISC processor does not feature specific instructions implementing these functions. Instead, the compiler generates inline code using the FAD instruction with special options suppressing normalization. This option is specified by the u and v modifier bits of the instruction.
+The FLOOR function is realized by adding 0 with an exponent of 127 + 24 and suppressing the insertion of a leading 1-bit (u = 1). This causes the mantissa of the argument to be shifted right until its exponent is equal to 151. The RISC instructions are:
+MOV' R1 R0 4B00H R1 := 4B000000H FAD' R0 R0 R1
+The FLT function is implemented also by adding 0 with an exponent of 151 and forced insertion of a leading 1-bit (v = 1).
+MOV' R1 R0 4B00H FAD" R0 R0 R1
+There are two predefined procedures for packing and unpacking a floating-point number:
+PACK(x,e) x:=x×2e (forx>0)
+UNPK(x, e) assign to x and e, such that x×2e = x0, where x0 is the original value of x,
+x becomes normalized, that is 1.0 ≤ x < 2.0
+Assuming R0 = x and R1 = e, the instruction sequence for PACK(x, e) is LSL R1 R1 23
+ADD R0 R0 R1 STR R0 x
+Again assuming x = R0, the instruction sequence for UNPK(x, e) is ASR R1R0 23
+SUB R1 R1 127 STR R1e
+LSL R1 R1 23 SUB R0R0R1 STR R0x
+
 \beginsubsubsection 15.1.2. The square root function.
+
+We rely on the definition x = 2e×m Using the intrinsic UNPK procedure, the components m and e are obtained from x. Then the square root is computed according to the formulas
+sqrt(x) = 2(e DIV 2) × sqrt(m) if e is even, sqrt(x) = 2(e DIV 2 - 1) × sqrt(2) × sqrt(m) if e is odd.
+The advantage is that the argument of the square root now lies in the narrow interval [1.0, 2.0], and therefore is easier and faster to approximate by a continued fraction.
+PROCEDURE sqrt(x: REAL): REAL; CONST c1 = 0.70710680; (* 1/sqrt(2) *)
+c2 = 0.590162067;
+c3 = 1.4142135; (*sqrt(2)*) VAR s: REAL; e: INTEGER;
+BEGIN ASSERT(x >= 0.0); IF x > 0.0 THEN
+UNPK(x, e);
+s := c2*(x+c1);
+s := s + (x/s);
+s := 0.25*s + x/s;
+s := 0.5 * (s + x/s);
+IF ODD(e) THEN s := c3*s END ; PACK(s, e DIV 2)
+ELSE s := 0.0 END ; RETURN s
+END sqrt;
+
 \beginsubsubsection 15.1.3. The exponential function.
+
+Since our floating-point format is based on an exponent of 2, we first use the formula exp(x) = ex = 2y with y = x × log2(e) = x / ln(2) log2(e) = 1.4426951
+and first compute y. We decompose y into its integral part n = FLOOR(y) and its fractional part y0 = y - n. Since 2n × 2y0 = 2n+y0, the result is the sum of the exponent n and the mantissa 2y0. Again, the advantage of the decomposition is that the argument y0 of the polynomial approximation lies in the narrow interval [1.0, 2.0].
+PROCEDURE exp(x: REAL): REAL; CONST c1 = 1.4426951; (*1/ln(2) *)
+p0 = 1.513864173E3; p1 = 2.020170000E1; p2 = 2.309432127E-2; q0 = 4.368088670E3; q1 = 2.331782320E2;
+VAR n: INTEGER; p, y, yy: REAL; BEGIN y := c1*x; (*1/ln(2)*)
+n := FLOOR(y + 0.5); y := y - FLT(n); yy := y*y;
+p := ((p2*yy + p1)*yy + p0)*y;
+p := p/((yy + q1)*yy + q0 - p) + 0.5; PACK(p, n+1); RETURN p
+END exp;
+
 \beginsubsubsection 15.1.4. The logarithm.
+
+Again we take advantage of the presence of an exponent in the floating-point representation and use the equations
+ln (a×b) = ln a + ln b
+ln (2e×m) = log2(2e×m) × ln(2) = e × ln(2) + ln m
+PROCEDURE ln(x: REAL): REAL;
+CONST c1 = 0.70710680; (* 1/sqrt(2) *)
+c2 = 0.69314720; (* ln(2) *) p0 = -9.01746917E1;
+p1 = 9.34639006E1;
+p2 = -1.83278704E1;
+q0 = -4.50873458E1; q1 = 6.176106560E1; q2 = -2.07334879E1;
+VAR e: INTEGER; y: REAL;
+BEGIN ASSERT(x > 0.0); UNPK(x, e);
+IF x < c1 THEN x := x*2.0; e := e-1 END ;
+x := (x - 1.0)/(x + 1.0);
+y := c2 * FLT(e) + x * ((p2*x + p1)*x + p0) / (((x + q2)*x + q1)*x + q0); RETURN y
+END ln;
+
 \beginsubsubsection 15.1.5. The sine function.
 
+\figure{pdfs/fig-15.1.png}{2.4in}{15.1}{Sine function $y = sin(x)$}
 
-% \beginsubsection 15.2. A DATA LINK.
-% \beginsubsection 15.3. A GENERATOR OF GRAPHIC MACROS.
-% \beginchapter CHAPTER 16: IMPLEMENTATION OF THE RISC PROCESSOR.
+First, the argument x is transposed into the interval $[0, \pi/4]$ by computing
+
+n := FLOOR(y+0.5); y := (y - n)
+and then distinguish between two approximating polynomials depending on whether x < π/4.
+PROCEDURE sin(x: REAL): REAL; CONST c1 = 6.3661977E-1; (*2/pi*)
+p0 = 7.8539816E-1; p1 = -8.0745512E-2; p2 = 2.4903946E-3; p3 = -3.6576204E-5; p4 = 3.1336162E-7; p5 = -1.7571493E-9; p6 = 6.8771004E-12; q0 = 9.9999999E-1; q1 = -3.0842514E-1; q2 = 1.5854344E-2; q3 = -3.2599189E-4; q4 = 3.5908591E-6; q5 = -2.4609457E-8; q6 = 1.1363813E-10;
+VAR n: INTEGER; y, yy, f: REAL; BEGIN y := c1*x;
+IF y >= 0.0 THEN n := FLOOR(y + 0.5) ELSE n := FLOOR(y - 0.5) END ;
+y := (y - FLT(n)) * 2.0; yy := y*y;
+IF ODD(n) THEN f := (((((q6*yy + q5)*yy + q4)*yy + q3)*yy + q2)*yy + q1)*yy + q0 ELSE f := ((((((p6*yy + p5)*yy + p4)*yy + p3)*yy + p2)*yy + p1)*yy + p0)*y
+END ;
+IF ODD(n DIV 2) THEN f := -f END ;
+RETURN f
+END sin;
+
+\beginsubsection 15.2. A DATA LINK.
+
+Module \code{PCLink} serves to transfer data (files) to and from another system. Data are transmitted as a sequence of blocks. Each block is a sequence of bytes. The number of data bytes lies between 0 and 255. They are preceded by a single byte indicating the length. Blocks are 255 bytes long, except the last block, whose length is less than 255.
+
+Here, the transmission channel is an \rs232 line. The interface consists of two registers, one for a data byte (address = -56), and one for the status (address = -52). Bit 0 of this status register indicates, whether a byte had been received. Bit 1 of the status register indicates, whether the byte in the data register had been sent. (Note: the default transmission rate of the \RISC is 9600 bit/s).
+
+This module represents a server running as an Oberon task which must be activated by the command \code{Run}. A server running on the partner system must be the master issuing requests. The command sequence is a \code{REC} byte, a \code{SND} byte, or a \code{REQ} byte (for testing the connection). \code{REC} and \code{SND} must be followed by a file name, and the sequence of blocks.
+
+Every block is acknowledged by the receiver sending an \code{ACK} byte, for which the sender waits before sending the next block. There is no synchronization within blocks. Because writing bytes onto a file may involve operations of unpredictable duration, the received bytes are not written to the file immediately. They are buffered and only output after the entire block had been received.
+\begintt
+
+MODULE PCLink; (*NW 8.2.2013 for Oberon on RISC*) IMPORT SYSTEM, Files, Texts, Oberon;
+CONST data = -56; stat = -52;
+BlkLen = 255;
+REQ = 20H; REC = 21H; SND = 22H; ACK = 10H; NAK = 11H;
+VAR T: Oberon.Task; W: Texts.Writer; PROCEDURE Rec(VAR x: BYTE); BEGIN
+REPEAT UNTIL SYSTEM.BIT(stat, 0);
+SYSTEM.GET(data, x) END Rec;
+PROCEDURE RecName(VAR s: ARRAY OF CHAR); VAR i: INTEGER; x: BYTE;
+BEGIN i := 0; Rec(x);
+WHILE x > 0 DO s[i] := CHR(x); INC(i); Rec(x) END ; s[i] := 0X
+END RecName;
+PROCEDURE Send(x: BYTE); BEGIN
+REPEAT UNTIL SYSTEM.BIT(stat, 1);
+SYSTEM.PUT(data, x) END Send;
+PROCEDURE Task;
+VAR len, n, i: INTEGER;
+x, ack, len1, code: BYTE; name: ARRAY 32 OF CHAR; F: Files.File; R: Files.Rider; buf: ARRAY 256 OF BYTE;
+BEGIN
+IF SYSTEM.BIT(stat, 0) THEN (*byte available*)
+Rec(code);
+IF code = SND THEN (*send file*)
+RecName(name); F := Files.Old(name); IF F # NIL THEN
+Send(ACK); len := Files.Length(F); Files.Set(R, F, 0); REPEAT
+IF len >= BlkLen THEN len1 := BlkLen ELSE len1 := len END ; Send(len1); n := len1; len := len - len1;
+WHILE n > 0 DO Files.ReadByte(R, x); Send(x); DEC(n) END ; IFack#ACKTHEN len:=0END
+UNTIL len1 < BlkLen ELSE Send(11H)
+END
+ELSIF code = REC THEN (*receive file*) RecName(name); F := Files.New(name); IF F # NIL THEN
+Files.Set(R, F, 0); Send(ACK); REPEAT Rec(x); len := x; i := 0;
+WHILE i < len DO Rec(x); buf[i] := x; INC(i) END ;
+i := 0;
+WHILE i < len DO Files.WriteByte(R, buf[i]); INC(i) END ; Send(ACK)
+UNTIL len < 255;
+Files.Register(F); Send(ACK) ELSE Send(NAK)
+END
+ELSIF code = REQ THEN Send(ACK) (*for testing*)
+END END
+END Task;
+PROCEDURE Run*;
+BEGIN Oberon.Install(T); Texts.WriteString(W, "PCLink started");
+Texts.WriteLn(W); Texts.Append(Oberon.Log, W.buf) END Run;
+PROCEDURE Stop*;
+BEGIN Oberon.Remove(T); Texts.WriteString(W, "PCLink stopped"); Texts.WriteLn(W); Texts.Append(Oberon.Log, W.buf)
+END Stop;
+BEGIN Texts.OpenWriter(W); T := Oberon.NewTask(Task, 0) END PCLink.
+\endtt
+
+\beginsubsection 15.3. A GENERATOR OF GRAPHIC MACROS.
+
+The module \code{MacroTool} serves to create macros for the graphic system (Ch. 13). It provides the commands \code{OpenMacro}, \code{MakeMacro}, \code{LoadLibrary} and \code{StoreLibrary}.
+
+\code{OpenMacro} decomposes the selected macro into its elements and places them at the position of the caret. This command is typically the first if an existing macro is to be modified.
+
+\code{MakeMacro L M} collects all selected objects in the frame designated by the star pointer and unites them into macro \code{M}. This macro is displayed at the caret position and inserted into library \code{L}. If no such library exists, a new one is created.
+
+\code{LoadLibrary L} loads the library \code{L} (under file name \code{L.Lib}). Note that a library must have been stored, before it can be loaded.
+
+\code{StoreLibrary} stores library \code{L} (with filename \code{L.Lib}).
+
+The required modules are \code{Texts}, \code{Oberon}, \code{Graphics}, \code{GraphicFrames}.
+
+\beginchapter CHAPTER 16: IMPLEMENTATION OF THE RISC PROCESSOR.
+
+
+
 % \beginsubsection 16.1. INTRODUCTION.
 % \beginsubsection 16.2. THE ARITHMETIC AND LOGIC UNIT (ALU).
 % \beginsubsubsection 16.2.1 Shifters.
