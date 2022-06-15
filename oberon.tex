@@ -7128,7 +7128,7 @@ u = z.x + f.x, v = z.y + f.y
 
 In order to determine whether an object z lies within a frame f, the following expression must hold:
 
-(f.X <= u) & (u + z.w <= f.X1) & (f.Y <= v) & (v + z.h <= f.Y1)
+(f.X <= u) $\&$ (u + z.w <= f.X1) $\&$ (f.Y <= v) $\&$ (v + z.h <= f.Y1)
 
 The record field marked indicates whether or not the frame contains a caret. Its display position is recorded in the field called mark. A frame may contain several (secondary) carets; they form a list of location descriptors.
 
@@ -7297,15 +7297,37 @@ method.copy := Copy; method.draw := Draw; method.selectable := Selectable; metho
 END Xs.
 \endtt
 
-We wish to point out that also the macro and library facilities are capable of integrating objects of new classes, i.e. of types not occurring in the declarations of macro and library facilities. The complete interface definition of module Graphics is obtained from its excerpt given in Sect. 13.3, augmented by the declarations of types and procedures in Sect. 13.6. and 13.7.
+We wish to point out that also the macro and library facilities are capable of integrating objects of new classes, i.e. of types not occurring in the declarations of macro and library facilities. The complete interface definition of module \code{Graphics} is obtained from its excerpt given in Sect. 13.3, augmented by the declarations of types and procedures in Sect. 13.6. and 13.7.
 
 \beginsubsection 13.8. THE IMPLEMENTATION.
 
 \beginsubsubsection 13.8.1. Module Draw.
 
+Module \code{Draw} is a typical command module whose exported procedures are listed in a tool text. Its task is to scan the text containing the command for parameters, to check their validity, and to activate the corresponding procedures, which primarily are contained in modules \code{Graphics} and \code{GraphicFrames}. The most prominent among them is the \code{Open} command. It generates a new viewer containing two frames, namely a text frame serving as menu, and a graphic frame.
 
+We emphasize at this point that graphic frames may be opened and manipulated also by other modules apart from \code{Draw}. In particular, document editors that integrate texts and graphics---and perhaps also other entities---would refer to \code{Graphics} and \code{GraphicFrames} directly, but not make use of \code{Draw} which, as a tool module, should not have client modules.
+\begintt
+DEFINITION Draw; PROCEDURE Open; PROCEDURE Delete; PROCEDURE SetWidth; PROCEDURE ChangeColor; PROCEDURE Store; PROCEDURE Macro;
+PROCEDURE OpenMacro; PROCEDURE MakeMacro; PROCEDURE LoadLibrary;
+END Draw.
+\endtt
 
-% \beginsubsubsection 13.8.2. Module GraphicFrames.
+\beginsubsubsection 13.8.2. Module GraphicFrames.
+
+Module \code{GraphicFrames} contains all routines concerned with displaying, visualizing graphic frames and their contents, i.e. graphics. It also contains the routines for creating new objects of the base classes, i.e. lines, captions, and macros. And most importantly, it specifies the appropriate frame handler which interprets input actions and thereby defines the user interface. The handler discriminates among the following message types:
+
+\item{1.} Update messages. According to the \code{id} field of the message record, either a specific object or the entire selection of a graphic are drawn according to a mode. The case \code{id = 0} signifies a restoration of the entire frame including all objects of the graphic.
+\item{2.} Selection, focus, and position queries. They serve for the identification of the graphic frame containing the latest selection, containing the caret (mark) or the indicated position. In order to identify the latest selection, the time is recorded in the graph descriptor whenever a new selection is made or when new objects are inserted.
+\item{3.} Input messages. They originate from the central loop of module \code{Oberon} and indicate either a mouse action (track message) or a keyboard event (consume message).
+\item{4.} Control messages from \code{Oberon}. They indicate that all marks (selection, caret, star) are to be removed (neutralize), or that the focus has to be relinquished (defocus).
+\item{5.} Selection and copy messages from \code{Oberon}. They constitute the interface between the graphics and the text system, and make possible identification and copying of captions between graphic and text frames.
+\item{6.} Modify messages from \code{MenuViewers}. They indicate that a frame has to be adjusted in size and position because a neighbouring viewer has been reshaped, or because its own viewer has been repositioned
+\item{7.} Display messages. They originate from procedure \code{InsertChar} and handle the displaying of single characters when a caption is composed (see below).
+
+The frame handler receiving a consume message interprets the request through procedure \code{InsertChar}, and receiving a track message through procedure \code{Edit}. If no mouse key is depressed, the cursor is simply drawn, and thereby the mouse is tracked. Instead of the regular arrow, a crosshair is used as cursor pattern. Thereby immediate visual feedback is provided to indicate that now mouse actions are interpreted by the graphics handler (instead of, e.g., a text handler). Such feedback is helpful when graphic frames appear not only in a menuviewer, but as subframes of a more highly structured document frame.
+
+Procedure \code{Edit} first tracks the mouse while recording further key activities (interclicks) until all keys are released. The subsequent action is determined by the perceived key clicks. The actions are (the second key denotes the interclick):
+
 % \beginsubsubsection 13.8.3. Module Graphics.
 % \beginsubsection 13.9. RECTANGLES AND CURVES.
 % \beginsubsubsection 13.9.1. Rectangles.
