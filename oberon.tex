@@ -7947,8 +7947,34 @@ shift      & 0000'1111 & 0000 & 0011'0000 & p = 15 \cr
 
 The shifting of \code{x} to the right also suggests that instead of shifting \code{y} to the left in each step, we keep \code{y} in the same position and shift the partial sum \code{p} to the right. We notice that the size of \code{x} decreases by 1 in each step, whereas the size of \code{p} increases by 1. This allows to pack \code{p} and \code{x} into a single double register \code{$<$B, A$>$} with a shifting border line. At the end, it contains the product $p = x \times y$.
 
+\medskip
+\halign{#\hfil\quad&#\hfil\quad&\hfil#\quad&#\hfil\quad&#\hfil\cr
+ & \code{p} & \code{x} & \cr
+\noalign{\smallskip\hrule}\cr
+           & 0000 & 0101 & \cr
+add y to p & 0011 & 0101 & \cr
+shift      & 00011 & 010 & \cr
+add 0 to p & 00011 & 010 & \cr
+shift      & 000011 & 01 & \cr
+add y to p & 001111 & 01 & \cr
+shift      & 0001111 & 0 & \cr
+add 0 to p & 0001111 & 0 & \cr
+shift      & 00001111 &  & p = 15 \cr
+}\medskip
 
+\begintt
+p = {B[31:0], A{31:[32-k]},
+x = A[31-k:0]
+k = 0 ... 31
+\endtt
 
+The multiplier is controlled by a rudimentary state machine \code{S}, actually a simple 5-bit counter running from 0 to 31. The multiplier is shown schematically in Figure 16.3.
+
+The multiplier interprets its operands as signed (\code{u = 0}) or unsigned (\code{u = 1}) integers. The difference between unsigned and signed representation is that in the former case the first term has a negative weight ($-x_{31} \times 2^{31}$). Therefore, implementation of signed multiplication requires very little change: Term 31 is subtracted instead of added (see complete program listing below).
+
+\figure{pdfs/fig-16.3.png}{3.4in}{16.3}{Schematic of multiplier}
+
+During execution of the 32 add-shift steps the processor must be stalled. The process proceeds and the counter \code{S} advances as long as the input \code{MUL} is active (high). \code{MUL} indicates that the current operation is a multiplication, and the signal is stable until the processor advances to the next instruction. This happens when step 31 is reached (Figure 16.4).
 
 % \beginsubsubsection 16.2.3. Division.
 % \beginsubsection 16.3. FLOATING-POINT ARITHMETIC.
@@ -7967,25 +7993,24 @@ The shifting of \code{x} to the right also suggests that instead of shifting \co
 
 % \eject \input src
 
-% \figure{pdfs/fig-16.3.png}{2.4in}{16.3}{}
-% \figure{pdfs/fig-16.4.png}{2.4in}{16.4}{}
-% \figure{pdfs/fig-16.5.png}{2.4in}{16.5}{}
-% \figure{pdfs/fig-16.6.png}{2.4in}{16.6}{}
-% \figure{pdfs/fig-16.7.png}{2.4in}{16.7}{}
-% \figure{pdfs/fig-16.8.png}{2.4in}{16.8}{}
-% \figure{pdfs/fig-17.1.png}{2.4in}{17.1}{}
-% \figure{pdfs/fig-17.2.png}{2.4in}{17.2}{}
-% \figure{pdfs/fig-17.3.png}{2.4in}{17.3}{}
-% \figure{pdfs/fig-17.4.png}{2.4in}{17.4}{}
-% \figure{pdfs/fig-17.5.png}{2.4in}{17.5}{}
-% \figure{pdfs/fig-17.6.png}{2.4in}{17.6}{}
-% \figure{pdfs/fig-17.7.png}{2.4in}{17.7}{}
-% \figure{pdfs/fig-17.8.png}{2.4in}{17.8}{}
-% \figure{pdfs/fig-17.9.png}{2.4in}{17.9}{}
-% \figure{pdfs/fig-17.10.png}{2.4in}{17.10}{}
-% \figure{pdfs/fig-17.11.png}{2.4in}{17.11}{}
-% \figure{pdfs/fig-17.12.png}{2.4in}{17.12}{}
-% \figure{pdfs/fig-17.13.png}{2.4in}{17.13}{}
+% \figure{pdfs/fig-16.4.png}{2.4in}{16.4}{Generating \emph{stall}}
+% \figure{pdfs/fig-16.5.png}{2.4in}{16.5}{Schematic of divider}
+% \figure{pdfs/fig-16.6.png}{2.4in}{16.6}{\acro{IEEE} standard floating-point representation of code{REAL} numbers}
+% \figure{pdfs/fig-16.7.png}{2.4in}{16.7}{Steps of floating-point addition}
+% \figure{pdfs/fig-16.8.png}{2.4in}{16.8}{The control unit}
+% \figure{pdfs/fig-17.1.png}{2.4in}{17.1}{The \RISC\ configuration}
+% \figure{pdfs/fig-17.2.png}{2.4in}{17.2}{Connections between processor and \SRAM}
+% \figure{pdfs/fig-17.3.png}{2.4in}{17.3}{Multiplexers for \SRAM\ byte access}
+% \figure{pdfs/fig-17.4.png}{2.4in}{17.4}{The \ps2 configuration}
+% \figure{pdfs/fig-17.5.png}{2.4in}{17.5}{Wheel with spokes and sensors}
+% \figure{pdfs/fig-17.6.png}{2.4in}{17.6}{Signals resulting from movements}
+% \figure{pdfs/fig-17.7.png}{2.4in}{17.7}{\SPI-configuration as a ring}
+% \figure{pdfs/fig-17.8.png}{2.4in}{17.8}{Connections between \SPI, \sdcard, and \code{Net} (see \code{RISCTop5.v})}
+% \figure{pdfs/fig-17.9.png}{2.4in}{17.9}{Shifting with \MSB first}
+% \figure{pdfs/fig-17.10.png}{2.4in}{17.10}{Synchronization and blanking signals}
+% \figure{pdfs/fig-17.11.png}{2.4in}{17.11}{Buffering the video output}
+% \figure{pdfs/fig-17.12.png}{2.4in}{17.12}{\rs232 configuration}
+% \figure{pdfs/fig-17.13.png}{2.4in}{17.13}{\rs232 packet format}
 
 
 
