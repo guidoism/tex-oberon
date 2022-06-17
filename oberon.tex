@@ -7847,26 +7847,63 @@ The data processing unit consisting of \ALU\ and registers is shown in Figure 16
 \endtt
 
 The following excerpt describes the essence of the \ALU\ circuits. It is written in the \acro{HDL} Verilog and refers to the following wires and registers.
+\begintt
+wire [31:0] IR;
+wire p, q, u, v, w; // instruction fields IR[31], IR[30], IR[29], IR[28], IR[16]
+wire [3:0] op, ira, irb, irc; // instruction fields IR[19:16], IR[27:24], IR[23:20], IR[3:0]
+wire [15:0] imm; // instruction field IR[15:0]
+wire [31:0] A, B, C0, C1, regmux;
+wire [31:0] s3, t3, quotient, fsum, fprod, fquot;
+wire [32:0] aluRes;
+wire [63:0] product;
+reg [31:0] R [0:15]; // array of 16 registers
+reg N, Z, C, OV; // condition flags
+\endtt
+
+\figure{pdfs/fig-16.2.png}{2.4in}{16.2}{Processor core with ALU and registers}
+
+\code{B} and \code{C0} are the outputs from the register bank, and \code{A} is its input. The register numbers \code{ira} for port \code{A}, \code{irb} for port \code{B}, and \code{irc} for port \code{C0} are taken from 4-bit fields of the instruction register \code{IR}. \code{C1} is the multiplexer selecting among the register output \code{C0} and the immediate field \code{imm}. \code{s3} and \code{t3} are outputs of the shift units (Sect. 16.2.1). \code{product} is the output of the multiplier (16.2.2), \code{quotient} and \code{remainder} those of the divider (16.2.3), \code{fsum} that of the floating-point adder (16.2.4), \code{fprod} that of the floating-point multiplier (16.2.5), and \code{fquot} the output of the floating-point divider (16.2.6).
+\begintt
+assign A = R[ira];
+assign B = R[irb];
+assign C0 = R[irc];
+assign C1 = q ? {{16{v}}, imm} : C0;
+\endtt
+
+The following represents the main instruction decoding and selection of results. The opcodes refer to specific values of fields \code{p} and \code{op} of \code{IR}. Note that \code{if x then y else z} is denoted in Verilog by \code{x ? y : z}.
+\begintt
+assign aluRes =
+MOV ? (q ? (~u ? {{16{v}}, imm} : {imm, 16'b0}) :
+(~u ? C0 : (~irc[0] ? H : {N, Z, C, OV, 20'b0, 8'b01010000}))) :
+LSL ? t3 :          // output of left shift unit
+(ASR |mid ROR) ? s3 :    // output of right shift unit
+AND ? B & C1 :
+ANN ? B & ~C1 :
+IOR ? B | C1 :
+XOR ? B ^ C1 :
+ADD ? B + C1 + (u & C) :
+SUB ? B - C1 - (u & C) :
+MUL ? product [31:0] :     // output of multiplier
+DIV ? quotient :
+(FAD |mid FSB) ? fsum :
+FML ? fprod :
+FDV ? fquot : 0;
+\endtt
+
+The input to the register bank, \code{regmux}, is selected from either \code{alures}, \code{inbus} (for \code{LDR} instructions), or the program address \code{nxpc} (for branch and link instructions). The signal \code{regwr} determines, whether data are to be stored (written) into the register bank. Details must be gathered from the respective program listing \code{RISC.v}.
+\begintt
+always @ (posedge clk) begin R[ira] <= regwr ? regmux : A;
+N <= regwr ? regmux[31] : N; Z <= regwr ? (regmux == 0) : Z;
+C <= (ADD |mid SUB) ? aluRes[32] : C;
+OV <= (ADD |mid SUB) ? aluRes[32] \^ aluRed[31] : OV ;
+end
+\endtt
+
+Whenever a register is written, the condition flags are also affected. They are \code{N} (\code{aluRes} negative), \code{Z} (\code{aluRes} zero), \code{C} (carry), and \code{OV} (overflow). The latter apply only to addition and subtraction.
+
+\beginsubsubsection 16.2.1. Shifters.
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-% \beginsubsubsection 16.2.1 Shifters.
 % \beginsubsubsection 16.2.2. Multiplication.
 % \beginsubsubsection 16.2.3. Division.
 % \beginsubsection 16.3. FLOATING-POINT ARITHMETIC.
@@ -7885,8 +7922,6 @@ The following excerpt describes the essence of the \ALU\ circuits. It is written
 
 % \eject \input src
 
-% \figure{pdfs/fig-16.1.png}{2.4in}{16.1}{}
-% \figure{pdfs/fig-16.2.png}{2.4in}{16.2}{}
 % \figure{pdfs/fig-16.3.png}{2.4in}{16.3}{}
 % \figure{pdfs/fig-16.4.png}{2.4in}{16.4}{}
 % \figure{pdfs/fig-16.5.png}{2.4in}{16.5}{}
