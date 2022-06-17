@@ -7903,8 +7903,53 @@ Whenever a register is written, the condition flags are also affected. They are 
 
 \beginsubsubsection 16.2.1. Shifters.
 
+Shifters are multi-way multiplexers. For a 32-bit word, the simplest solution would be 32 32-way multiplexers. But this is hardly economical. On the \FPGA\ used here, 4-way muxes are basic cells. It is therefore beneficial, to compose a shifter out of 4-way muxes. Now the obvious solution is to use 3 levels of muxes through which data flow. The first level shifts by amounts of 0, 1, 2, or 3, the second by amounts of 0, 4, 8, 12, and the third by 0 or 16. This scheme is programmed as follows for left shifts (instruction \code{LSL}) with \code{B} as input, \code{sc0 = C1[1:0]} and \code{sc1 = C1[3:2]} as shift counts, and t3 as output:
+\begintt
+assign t1 = (sc0 == 3) ? {B[28:0], 3'b0} :
+            (sc0 == 2) ? {B[29:0], 2'b0} :
+            (sc0 == 1) ? {B[30:0], 1'b0} : B;
+assign t2 = (sc1 == 3) ? {t1[19:0], 12'b0} :
+            (sc1 == 2) ? {t1[23:0], 8'b0} :
+            (sc1 == 1) ? {t1[27:0], 4'b0} : t1;
+assign t3 = C1[4] ? {t2[15:0], 16'b0} : t2;
+\endtt
 
-% \beginsubsubsection 16.2.2. Multiplication.
+The solution for right shifts is analogous. An additional level of multiplexing is required, shifting in either the sign bit (\code{ASR} with sign propagation) or bits from the low end of the word (\code{ROR}), making a barrel shifter. This selection is controlled by the instruction bit \code{w = IR[16]}.
+
+\beginsubsubsection 16.2.2. Multiplication.
+
+Multiplication is an inherently more complex operation than addition and subtraction. After all, multiplication can be composed (of a sequence) of additions. There are many methods to implement multiplication, all---of course---based on the same concept of a series of additions. They show the fundamental problem of trade-off between time and space (circuitry). Some solutions operate with a minimum of circuitry, namely a single adder used for all 32 additions executed sequentially (in time). They obviously sacrifice speed. The other extreme is multiplication in a single cycle, using 32 adders in series (in space). This solution is fast, but the amount of required circuitry is high.
+
+Before we present the sequential solution, let us briefly recapitulate the basics of a multiplication $p \gets x \times y$. Here $p$ is the product, $x$ the multiplier, and $y$ the multiplicand. Let $x$ and $y$ be \emph{unsigned} integers. Consider $x$ in binary form.
+$$x = x_{31} \times 2^{31} + x_{30} \times 2^{30} + ... + x_1 \times 2^1 + x_0 \times 2^0$$
+Evidently, the product is the sum of 32 terms of the form $x_k \times 2^k \times y$, i.e. of $y$ left shifted by $k$ positions multiplied by $x_k$. Since $x_k$ is either 0 or 1, the product is either 0 or $y$ (shifted). Multiplication is thus performed by an adder and a selector. The selector is controlled by $x_k$, a bit of the multiplier. Instead of selecting this bit among $x_0...x_{31}$, we right shift $x$ by one bit in each step. Then the selection is always according to $x_0$. The \emph{add-shift} step then is
+\begintt
+IF ODD(x) THEN p := p + y END ;
+y := 2*y; x := x DIV 2
+\endtt
+
+whereby multiplication by 2 is done by a left shift, and division by 2 by a right shift: As an example, consider the multiplication of two 4-bit integers $x = 5$ and $y = 3$, requiring 4 steps:
+
+\medskip
+\halign{#\hfil\quad&#\hfil\quad&#\hfil\quad&#\hfil\quad&#\hfil\cr
+ & \code{p} & \code{x} & \code{y} & \cr
+\noalign{\smallskip\hrule}\cr
+           & 0000'0000 & 0101 & 0000'0011 & \cr
+add y to p & 0000'0011 & 0101 & 0000'0011 & \cr
+shift      & 0000'0011 & 0010 & 0000'0110 & \cr
+add 0 to p & 0000'0011 & 0010 & 0000'0110 & \cr
+shift      & 0000'0011 & 0001 & 0000'1100 & \cr
+add y to p & 0000'1111 & 0001 & 0000'1100 & \cr
+shift      & 0000'1111 & 0000 & 0001'1000 & \cr
+add 0 to p & 0000'1111 & 0000 & 0001'1000 & \cr
+shift      & 0000'1111 & 0000 & 0011'0000 & p = 15 \cr
+}\medskip
+
+The shifting of \code{x} to the right also suggests that instead of shifting \code{y} to the left in each step, we keep \code{y} in the same position and shift the partial sum \code{p} to the right. We notice that the size of \code{x} decreases by 1 in each step, whereas the size of \code{p} increases by 1. This allows to pack \code{p} and \code{x} into a single double register \code{$<$B, A$>$} with a shifting border line. At the end, it contains the product $p = x \times y$.
+
+
+
+
 % \beginsubsubsection 16.2.3. Division.
 % \beginsubsection 16.3. FLOATING-POINT ARITHMETIC.
 % \beginsubsubsection 16.3.1. Floating-point addition.
