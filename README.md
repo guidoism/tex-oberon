@@ -21,6 +21,10 @@ Being a document with TeX sources, instead of a dead PDF, future
 Project Oberon engineers will be able to modify the text to keep it
 up-to-date with the running source code.
 
+I have a dream that we -- as the Oberon community -- can edit and publish this
+book. I would love for this to be printed as a nice hardcover that can sit
+right next to my Art of Computer Programming books.
+
 PDF and code taken from http://www.projectoberon.com
 
 ## Progress
