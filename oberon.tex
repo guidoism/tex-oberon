@@ -15,8 +15,13 @@
 }
 \def\pattern#1{{\bf Pattern #1:}}
 \def\RISC{\acro{RISC}}
-\def\MMU{\acro{MMU} }
-\def\ASCII{\acro{ASCII} }
+\def\FPGA{\acro{RISC}}
+\def\RAM{\acro{MMU}}
+\def\BRAM{\acro{MMU}}
+\def\SRAM{\acro{MMU}}
+\def\ROM{\acro{MMU}}
+\def\MMU{\acro{MMU}}
+\def\ASCII{\acro{ASCII}}
 
 % TODO: Change raw tags to use semantic \code and \emph macros
 
@@ -7787,9 +7792,31 @@ The required modules are \code{Texts}, \code{Oberon}, \code{Graphics}, \code{Gra
 
 \beginchapter CHAPTER 16: IMPLEMENTATION OF THE RISC PROCESSOR.
 
+\beginsubsection 16.1. INTRODUCTION.
+
+The design of the processor to be described here in detail was guided by two intentions. The first was to present an architecture that is distinct in its regularity, minimal in the number of features, yet complete and realistic. It should be ideal to present and explain the main principles of processors. In particular, it should connect the subjects of architectural and compiler design, of hardware and software, which are so closely interconnected.
+
+Clearly ``real'', commercial processors are far more complex than the one presented here. We concentrate on the fundamental concepts rather than on their elaboration. We strive for a fair degree of completeness of facilities, but refrain from their ``optimization''. In fact, the dominant part of the vast size and complexity of modern processors and software is due to speed-up called optimization. It is the main culprit in obfuscating the basic principles, making them hard, if not impossible to study. In this light, the choice of a \RISC\ (Reduced Instruction Set Computer) is obvious.
+
+The use of an \FPGA\ provides a substantial amount of freedom for design. Yet, the hardware designer must be much more aware of availability of resources and of limitations than the software developer. Also, timing is a concern that usually does not occur in software, but pops up unavoidably in circuit design. Nowadays circuits are no longer described in terms of elaborate diagrams, but rather as a formal text. This lets circuit and program design appear quite similar. The circuit description language – we here use Verilog – appears almost the same as a programming language. But one must be aware that differences still exist, the main one being that in software we create mostly sequential processes, whereas in hardware everything ``runs'' concurrently. However, the presence of a language---a textual definition---is an enormous advantage over graphical schemata. Even more so are systems (tools) that compile such texts into circuits, taking over the arduous task of placing components and connecting them (routing). This holds in particular for \FPGA{}s, where components and wires connecting them are limited, and routing is a very difficult and time-consuming matter.
+
+The development of this \RISC\ progressed through several stages. The first was the design of the architecture itself, (more or less) independent of subsequent implementation considerations. Then followed a first implementation called \RISC-0. For this a Harvard Architecture was chosen, implying that two distinct memories are used for program and for data. For both chip-internal block \RAM{}s were used. The Harvard architecture allows for a neat separation of the arithmetic from the control unit.
+
+But these blocks of RAM are relatively small on the used Spartan-3 development board (1--4K words). This board, however, provides also an \FPGA-external static \RAM\ with a capacity of 1 MByte. In a second effort, the \BRAM\ for data was replaced by this \SRAM. Both instructions and data are placed into the \SRAM, resulting in a von Neumann architecture.
+
+The \RISC\ hardware is characterized by three interfaces. The first is the programmer's interface, the architecture, that is, those aspects that are relevant to the programmer, in particular, the instruction set. It is described in Appendix A2. The second is the hardware interface between the processor core and its environment, described here. The third is that which connects the environment with physical devices such as memory, keyboard and display. This is described in Chapter 17.
+\begintt
+module RISC5(
+  input clk, rst, stallX,
+  input [31:0] inbus, codebus,
+  output [19:0] adr,            // memory and device addresses
+  output rd, wr, ben,           // ead, write, byte enable control signals for memory
+  output [31:0] outbus);
+\endtt
+
+The main parts of the hardware interface are three busses, the data input and output busses, the code bus, and the address bus. Signals \code{rd} and \code{wr} indicate, whether a read or a write operation is to be performed. \code{ben} indicates a byte (rather than word) access. The entire processor operates synchronously on the clock \code{clk} (25 MHz on Spartan-3), \code{rst} is the reset signal (from a push button on the development board), and \code{stall} is the input to stall the processor.
 
 
-% \beginsubsection 16.1. INTRODUCTION.
 % \beginsubsection 16.2. THE ARITHMETIC AND LOGIC UNIT (ALU).
 % \beginsubsubsection 16.2.1 Shifters.
 % \beginsubsubsection 16.2.2. Multiplication.
