@@ -16,6 +16,9 @@
 \def\pattern#1{{\bf Pattern #1:}}
 \def\RISC{\acro{RISC}}
 \def\CISC{\acro{CISC}}
+\def\MIPS{\acro{MIPS}}
+\def\SPARC{\acro{SPARC}}
+\def\ARM{\acro{ARM}}
 \def\FPGA{\acro{FPGA}}
 \def\RAM{\acro{RAM}}
 \def\BRAM{\acro{BRAM}}
@@ -24,6 +27,7 @@
 \def\ALU{\acro{ALU}}
 \def\MMU{\acro{MMU}}
 \def\ASCII{\acro{ASCII}}
+\def\IEEE{\acro{IEEE}}
 
 % TODO: Change raw tags to use semantic \code and \emph macros
 
@@ -7976,8 +7980,131 @@ The multiplier interprets its operands as signed (\code{u = 0}) or unsigned (\co
 
 During execution of the 32 add-shift steps the processor must be stalled. The process proceeds and the counter \code{S} advances as long as the input \code{MUL} is active (high). \code{MUL} indicates that the current operation is a multiplication, and the signal is stable until the processor advances to the next instruction. This happens when step 31 is reached (Figure 16.4).
 
-% \beginsubsubsection 16.2.3. Division.
-% \beginsubsection 16.3. FLOATING-POINT ARITHMETIC.
+\begintt
+stall = MUL & ~(S == 31);
+S <= MUL ? S + 1 : 0;
+\endtt
+
+\figure{pdfs/fig-16.4.png}{2.4in}{16.4}{Generating \emph{stall}}
+
+The details of the simple multiplier are listed below:
+
+\begintt
+module Multiplier( input CLK, MUL, u, output stall,
+input [31:0] x, y, output [63:0] z);
+reg [4:0] S; // state
+reg [31:0] B2, A2; // high and low parts of partial product
+wire [32:0] B0, B00, B01;
+wire [31:0] B1, A0, A1;
+assign stall = MUL & ~(S == 31);
+assign B00 = (S == 0) ? 0 : {B2[31] & u, B2};
+assign B01 = A0[0] ? {y[31] & u, y} : 0;
+assign B0 = ((S == 31) & u) ? B00 - B01 : B00 + B01;
+assign B1 = B0[32:1];
+assign A0 = (S == 0) ? x : A2;
+assign A1 = {B0[0], A0[31:1]};
+assign z = {B1, A1};
+always @ (posedge(CLK)) begin
+  B2 <= B1; A2 <= A1;
+  S <= MUL ? S+1 : 0;
+end
+endmodule
+\endtt
+
+Implementing multiplication in hardware made the operation about 30 times faster than its solution by software. A significant factor! As multiplication is a relatively rare operation---at least in comparison with addition and subtraction---early \RISC\ designs (\MIPS, \SPARC, \ARM) refrained from its full implementation in hardware. Instead, an instruction called multiply step was provided, performing a single add-shift step in one clock cycle. A multiplication was then programmed by a sequence of 32 step instructions, typically provided as a subroutine. This measure of economy was abandoned, when hardware became faster and cheaper.
+
+The \FPGA used on the Spartan-3 board features a welcome facility for speeding up multiplication, namely fast 18 \times\ 18 bit multiplier units. These are made available as basic cells of the \FPGA, and they multiply in a single clock cycle. Considering an operand $x = x_1 \times 2^{16} + x_0$, the product is obtained as the sum of only 4 terms:
+
+$$p = x \times y = x_1 \times y_1 \times 2^{32} + (x_0 \times y_1 + x_1 \times y_0) \times 2^{16} + x_0 \times y_0$$
+
+Thereby multiplication of two 32-bit integers can be performed in 2 cycles only, one for multiplications, one for addition. Four multipliers are needed. For details, the reader is referred to the program listing (module \code{Multiplier1}).
+
+\beginsubsubsection 16.2.3. Division.
+
+Division is similar to multiplication in structure, but slightly more complicated. We present its implementation by a sequence of 32 \emph{shift-subtract} steps, the complement of add-shift. We here discuss division of \emph{unsigned} integers only.
+\begintt
+q = x DIV y
+r = x MOD y
+\endtt
+
+\code{q} is the quotient, \code{r} the remainder. These are defined by the invariants
+
+$$x = q \times y + r\ with\ 0 \le r < y$$
+
+Both \code{q} and \code{r} are held in registers. Initially we set \code{r} to \code{x}, the dividend, and then subtract multiples of \code{y} (the divisor) from it, each time checking that the result is not negative. This \emph{shift-subtract} step is
+\begintt
+r := 2*r; q := 2*q;
+IF r – y ≥ 0 THEN r := r – y END
+\endtt
+
+As an example, consider the division of the 8-bit integer x = 14 by the 4-bit integer y = 4, where multiplication and division by 2 are done by shifts:
+
+\medskip
+\halign{#\hfil\quad&#\hfil\quad&#\hfil\quad&#\hfil\quad&#\hfil\cr
+ & \code{r} & \code{q} & \code{y} & \cr
+\noalign{\smallskip\hrule}\cr
+             & 0000'1110 & 0000 & 0001'1000 & \cr
+shift        & 0000'1110 & 0000 & 0001'1000 & $r < y$ \cr
+sub 0 from r & 0000'1110 & 0000 & 0000'1100 & \cr
+shift        & 0000'1110 & 0000 & 0000'1100 & $r \ge y$ \cr
+sub y from r & 0000'0010 & 0001 & 0000'1100 & \cr
+shift        & 0000'0010 & 0010 & 0000'0110 & $r<y$ \cr
+sub 0 from r & 0000'0010 & 0010 & 0000'0110 & \cr
+shift        & 0000'0010 & 0100 & 0000'0011 & $r<y$ \cr
+sub y from r & 0000'0010 & 0100 & 0000'0011 & $q = 4, r = 2$ \cr
+}\medskip
+
+As with multiplication this arrangement may be simplified by putting r and q into a double-length shift register, and by shifting r to the left instead of y to the right. This results in
+
+\medskip
+\halign{#\hfil\quad&#\hfil\quad&\hfil#\quad&#\hfil\quad&#\hfil\cr
+ & \code{r} & \code{q} & \cr
+\noalign{\smallskip\hrule}\cr
+             & 0000'1110 &       & \cr
+shift        & 0001'110  &   0   & $r < Y$ \cr
+sub 0 from r & 0001'110  &   0   & \cr
+shift        & 0011'10   &  00   & $r \ge Y$\cr
+sub y from r & 0000'10   &  01   & \cr 
+shift        & 0001'0    & 010   & $r < Y$\cr
+sub 0 from r & 0001'0    & 010   & \cr
+shift        & 0010      & 0100  & $r < Y$\cr
+sub 0 from r & 0010      & 0100  & $q=4, r=2$\cr
+}\medskip
+
+This scheme is represented by the circuit shown in Figure 16.5.
+
+\figure{pdfs/fig-16.5.png}{2.4in}{16.5}{Schematic of divider}
+
+Stall generation is the same as for the multiplier. A division takes 32 clock cycles. Further details are shown in the subsequent program listing.
+\begintt
+module Divider(
+input clk, DIV,
+output stall,
+input [31:0] x, y,
+output [31:0] quot, rem);
+reg [4:0] S; // state
+reg [31:0] r3, q2;
+wire [31:0] r0, r1, r2, q0, q1, d;
+assign stall = DIV & ~(S == 31);
+assign r0 = (S == 0) ? 0 : r3;
+assign d = r1 - y;
+assign r1 = {r0[30:0], q0[31]};
+assign r2 = d[31] ? r1 : d;
+assign q0 = (S == 0) ? x : q2;
+assign q1 = {q0[30:0], ~d[31]};
+assign rem = r2;
+assign quot = q1;
+always @ (posedge(clk)) begin
+  r3 <= r2; q2 <= q1;
+  S <= DIV ? S+1 : 0;
+end
+endmodule
+\endtt
+
+\beginsubsection 16.3. FLOATING-POINT ARITHMETIC.
+
+The \RISC\ uses the \IEEE\ Standard for representing \code{REAL} (floating-point) numbers with 32 bits. The word is divided into 3 fields: \code{s} for the sign, \code{e} for the exponent, and \code{m} for the mantissa. The value is
+
 % \beginsubsubsection 16.3.1. Floating-point addition.
 % \beginsubsubsection 16.3.2. Floating-point multiplication.
 % \beginsubsubsection 16.3.3. Floating-point division.
@@ -7993,8 +8120,6 @@ During execution of the 32 add-shift steps the processor must be stalled. The pr
 
 % \eject \input src
 
-% \figure{pdfs/fig-16.4.png}{2.4in}{16.4}{Generating \emph{stall}}
-% \figure{pdfs/fig-16.5.png}{2.4in}{16.5}{Schematic of divider}
 % \figure{pdfs/fig-16.6.png}{2.4in}{16.6}{\acro{IEEE} standard floating-point representation of code{REAL} numbers}
 % \figure{pdfs/fig-16.7.png}{2.4in}{16.7}{Steps of floating-point addition}
 % \figure{pdfs/fig-16.8.png}{2.4in}{16.8}{The control unit}
