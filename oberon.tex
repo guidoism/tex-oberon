@@ -8105,6 +8105,8 @@ endmodule
 
 The \RISC\ uses the \IEEE\ Standard for representing \code{REAL} (floating-point) numbers with 32 bits. The word is divided into 3 fields: \code{s} for the sign, \code{e} for the exponent, and \code{m} for the mantissa. The value is
 
+$$x = (-1)^s \times 2^{e-127} \times 1.m \qquad\hbox{with}\qquad 1.0 \le m < 2.0 \eqno(normalized form)$$
+
 % \beginsubsubsection 16.3.1. Floating-point addition.
 % \beginsubsubsection 16.3.2. Floating-point multiplication.
 % \beginsubsubsection 16.3.3. Floating-point division.
