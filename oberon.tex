@@ -6,7 +6,7 @@
 \def\btree{{\mc B-T}ree }
 \def\ps2{{\mc PS}-2 }
 \def\rs232{{\mc RS}-232 }
-\def\sdcard{{\mc SD}-card }
+\def\sdcard{{\mc SD}-card}
 \def\figure#1#2#3#4{\medskip\centerline{\directlua 0 {
   a = img.new{filename = "#1", width = "#2"}
   img.write(a)
@@ -24,6 +24,7 @@
 \def\BRAM{\acro{BRAM}}
 \def\SRAM{\acro{SRAM}}
 \def\ROM{\acro{ROM}}
+\def\SPI{\acro{SPI}}
 \def\ALU{\acro{ALU}}
 \def\MMU{\acro{MMU}}
 \def\ASCII{\acro{ASCII}}
@@ -8105,40 +8106,351 @@ endmodule
 
 The \RISC\ uses the \IEEE\ Standard for representing \code{REAL} (floating-point) numbers with 32 bits. The word is divided into 3 fields: \code{s} for the sign, \code{e} for the exponent, and \code{m} for the mantissa. The value is
 
-$$x = (-1)^s \times 2^{e-127} \times 1.m \qquad\hbox{with}\qquad 1.0 \le m < 2.0 \eqno(normalized form)$$
+$$x = (-1)^s \times 2^{e-127} \times 1.m \qquad\hbox{with}\qquad 1.0 \le m < 2.0 \qquad\hbox{(normalized form)}$$
 
-% \beginsubsubsection 16.3.1. Floating-point addition.
-% \beginsubsubsection 16.3.2. Floating-point multiplication.
-% \beginsubsubsection 16.3.3. Floating-point division.
-% \beginsubsection 16.4. THE CONTROL UNIT.
-% \beginchapter CHAPTER 17: THE PROCESSOR'S ENVIRONMENT.
-% \beginsubsection 17.1. THE SRAM MEMORY.
-% \beginsubsection 17.2. PERIPHERAL INTERFACES.
-% \beginsubsubsection 17.2.1. The PS-2 interface.
-% \beginsubsubsection 17.2.2. The SPI interface.
-% \beginsubsubsection 17.2.3. The RS-232 interface.
-% \beginsubsubsection 17.2.4. The display controller.
-% \beginsubsubsection 17.2.5. The Mouse interface.
+Numbers are represented in sign-magnitude form. This implies that for sign inversion only the sign
+bit must be inverted, and exponent and mantissa remain unchanged.
+
+Zero is a special case represented by 32 0-bits, and therefore has to be treated separately. Furthermore, $e = 255$ denotes ``not a number''. It is generated in the case of arithmetic overflow.
+
+\figure{pdfs/fig-16.6.png}{2.4in}{16.6}{\acro{IEEE} standard floating-point representation of \code{REAL} numbers}
+
+\beginsubsubsection 16.3.1. Floating-point addition.
+
+If two numbers are to be added, they must have the same exponent. This implies that the summand with the smaller exponent must be denormalized. $m$ is shifted to the right and $e$ is incremented accordingly. That is, if $d$ is the difference of the two exponents, $m$ is multiplied by $2d$, and $e$ is incremented by $d$. After the addition, the sum must be rounded and post-normalized. $m$ is shifted to the left and $e$ is decremented accordingly. The shift amount is determined by the position of the leftmost one-bit. This results in the scheme shown in Figure 16.7, and the module's interface is
+\begintt
+module FPAdder(
+  input clk, run, u, v,
+  input [31:0] x, y,
+  output stall,
+  output [31:0] z);
+\endtt
+
+\figure{pdfs/fig-16.7.png}{2.4in}{16.7}{Steps of floating-point addition}
+
+It is important to achieve proper rounding. This is done by extending the mantissa of both operands by a guard bit, initialized to 0. A one is added (effectively 0.5) and at the end the guard bit is discarded.
+
+The two predefined conversion functions \code{FLT} and \code{FLOOR} are conveniently implemented as additions. A denormalized 0 is added to the argument, effecting the proper shift. In the case of \code{FLT} (modifier bit \code{u} = 1), denormalization is omitted (no 1-bit inserted), and in the case of \code{FLOOR} (modifier bit \code{v} = 1), post-normalization is suppressed.
+
+\beginsubsubsection 16.3.2. Floating-point multiplication.
+
+A product is given by the equation
+
+$$p = x \times y = (2^{xe} \times xm) \times (2^{ye} \times ym) = 2^{xe+ye} \times (xm \times ym)$$
+$$p = (xs, xe, xm) \times (ys, ye, ym) = (xs \oplus ys, xe+ye, xm \times ym)$$
+
+That is, exponents are added, mantissas multiplied. Denormalization is not needed. Post-normalization is a right shift of at most one bit, because if $1.0 \le xm$, $ym < 2.0$, the result satisfies $1.0 \le xm \times ym < 4.0$. The sign of the product is the exclusive or of the signs of the arguments. The multiplier module's interface is
+\begintt
+module FPMultiplier(
+  input clk, run,
+  input [31:0] x, y,
+  output stall,
+  output [31:0] z);
+\endtt
+
+\beginsubsubsection 16.3.3. Floating-point division.
+
+A quotient is given by the equation
+
+$$q = x/y = (2^{xe} \times xm) / (2^{ye} \times ym) = 2^{xe-ye} \times (xm/ym)$$
+$$q = (sx, ex, mx) / (sy, ey, my) = (sx \oplus sy, ex-ey, mx/my)$$
+
+That is, exponents are subtracted, mantissas divided. Denormalization is not needed. Post-normalization requires a left shift by at most a single bit, because if $1.0 \le xm$, $ym < 2.0$, the result satisfies $0.5 \le xm/ym < 2.0$. The sign of the product is the exclusive or of the signs of the arguments. The divider module's interfaces is
+
+\begintt
+module FPDivider(
+  input clk, run,
+  input [31:0] x, y,
+  output stall,
+  output [31:0] z);
+\endtt
+
+\beginsubsection 16.4. THE CONTROL UNIT.
+
+The control unit determines the sequence of executed instructions. It contains two registers, the program counter PC holding the address of the current instruction, and the current instruction register IR holding the instruction currently being interpreted. Instructions are obtained from memory through the codebus (see interface), from where the decoding signals emanate. Mostly, the arithmetic unit and the control unit operate concurrently (in parallel). While the arithmetic unit performs the operation held in register \code{IR} and data signals flow through the \ALU, the control unit fetches in the same clock cycle the next instruction from memory in the location with the address held in \code{PC}. Next address and next instruction are latched in the registers at the end of a cycle. This scheme constitutes a one-element pipeline of instructions.
+
+The principal task of the control unit is to generate the address of the next instruction. There are essentially only four cases:
+
+\item{0.} Zero on reset.
+\item{1.} The next instructions address is \code{PC}+1 (all instructions except branches)
+\item{2.} The branch target \code{PC}+1 + offset. (Branch instructions).
+\item{3.} It is taken from a data register. (This is used for returning from procedures).
+
+This is reflected by the following program text, and shown in Figure 16.8.
+\begintt
+reg [17:0] PC;
+reg [31:0] IRBuf;
+wire [31:0] IR;
+wire [31:0] pmout;
+wire [17:0] pcmux, nxpc;
+wire cond;
+IR = codebus;
+nxpc = PC + 1;
+pcmux = (~rst) ? 0 :
+  (stall) ? PC : // stall
+  (BR & cond & u) ? off + nxpc :
+  (BR & cond & ~u) ? C0[19:2] :
+  nxpc;
+always @ (posedge clk) PC <= pcmux; end
+\endtt
+
+\figure{pdfs/fig-16.8.png}{2.4in}{16.8}{The control unit}
+
+Branches are the only conditional instructions. Whether a branch is taken or not, is determined by the combination of the condition flags selected by the condition code field of the branch instruction. \code{IR[27]} is the condition sense inversion bit.
+\begintt
+TODO
+\endtt
+
+There is, unfortunately, a complication obfuscating the simple scheme presented so far. It stems from the necessity to initialize the processor. Only registers and memory blocks (\BRAM) can be initialized and loaded by the available \FPGA-tools. How, then, is a program (in our case the boot loader) moved into memory, the chip-external \SRAM? The following scheme has been chosen:
+
+The initial program is loaded into a \BRAM\ (1K x 32). This block is memory-mapped into high-end addresses in the range of the data stack. On startup, the flag \code{PMsel} is set and \code{IR} is loaded from \code{pmout} (from the \BRAM) at StartAdr. At the end of the program (boot loader), a branch instruction with destination 0 jumps to the beginning of the program that had just been loaded into \SRAM\ by the boot loader. This is, presumably, but not necessarily, the operating system. The following changes and additions are required:
+\begintt
+localparam StartAdr = 18'b111111100000000000; // 0FE000H
+reg PMsel; // memory select for instruction fetch reg [31:0] IRBuf;
+dbram32 PM ( // BRAM
+.clka (clk),
+.rdb (pmout), // output port .ab (pcmux[10:0])); // address
+assign IR = PMsel ? pmout : IRBuf;
+always @ (posedge clk) begin
+PMsel <= ~rst | (pcmux[17:11] == 7'b1111111); IRBuf <= stall ? IRBuf : codebus;
+...
+end ;
+\endtt
+
+\beginchapter CHAPTER 17: THE PROCESSOR'S ENVIRONMENT.
+
+The \RISC\ processor is embedded in an environment (module \code{RISCTop.v}) connecting it with elements that are \FPGA-chip external, but whose are provided on the Spartan development board (Figure 17.1). The environment consists of an address decoder, a data multiplexer, and interfaces to the memory and peripheral devices.
+
+\figure{pdfs/fig-17.1.png}{2.4in}{17.1}{The \RISC\ configuration}
+
+The decoder for output and the multiplexer for input determine the various addresses of devices:
+
+\medskip
+\halign{#\hfil\quad&#\hfil\quad&\hfil#\quad&#\hfil\quad&#\hfil\cr
+\code{adr} & & input & output & \cr
+\noalign{\smallskip\hrule}\cr
+0  & \code{0FFFFFFC0} & millisecond counter & reserved \cr
+4  & \code{0FFFFFFC4} & switches & LEDs \cr
+8  & \code{0FFFFFFC8} & RS-232 data & RS-232 data \cr
+12 & \code{0FFFFFFCC} & RS-232 status & RS-232 control \cr
+16 & \code{0FFFFFFD0} & SPI data (SD-card, net) & SPI data (SD-card, nat) \cr
+20 & \code{0FFFFFFD4} & SPI status & SPI control \cr
+24 & \code{0FFFFFFD8} & PS/2 keyboard & \cr
+28 & \code{0FFFFFFDC} & mouse & \cr
+}\medskip
+
+The circuitry connecting with the \SRAM\ is part of this module, whereas the drivers for the other devices are described in separate modules. Note: The signals to and from devices must be listed in the heading of the top module, which is not imported by any other module. Their pin numbers are specified in a configuration file (\code{.ucf}). For details, the reader is referred to the program listing, as several items are rather dependent on the given Spartan-3 board.
+
+\beginsubsection 17.1. THE SRAM MEMORY.
+
+The design of the circuitry around a static \RAM\ is quite straight forward. The only controls are a read (\code{SRoe}) and a write enable signal (\code{SRwe}). Since the \SRAM\ multiplexes data lines for input and output, a tri-state driver (\code{SRbuf}) must be used on the \FPGA. This is shown schematically in Figure 17.2.
+
+\figure{pdfs/fig-17.2.png}{2.4in}{17.2}{Connections between processor and \SRAM}
+
+However, there is a complication: the feature of byte-wise access. After all, the present \RAM\ is 32 bits wide (actually there are two 512K x 16-bit chips in parallel). Evidently, some multiplexing is unavoidable. The task is significantly eased by the chip's feature of four separate write enables, one for each byte of a word. The selection of the byte affected is determined by address bits 0 an 1 (which are ignored in the case of word-access). This scheme is shown in Figure 17.3. The codebus bypasses the multiplexers.
+
+\figure{pdfs/fig-17.3.png}{2.4in}{17.3}{Multiplexers for \SRAM\ byte access}
+
+\beginsubsection 17.2. PERIPHERAL INTERFACES.
+
+Each of the interfaces to external media is implemented as a separate module and can therefore easily be exchanged. Modules are connected with the processor by the input and the output bus, and by enable signals \code{wr} and \code{rd}.
+
+\beginsubsubsection 17.2.1. The PS-2 interface.
+
+PS/2 is mostly used for input devices. It uses 2 wires (apart from ground)., one for data, one for the clock. It uses a synchronous transmission, and the clock is driven by the device. Here it is used for the keyboard and the mouse (see Sect. 17.2.5). Transmission occurs in packets of 8 bits. An optional third wire serves for output. It is not used in this application. The interface is very simple and consists of an 8-bit buffer register. The following describes the interface for the keyboard.
+
+A bit is shifted into the data register whenever the clock shows a falling edge, i.e. the clock signal \code{Q0} is low and the clock delayed by one cycle \code{Q1} is high.
+
+\figure{pdfs/fig-17.4.png}{2.4in}{17.4}{The \ps2 configuration}
+
+In the driver for the keyboard a 16-byte fifo buffer is inserted, forming a queue. This is necessary in order to avoid loss of characters when the processor is tied up in computation.
+\begintt
+module PS2(
+input clk, rst,
+input done, // "byte has been read" output rdy, // "byte is available" output shift, // shift in, transmitter output [7:0] data,
+input PS2C, // serial input
+input PS2D); // clock
+reg Q0, Q1; // synchronizer and falling edge detector reg [10:0] shreg;
+reg [3:0] inptr, outptr;
+reg [7:0] fifo [15:0]; // 16 byte buffer
+wire endbit;
+assign endbit = ~shreg[0]; //start bit reached correct pos assign shift = Q1 & ~Q0;
+assign data = fifo[outptr];
+assign rdy = ~(inptr == outptr);
+always @ (posedge clk) begin
+Q0 <= PS2C; Q1 <= Q0;
+shreg <= (~rst | endbit) ? 11'h7FF :
+shift ? {PS2D, shreg[10:1]} : shreg;
+outptr <= ~rst ? 0 : rdy & done ? outptr+1 : outptr; inptr <= ~rst ? 0 : endbit ? inptr+1 : inptr;
+if (endbit) fifo[inptr] <= shreg[8:1];
+end endmodule
+\endtt
+
+\beginsubsubsection 17.2.2. The Mouse.
+
+Subsequently we present two Mouse interfaces. The first (\code{MouseP}) is based on the PS/2 Standard and caters for most commercially available mice. The second (\code{MouseX}) is included here for historical reasons. It was used by the computer Lilith in 1979, and used the same Mouse as its ancestor Alto (at \acro{PARC}, 1975). It is distinguished by a very simple hardware without its own microprocessor, which is currently contained in most mice. This goes at a cost of a 9-wire cable. But today, microprocessors are cheaper than cables. We include this interface here, because it allows for a simple explanation of the principle of pointing devices.
+
+The first interface uses the PS/2 Standard, that is, a 2-wire cable (not counting ground and power). It complies with the commercial standard of pointing devices. Details are shown on module \code{MouseP.v}.
+\begintt
+module MouseP (
+  input rst, clk,
+  inout PS2C, PS2D,
+  output [27:0] out);
+endmodule
+\endtt
+
+The second interface described here is not based on any standard, but it features the same interface to the software environment. Its principles are very simple and easily explained, and it refrains from the use of a mouse-internal processor. The price for this simplicity is a cable with 7 wires (plus 2 for power and ground), namely 3 for 3 buttons, and 2 for each direction, $x$ (left/right) and $y$ (up/down).
+
+Let us first explain how signals indicating movements are derived. The key reason for the solution's simplicity is that these signals are directly mirrored by the position of a cursor on the display. The human user simply moves the Mouse until the cursor has reached the desired position (for example, at a displayed object). Thereby, the human eye and hand are included in the feedback loop providing the desired precision. This represents a very clever symbiosis between man and computer.
+
+An actual movement is recognized by a simple light sensor (we will restrict our observation to a single coordinate $x$). The movement is transmitted to a wheel consisting of a transparent disc with intransparent spokes. A light beam shines through the disk and is received by the light sensor. Each time a spoke passes, the light is blocked. Any change in the sensor output signals a movement (see Figure 17.5). Unfortunately, this scheme does not allow to recognize the direction of the movement (left or right). A second light and sensor solve this problem. The distance between the two lights is half the distance of adjacent spokes.
+
+\figure{pdfs/fig-17.5.png}{2.4in}{17.5}{Wheel with spokes and sensors}
+
+The signal pair x0, x1 originating from a movement (with constant speed) to the left or to the right is shown in Figure 17.6.
+
+\figure{pdfs/fig-17.6.png}{2.4in}{17.6}{Signals resulting from movements}
+
+The logic equations for movements to the left and right (or up and down) are derived from this signal pair. For each signal a register records the state. Therefore it can be determined whether a move to the left, or to the right, or no move had occurred. The sampling frequency is irrelevant, as long as it is high enough. Let x01 be x00 delayed by one clock cycle, and x11 be x10 delayed by one cycle.
+\begintt
+x00    0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1
+x01    0 0 0 0 1 1 1 1 0 0 0 0 1 1 1 1
+x10    0 0 1 1 0 0 1 1 0 0 1 1 0 0 1 1
+x11    0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1
+right  0 1 0 0 0 0 0 1 1 0 0 0 0 0 1 0
+left   0 0 1 0 1 0 0 0 0 0 0 1 0 1 0 0
+\endtt
+
+Every active \emph{right} signal causes the 10-bit $x$ counter to be incremented, and every \emph{left} to be decremented.
+
+An identical circuit is used for the up/down direction, with its wheel set perpendicular to the first wheel. Finally, the output is packed into a single word. 3 bits are taken by the keys, and 10 by each of the two counters.
+\begintt
+TODO
+\endtt
+
+\beginsubsubsection 17.2.3. The SPI interface for the SD-card (disk) and the Net.
+
+\SPI\ (Standard Peripheral Interface) is similar to PS/2, and also synchronous. However, there may be many participants. They are configured in a loop as shown in Figure 17.7, and the clock is provided by a master, namely the \RISC. \SPI\ requires 3 wires (apart from ground).
+
+\figure{pdfs/fig-17.7.png}{2.4in}{17.7}{\SPI-configuration as a ring}
+
+Here, however, no use is made of \SPI's ring topology. Instead, One master interface is serving both the disk and the net. The connection is determined in module \code{RISC5Top}. The packet (and thus the shift register) is 32 bits long.
+
+Transmission frequency is 0.4 MHz at startup (as required by the \sdcard), and then is raised to 8.33 MHz. Details are shown in the respective program listing.
+
+\figure{pdfs/fig-17.8.png}{2.4in}{17.8}{Connections between \SPI, \sdcard, and \code{Net} (see \code{RISCTop5.v})}
+\begintt
+// Motorola Serial Peripheral Interface (SPI) PDR 23.3.12 / 16.10.13
+// transmitter / receiver of words (fast, clk/3) or bytes (slow, clk/64)
+// e.g 8.33MHz or ~400KHz respectively at 25MHz (slow needed for SD-card init) // note: bytes are always MSbit first; but if fast, words are LSByte first
+module SPI(
+input clk, rst,
+input start, fast, input [31:0] dataTx, output [31:0] dataRx, output reg rdy,
+input MISO,
+output MOSI, SCLK); endmodule
+\endtt
+
+The SPI specifications postulate that bytes are sent with the most significant bit first. This results in a somewhat twisted scheme for shifting bits (see Fig. 17.9).
+\begintt
+shreg <= {shreg[30:24], MISO, shreg[22:16], shreg[31], shreg[14:8], shreg[23], shreg[6:0], shreg[15]}
+\endtt
+
+\figure{pdfs/fig-17.9.png}{2.4in}{17.9}{Shifting with \acro{MSB} first}
+
+\beginsubsubsection 17.2.4. The display controller.
+
+A controller for a raster scan display feeds data from memory to the display. The data area in memory is called \emph{frame buffer}. It contains a fixed number of bits for each pixel on the screen. In this case, there is exactly one bit per pixel, signalling black or white. For a 1024 \times 768 pixel display area, 96 Kbyte are required.
+
+The pixel position on the display is not determined by an address. Instead, data are received by rhe display purely sequentially, and the position is indirectly determined by two synchronization signals, \emph{hsync} (for horizontal sync) at the end of each line, and \emph{vsync} (for vertical sync) at the end of every frame. This scheme originates from cathode ray tube (\acro{CRT}) monitors, where an electron beam is sweeping the screen. It is deflected by magnetic fields, which require some time to sweep back. The timing with retrace periods was retained for \acro{LCD} displays as a legacy.
+
+The heart of the controller consists of a data buffer (32 bits) fed from memory and shifted out bit by bit to the display, and of two counters \code{hcnt} and \code{vcnt}, representing the horizontal and vertical coordinates.The memory word address is derived from \code{hcnt} and \code{vcnt}:
+
+$$vidadr = (hcnt DIV 32) + (vcnt * 32) + org$$
+
+Every line consists of 1024 pixels (32 words). The challenge is to find a design with as few registers and comparators as possible. There are two signals for suppressing video data: \code{hblank}, \code{vblank}. They are needed for turning the light off durich retrace.
+
+\figure{pdfs/fig-17.10.png}{2.4in}{17.10}{Synchronization and blanking signals}
+
+Let us generalize this scheme to displays of $w$ pixels per line and $h$ lines per frame. Also, let $w'$ be the number of pixels per line including those of the retrace time, and $h'$ be the number of lines including the vertical retrace. Also, let the number of displayed frames per second be $n$. Then the pixel frequency is
+
+$$f = w' \times h' \times n$$
+
+This will in all probability be different from the system clock's frequency. Therefore the need arises for a diffenernt pixel clock. It is generated by the \FPGA's built-in digital clock manager (\code{dcm}). It multiplies and divides the system clock by selectable factors. Note that the refresh rate may vary within certain bounds for all brands of monitors. Therefore, a simple factor may be chosen for division and multiplication. Examples:
+
+(1024 \times 768) 1182 \times 791 \times 60 = 56'097'720 rounded up to 60 MHz (1280 \times 1024) 1536 \times 1280 \times 60 = 117'964'800 rounded up to 125 MHz
+
+The pixel buffer is fed from the video buffer driven by the system clock, and it is shifted and read by the pixel clock. This makes a double-buffering necessary, as shown in Figure 17.11. Also the counters are driven by this pixel clock. The numbers for \code{hcnt} and \code{vcnt} shown are, of course, device-specific (see Figure 17.10).
+
+\figure{pdfs/fig-17.11.png}{2.4in}{17.11}{Buffering the video output}
+
+\begintt
+module VID(
+input clk, clk25, inv,
+input [31:0] viddata,
+output reg req, // read request
+output hsync, vsync, // to display
+output [17:0] vidadr, output [2:0] RGB);
+localparam Org = 18'b1101_1111_1111_0000_00; // DFF00 reg [9:0] hcnt, vcnt;
+reg [4:0] hword; // from hcnt, but latched in the clk domain reg [31:0] vidbuf, pixbuf;
+reg hblank; endmodule
+\endtt
+
+Both the display controller and the processor access memory directly. It therefore becomes necessary to arbitrate in the case where both require access simultaneously, that is, to decide which has priority. The decision is simple, because the display controller is time-critical and must not be delayed. The processor, on the other hand, can easily be delayed by the already present stalling scheme. The signal (wire) \code{dspreq} stalls the processor (\code{stallX}) and decides whether the memory address (\code{SRadr}) should be taken from the processor (\code{adr}) or the display controller (\code{vidadr}). The following multiplexer is placed in module \code{RISCTop}:
+\begintt
+assign SRadr = dspreq ? vidadr : adr[19:2];
+\endtt
+
+\beginsubsubsection 17.2.5. The RS-232 interface.
+
+\rs232 is an old standard for serial data transmission (see also Sect. 9.4). We chose to describe it here in detail because of its frequent use and inherent simplicity. \rs232 uses 2 wires (apart from ground), one for input (\code{RxD}) and one for output (\code{TxD}) as shown in Figure 17.12. Data are transmitted in packets of a fixed length, here of length 8, i.e. byte-wise. Since there is no clock wire, bytes are transmitted asynchronously. Their beginning is marked by a start-bit, and at the end a stop-bit is appended. Hence, a packet is 10 bits long (see Figure 17.13). Within a packet, transmission is synchronous, i.e. with a fixed clock rate, on which transmitter and receiver agree. The packet length is short enough to admit slight deviations. The standard defines several packet lengths and many clock rates. Here we use a rate of 19200 or 115200 bit/s.
+
+\figure{pdfs/fig-17.12.png}{2.4in}{17.12}{\rs232 configuration}
+
+\figure{pdfs/fig-17.13.png}{2.4in}{17.13}{\rs232 packet format}
+
+The input signal \code{start} triggers the state machine by setting register \code{run}. The transmitter has 2 counters and a shift register. Counter \code{tick} runs from 0 to 1302, yielding a frequency of 25’000 / 1302 = 19.2 KHz, the transmission rate for bits. The signal \code{endtick} advances counter bitcnt, running from 0 to 9 (the number of bits in a packet). Signal \code{endbit} resets run and the counter to 0. Signal \code{rdy} indicates whether or not a next byte can be loaded and sent.
+\begintt
+module RS232T(
+input clk, rst, // system clock, 25 MHz
+input start, // request to accept and send a byte input [7:0] data,
+output rdy, // status output TxD); // serial data
+wire endtick, endbit; reg run;
+reg [11:0] tick;
+reg [3:0] bitcnt;
+reg [8:0] shreg;
+assign endtick = tick == 1302; assign endbit = bitcnt == 9; assign rdy = ~run;
+assign TxD = shreg[0];
+always @ (posedge clk) begin
+run <= (~rst | endtick & endbit) ? 0 : start ? 1 : run; tick <= (run & ~endtick) ? tick + 1 : 0;
+bitcnt <= (endtick & ~endbit) ? bitcnt + 1 :
+(endtick & endbit) ? 0 : bitcnt;
+shreg <= (~rst) ? 1 : start ? {data, 1'b0} :
+endtick ? {1'b1, shreg[8:1]} : shreg; end
+endmodule
+\endtt
+
+The receiver is structured very similarly with 2 counters and a shift register. The state machine is triggered by an incoming start bit at \code{RxD}. The state \code{rdy} is set when the last data bit has been received, and it is reset by the done signal, generated when reading a byte. The line \code{RxD} is sampled in the middle of the bit period rather than at the end, namely when $midtick = endtick/2$.
+\begintt
+module RS232R(
+input clk, rst,
+input done, // "byte has been read" input RxD,
+output rdy,
+output [7:0] data);
+wire endtick, midtick; reg run, stat;
+reg [11:0] tick;
+reg [3:0] bitcnt;
+reg [7:0] shreg;
+assign endtick = tick == 1302; assign midtick = tick == 651; assign endbit = bitcnt == 8; assign data = shreg;
+assign rdy = stat;
+always @ (posedge clk) begin
+run <= (~RxD) | (~rst | endtick & endbit) & run; tick <= (run & ~endtick) ? tick + 1 : 0;
+bitcnt <= (endtick & ~endbit) ? bitcnt + 1 :
+(endtick & endbit) ? 0 : bitcnt;
+shreg <= midtick ? {RxD, shreg[7:1]} : shreg;
+stat <= (endtick & endbit) ? 1 : (~rst | done) ? 0 : stat;
+end endmodule
+\endtt
 
 % \eject \input src
-
-% \figure{pdfs/fig-16.6.png}{2.4in}{16.6}{\acro{IEEE} standard floating-point representation of code{REAL} numbers}
-% \figure{pdfs/fig-16.7.png}{2.4in}{16.7}{Steps of floating-point addition}
-% \figure{pdfs/fig-16.8.png}{2.4in}{16.8}{The control unit}
-% \figure{pdfs/fig-17.1.png}{2.4in}{17.1}{The \RISC\ configuration}
-% \figure{pdfs/fig-17.2.png}{2.4in}{17.2}{Connections between processor and \SRAM}
-% \figure{pdfs/fig-17.3.png}{2.4in}{17.3}{Multiplexers for \SRAM\ byte access}
-% \figure{pdfs/fig-17.4.png}{2.4in}{17.4}{The \ps2 configuration}
-% \figure{pdfs/fig-17.5.png}{2.4in}{17.5}{Wheel with spokes and sensors}
-% \figure{pdfs/fig-17.6.png}{2.4in}{17.6}{Signals resulting from movements}
-% \figure{pdfs/fig-17.7.png}{2.4in}{17.7}{\SPI-configuration as a ring}
-% \figure{pdfs/fig-17.8.png}{2.4in}{17.8}{Connections between \SPI, \sdcard, and \code{Net} (see \code{RISCTop5.v})}
-% \figure{pdfs/fig-17.9.png}{2.4in}{17.9}{Shifting with \MSB first}
-% \figure{pdfs/fig-17.10.png}{2.4in}{17.10}{Synchronization and blanking signals}
-% \figure{pdfs/fig-17.11.png}{2.4in}{17.11}{Buffering the video output}
-% \figure{pdfs/fig-17.12.png}{2.4in}{17.12}{\rs232 configuration}
-% \figure{pdfs/fig-17.13.png}{2.4in}{17.13}{\rs232 packet format}
-
-
 
 \bye
