@@ -118,23 +118,23 @@
 - [ ] Proofread until 15.1.5. The sine function
 - [ ] Proofread until 15.2. A DATA LINK.
 - [ ] Proofread until 15.3. A GENERATOR OF GRAPHIC MACROS.
-- [ ] Proofread until 16.1. INTRODUCTION.
-- [ ] Proofread until 16.2. THE ARITHMETIC AND LOGIC UNIT (ALU).
-- [ ] Proofread until 16.2.1 Shifters.
-- [ ] Proofread until 16.2.2. Multiplication.
-- [ ] Proofread until 16.2.3. Division.
-- [ ] Proofread until 16.3. FLOATING-POINT ARITHMETIC.
-- [ ] Proofread until 16.3.1. Floating-point addition.
-- [ ] Proofread until 16.3.2. Floating-point multiplication.
-- [ ] Proofread until 16.3.3. Floating-point division.
-- [ ] Proofread until 16.4. THE CONTROL UNIT.
-- [ ] Proofread until 17.1. THE SRAM MEMORY.
-- [ ] Proofread until 17.2. PERIPHERAL INTERFACES.
-- [ ] Proofread until 17.2.1. The PS-2 interface.
-- [ ] Proofread until 17.2.2. The SPI interface.
-- [ ] Proofread until 17.2.3. The RS-232 interface.
-- [ ] Proofread until 17.2.4. The display controller.
-- [ ] Proofread until 17.2.5. The Mouse interface.
+- [X] Proofread until 16.1. INTRODUCTION.
+- [X] Proofread until 16.2. THE ARITHMETIC AND LOGIC UNIT (ALU).
+- [X] Proofread until 16.2.1 Shifters.
+- [X] Proofread until 16.2.2. Multiplication.
+- [X] Proofread until 16.2.3. Division.
+- [X] Proofread until 16.3. FLOATING-POINT ARITHMETIC.
+- [X] Proofread until 16.3.1. Floating-point addition.
+- [X] Proofread until 16.3.2. Floating-point multiplication.
+- [X] Proofread until 16.3.3. Floating-point division.
+- [X] Proofread until 16.4. THE CONTROL UNIT.
+- [X] Proofread until 17.1. THE SRAM MEMORY.
+- [X] Proofread until 17.2. PERIPHERAL INTERFACES.
+- [X] Proofread until 17.2.1. The PS-2 interface.
+- [X] Proofread until 17.2.2. The SPI interface.
+- [X] Proofread until 17.2.3. The RS-232 interface.
+- [X] Proofread until 17.2.4. The display controller.
+- [X] Proofread until 17.2.5. The Mouse interface.
 
 
 
@@ -145,6 +145,7 @@
 - [ ] Figure out a better way to do references in section 2.4
 - [ ] Clean up code formatting so it fits on the page
 - [ ] Confirm: "source language Oberon defined in Appendix 1, and with the target computer RISC, defined in Appendix 2."
+- [ ] Figure out why it just abruptly ends
 
 * Code formatting
 
