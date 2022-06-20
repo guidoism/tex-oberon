@@ -3,9 +3,9 @@
 \def\code#1{{\tt #1\/}}
 \def\emph#1{{\it #1\/}}
 \def\acro#1{{\mc #1\/}}
-\def\btree{{\mc B-T}ree }
-\def\ps2{{\mc PS}-2 }
-\def\rs232{{\mc RS}-232 }
+\def\btree{{\mc B-T}ree}
+\def\ps2{{\mc PS}/2}
+\def\rs232{{\mc RS}-232}
 \def\sdcard{{\mc SD}-card}
 \def\figure#1#2#3#4{\medskip\centerline{\directlua 0 {
   a = img.new{filename = "#1", width = "#2"}
@@ -8258,52 +8258,62 @@ The circuitry connecting with the \SRAM\ is part of this module, whereas the dri
 
 The design of the circuitry around a static \RAM\ is quite straight forward. The only controls are a read (\code{SRoe}) and a write enable signal (\code{SRwe}). Since the \SRAM\ multiplexes data lines for input and output, a tri-state driver (\code{SRbuf}) must be used on the \FPGA. This is shown schematically in Figure 17.2.
 
-\figure{pdfs/fig-17.2.png}{2.4in}{17.2}{Connections between processor and \SRAM}
+\figure{pdfs/fig-17.2.png}{3.4in}{17.2}{Connections between processor and \SRAM}
 
-However, there is a complication: the feature of byte-wise access. After all, the present \RAM\ is 32 bits wide (actually there are two 512K x 16-bit chips in parallel). Evidently, some multiplexing is unavoidable. The task is significantly eased by the chip's feature of four separate write enables, one for each byte of a word. The selection of the byte affected is determined by address bits 0 an 1 (which are ignored in the case of word-access). This scheme is shown in Figure 17.3. The codebus bypasses the multiplexers.
+However, there is a complication: the feature of byte-wise access. After all, the present \RAM\ is 32 bits wide (actually there are two 512\acro{K} x 16-bit chips in parallel). Evidently, some multiplexing is unavoidable. The task is significantly eased by the chip's feature of four separate write enables, one for each byte of a word. The selection of the byte affected is determined by address bits 0 an 1 (which are ignored in the case of word-access). This scheme is shown in Figure 17.3. The codebus bypasses the multiplexers.
 
-\figure{pdfs/fig-17.3.png}{2.4in}{17.3}{Multiplexers for \SRAM\ byte access}
+\figure{pdfs/fig-17.3.png}{3.4in}{17.3}{Multiplexers for \SRAM\ byte access}
 
 \beginsubsection 17.2. PERIPHERAL INTERFACES.
 
 Each of the interfaces to external media is implemented as a separate module and can therefore easily be exchanged. Modules are connected with the processor by the input and the output bus, and by enable signals \code{wr} and \code{rd}.
 
-\beginsubsubsection 17.2.1. The PS-2 interface.
+\beginsubsubsection 17.2.1. The PS/2 interface.
 
-PS/2 is mostly used for input devices. It uses 2 wires (apart from ground)., one for data, one for the clock. It uses a synchronous transmission, and the clock is driven by the device. Here it is used for the keyboard and the mouse (see Sect. 17.2.5). Transmission occurs in packets of 8 bits. An optional third wire serves for output. It is not used in this application. The interface is very simple and consists of an 8-bit buffer register. The following describes the interface for the keyboard.
+\ps2 is mostly used for input devices. It uses 2 wires (apart from ground)., one for data, one for the clock. It uses a synchronous transmission, and the clock is driven by the device. Here it is used for the keyboard and the mouse (see Sect. 17.2.5). Transmission occurs in packets of 8 bits. An optional third wire serves for output. It is not used in this application. The interface is very simple and consists of an 8-bit buffer register. The following describes the interface for the keyboard.
 
 A bit is shifted into the data register whenever the clock shows a falling edge, i.e. the clock signal \code{Q0} is low and the clock delayed by one cycle \code{Q1} is high.
 
-\figure{pdfs/fig-17.4.png}{2.4in}{17.4}{The \ps2 configuration}
+\figure{pdfs/fig-17.4.png}{3.4in}{17.4}{The \ps2 configuration}
 
 In the driver for the keyboard a 16-byte fifo buffer is inserted, forming a queue. This is necessary in order to avoid loss of characters when the processor is tied up in computation.
 \begintt
 module PS2(
-input clk, rst,
-input done, // "byte has been read" output rdy, // "byte is available" output shift, // shift in, transmitter output [7:0] data,
-input PS2C, // serial input
-input PS2D); // clock
-reg Q0, Q1; // synchronizer and falling edge detector reg [10:0] shreg;
+  input clk, rst,
+  input done, // "byte has been read"
+  output rdy, // "byte is available"
+  output shift, // shift in, transmitter
+  output [7:0] data,
+  input PS2C, // serial input
+  input PS2D); // clock
+  
+reg Q0, Q1; // synchronizer and falling edge detector
+reg [10:0] shreg;
 reg [3:0] inptr, outptr;
 reg [7:0] fifo [15:0]; // 16 byte buffer
 wire endbit;
-assign endbit = ~shreg[0]; //start bit reached correct pos assign shift = Q1 & ~Q0;
+
+assign endbit = ~shreg[0]; //start bit reached correct pos
+assign shift = Q1 & ~Q0;
 assign data = fifo[outptr];
 assign rdy = ~(inptr == outptr);
+
 always @ (posedge clk) begin
-Q0 <= PS2C; Q1 <= Q0;
-shreg <= (~rst | endbit) ? 11'h7FF :
-shift ? {PS2D, shreg[10:1]} : shreg;
-outptr <= ~rst ? 0 : rdy & done ? outptr+1 : outptr; inptr <= ~rst ? 0 : endbit ? inptr+1 : inptr;
-if (endbit) fifo[inptr] <= shreg[8:1];
-end endmodule
+  Q0 <= PS2C; Q1 <= Q0;
+  shreg <= (~rst | endbit) ? 11'h7FF :
+    shift ? {PS2D, shreg[10:1]} : shreg;
+  outptr <= ~rst ? 0 : rdy & done ? outptr+1 : outptr;
+  inptr <= ~rst ? 0 : endbit ? inptr+1 : inptr;
+  if (endbit) fifo[inptr] <= shreg[8:1];
+end
+endmodule
 \endtt
 
 \beginsubsubsection 17.2.2. The Mouse.
 
-Subsequently we present two Mouse interfaces. The first (\code{MouseP}) is based on the PS/2 Standard and caters for most commercially available mice. The second (\code{MouseX}) is included here for historical reasons. It was used by the computer Lilith in 1979, and used the same Mouse as its ancestor Alto (at \acro{PARC}, 1975). It is distinguished by a very simple hardware without its own microprocessor, which is currently contained in most mice. This goes at a cost of a 9-wire cable. But today, microprocessors are cheaper than cables. We include this interface here, because it allows for a simple explanation of the principle of pointing devices.
+Subsequently we present two Mouse interfaces. The first (\code{MouseP}) is based on the \ps2 Standard and caters for most commercially available mice. The second (\code{MouseX}) is included here for historical reasons. It was used by the computer Lilith in 1979, and used the same Mouse as its ancestor Alto (at \acro{PARC}, 1975). It is distinguished by a very simple hardware without its own microprocessor, which is currently contained in most mice. This goes at a cost of a 9-wire cable. But today, microprocessors are cheaper than cables. We include this interface here, because it allows for a simple explanation of the principle of pointing devices.
 
-The first interface uses the PS/2 Standard, that is, a 2-wire cable (not counting ground and power). It complies with the commercial standard of pointing devices. Details are shown on module \code{MouseP.v}.
+The first interface uses the \ps2 Standard, that is, a 2-wire cable (not counting ground and power). It complies with the commercial standard of pointing devices. Details are shown on module \code{MouseP.v}.
 \begintt
 module MouseP (
   input rst, clk,
@@ -8318,13 +8328,13 @@ Let us first explain how signals indicating movements are derived. The key reaso
 
 An actual movement is recognized by a simple light sensor (we will restrict our observation to a single coordinate $x$). The movement is transmitted to a wheel consisting of a transparent disc with intransparent spokes. A light beam shines through the disk and is received by the light sensor. Each time a spoke passes, the light is blocked. Any change in the sensor output signals a movement (see Figure 17.5). Unfortunately, this scheme does not allow to recognize the direction of the movement (left or right). A second light and sensor solve this problem. The distance between the two lights is half the distance of adjacent spokes.
 
-\figure{pdfs/fig-17.5.png}{2.4in}{17.5}{Wheel with spokes and sensors}
+\figure{pdfs/fig-17.5.png}{1.4in}{17.5}{Wheel with spokes and sensors}
 
-The signal pair x0, x1 originating from a movement (with constant speed) to the left or to the right is shown in Figure 17.6.
+The signal pair $x0$, $x1$ originating from a movement (with constant speed) to the left or to the right is shown in Figure 17.6.
 
-\figure{pdfs/fig-17.6.png}{2.4in}{17.6}{Signals resulting from movements}
+\figure{pdfs/fig-17.6.png}{4.4in}{17.6}{Signals resulting from movements}
 
-The logic equations for movements to the left and right (or up and down) are derived from this signal pair. For each signal a register records the state. Therefore it can be determined whether a move to the left, or to the right, or no move had occurred. The sampling frequency is irrelevant, as long as it is high enough. Let x01 be x00 delayed by one clock cycle, and x11 be x10 delayed by one cycle.
+The logic equations for movements to the left and right (or up and down) are derived from this signal pair. For each signal a register records the state. Therefore it can be determined whether a move to the left, or to the right, or no move had occurred. The sampling frequency is irrelevant, as long as it is high enough. Let $x01$ be $x00$ delayed by one clock cycle, and $x11$ be $x10$ delayed by one cycle.
 \begintt
 x00    0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1
 x01    0 0 0 0 1 1 1 1 0 0 0 0 1 1 1 1
@@ -8338,20 +8348,44 @@ Every active \emph{right} signal causes the 10-bit $x$ counter to be incremented
 
 An identical circuit is used for the up/down direction, with its wheel set perpendicular to the first wheel. Finally, the output is packed into a single word. 3 bits are taken by the keys, and 10 by each of the two counters.
 \begintt
-TODO
+module MouseX(
+  input clk,
+  input [6:0] in,
+  output [27:0] out);
+  
+  reg x00, x01, x10, x11, y00, y01, y10, y11;
+  reg ML, MM, MR; // keys
+  reg [9:0] x, y; // counters
+  
+  wire xup, xdn, yup, ydn;
+  
+  assign xup = ~x00&~x01&~x10&x11 |mid ~x00&x01&x10&x11 |mid x00&~x01&~x10&~x11 |mid x00&x01&x10&~x11;
+  assign yup = ~y00&~y01&~y10&y11 |mid ~y00&y01&y10&y11 |mid y00&~y01&~y10&~y11 |mid y00&y01&y10&~y11;
+  assign xdn = ~x00&~x01&x10&~x11 |mid ~x00&x01&~x10&~x11 |mid x00&~x01&x10&x11 |mid x00&x01&~x10&x11;
+  assign ydn = ~y00&~y01&y10&~y11 |mid ~y00&y01&~y10&~y11 |mid y00&~y01&y10&y11 |mid y00&y01&~y10&y11;
+  assign out = {1'b0, ML, MM, MR, 2'b0, y, 2'b0, x};
+
+always @ (posedge clk) begin
+  x00 <= in[3]; x01 <= x00; x10 <= in[2]; x11 <= x10;
+  y00 <= in[1]; y01 <= y00; y10 <= in[0]; y11 <= y10;
+  MR <= ~in[4]; MM <= ~in[5]; ML <= ~in[6];
+  x <= xup ? x+1 : xdn ? x-1 : x;
+  y <= yup ? y+1 : ydn ? y-1 : y;
+end
+endmodule
 \endtt
 
 \beginsubsubsection 17.2.3. The SPI interface for the SD-card (disk) and the Net.
 
-\SPI\ (Standard Peripheral Interface) is similar to PS/2, and also synchronous. However, there may be many participants. They are configured in a loop as shown in Figure 17.7, and the clock is provided by a master, namely the \RISC. \SPI\ requires 3 wires (apart from ground).
+\SPI\ (Standard Peripheral Interface) is similar to \ps2, and also synchronous. However, there may be many participants. They are configured in a loop as shown in Figure 17.7, and the clock is provided by a master, namely the \RISC. \SPI\ requires 3 wires (apart from ground).
 
-\figure{pdfs/fig-17.7.png}{2.4in}{17.7}{\SPI-configuration as a ring}
+\figure{pdfs/fig-17.7.png}{4.4in}{17.7}{\SPI-configuration as a ring}
 
 Here, however, no use is made of \SPI's ring topology. Instead, One master interface is serving both the disk and the net. The connection is determined in module \code{RISC5Top}. The packet (and thus the shift register) is 32 bits long.
 
 Transmission frequency is 0.4 MHz at startup (as required by the \sdcard), and then is raised to 8.33 MHz. Details are shown in the respective program listing.
 
-\figure{pdfs/fig-17.8.png}{2.4in}{17.8}{Connections between \SPI, \sdcard, and \code{Net} (see \code{RISCTop5.v})}
+\figure{pdfs/fig-17.8.png}{4.4in}{17.8}{Connections between \SPI, \sdcard, and \code{Net} (see \code{RISCTop5.v})}
 \begintt
 // Motorola Serial Peripheral Interface (SPI) PDR 23.3.12 / 16.10.13
 // transmitter / receiver of words (fast, clk/3) or bytes (slow, clk/64)
@@ -8368,7 +8402,7 @@ The SPI specifications postulate that bytes are sent with the most significant b
 shreg <= {shreg[30:24], MISO, shreg[22:16], shreg[31], shreg[14:8], shreg[23], shreg[6:0], shreg[15]}
 \endtt
 
-\figure{pdfs/fig-17.9.png}{2.4in}{17.9}{Shifting with \acro{MSB} first}
+\figure{pdfs/fig-17.9.png}{4.4in}{17.9}{Shifting with \acro{MSB} first}
 
 \beginsubsubsection 17.2.4. The display controller.
 
