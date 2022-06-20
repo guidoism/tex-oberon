@@ -8113,7 +8113,7 @@ $$x = (-1)^s \times 2^{e-127} \times 1.m \qquad\hbox{with}\qquad 1.0 \le m < 2.0
 
 Zero is a special case represented by 32 0-bits, and therefore has to be treated separately. Furthermore, $e = 255$ denotes ``not a number''. It is generated in the case of arithmetic overflow.
 
-\figure{pdfs/fig-16.6.png}{2.4in}{16.6}{\acro{IEEE} standard floating-point representation of \code{REAL} numbers}
+\figure{pdfs/fig-16.6.png}{3.4in}{16.6}{\acro{IEEE} standard floating-point representation of \code{REAL} numbers}
 
 \beginsubsubsection 16.3.1. Floating-point addition.
 
@@ -8126,7 +8126,7 @@ module FPAdder(
   output [31:0] z);
 \endtt
 
-\figure{pdfs/fig-16.7.png}{2.4in}{16.7}{Steps of floating-point addition}
+\figure{pdfs/fig-16.7.png}{4.4in}{16.7}{Steps of floating-point addition}
 
 It is important to achieve proper rounding. This is done by extending the mantissa of both operands by a guard bit, initialized to 0. A one is added (effectively 0.5) and at the end the guard bit is discarded.
 
@@ -8135,10 +8135,8 @@ The two predefined conversion functions \code{FLT} and \code{FLOOR} are convenie
 \beginsubsubsection 16.3.2. Floating-point multiplication.
 
 A product is given by the equation
-
 $$p = x \times y = (2^{xe} \times xm) \times (2^{ye} \times ym) = 2^{xe+ye} \times (xm \times ym)$$
 $$p = (xs, xe, xm) \times (ys, ye, ym) = (xs \oplus ys, xe+ye, xm \times ym)$$
-
 That is, exponents are added, mantissas multiplied. Denormalization is not needed. Post-normalization is a right shift of at most one bit, because if $1.0 \le xm$, $ym < 2.0$, the result satisfies $1.0 \le xm \times ym < 4.0$. The sign of the product is the exclusive or of the signs of the arguments. The multiplier module's interface is
 \begintt
 module FPMultiplier(
@@ -8151,10 +8149,8 @@ module FPMultiplier(
 \beginsubsubsection 16.3.3. Floating-point division.
 
 A quotient is given by the equation
-
 $$q = x/y = (2^{xe} \times xm) / (2^{ye} \times ym) = 2^{xe-ye} \times (xm/ym)$$
 $$q = (sx, ex, mx) / (sy, ey, my) = (sx \oplus sy, ex-ey, mx/my)$$
-
 That is, exponents are subtracted, mantissas divided. Denormalization is not needed. Post-normalization requires a left shift by at most a single bit, because if $1.0 \le xm$, $ym < 2.0$, the result satisfies $0.5 \le xm/ym < 2.0$. The sign of the product is the exclusive or of the signs of the arguments. The divider module's interfaces is
 
 \begintt
@@ -8167,7 +8163,7 @@ module FPDivider(
 
 \beginsubsection 16.4. THE CONTROL UNIT.
 
-The control unit determines the sequence of executed instructions. It contains two registers, the program counter PC holding the address of the current instruction, and the current instruction register IR holding the instruction currently being interpreted. Instructions are obtained from memory through the codebus (see interface), from where the decoding signals emanate. Mostly, the arithmetic unit and the control unit operate concurrently (in parallel). While the arithmetic unit performs the operation held in register \code{IR} and data signals flow through the \ALU, the control unit fetches in the same clock cycle the next instruction from memory in the location with the address held in \code{PC}. Next address and next instruction are latched in the registers at the end of a cycle. This scheme constitutes a one-element pipeline of instructions.
+The control unit determines the sequence of executed instructions. It contains two registers, the program counter \code{PC} holding the address of the current instruction, and the current instruction register \code{IR} holding the instruction currently being interpreted. Instructions are obtained from memory through the codebus (see interface), from where the decoding signals emanate. Mostly, the arithmetic unit and the control unit operate concurrently (in parallel). While the arithmetic unit performs the operation held in register \code{IR} and data signals flow through the \ALU, the control unit fetches in the same clock cycle the next instruction from memory in the location with the address held in \code{PC}. Next address and next instruction are latched in the registers at the end of a cycle. This scheme constitutes a one-element pipeline of instructions.
 
 The principal task of the control unit is to generate the address of the next instruction. There are essentially only four cases:
 
@@ -8194,26 +8190,43 @@ pcmux = (~rst) ? 0 :
 always @ (posedge clk) PC <= pcmux; end
 \endtt
 
-\figure{pdfs/fig-16.8.png}{2.4in}{16.8}{The control unit}
+\figure{pdfs/fig-16.8.png}{3.4in}{16.8}{The control unit}
 
 Branches are the only conditional instructions. Whether a branch is taken or not, is determined by the combination of the condition flags selected by the condition code field of the branch instruction. \code{IR[27]} is the condition sense inversion bit.
 \begintt
-TODO
+reg N, Z, C, OV; // condition flags
+wire S;
+assign S = N |^ 0V;
+assign cond = IR[27] |^
+  ((cc == 0) |& N |mid      // MI, PL
+   (cc == 1) |& Z |mid      // EQ, NE
+   (cc == 2) |& C |mid      // CS, CC
+   (cc == 3) |& OV |mid     // VS, VC
+   (cc == 4) |& (C|mid Z) |mid // LS, HI
+   (cc == 5) |& S |mid      // LT, GE
+   (cc == 6) |& (S|mid Z) |mid // LE, GT
+   (cc == 7));        // T, F
 \endtt
 
-There is, unfortunately, a complication obfuscating the simple scheme presented so far. It stems from the necessity to initialize the processor. Only registers and memory blocks (\BRAM) can be initialized and loaded by the available \FPGA-tools. How, then, is a program (in our case the boot loader) moved into memory, the chip-external \SRAM? The following scheme has been chosen:
+\noindent There is, unfortunately, a complication obfuscating the simple scheme presented so far. It stems from the necessity to initialize the processor. Only registers and memory blocks (\BRAM) can be initialized and loaded by the available \FPGA-tools. How, then, is a program (in our case the boot loader) moved into memory, the chip-external \SRAM? The following scheme has been chosen:
 
-The initial program is loaded into a \BRAM\ (1K x 32). This block is memory-mapped into high-end addresses in the range of the data stack. On startup, the flag \code{PMsel} is set and \code{IR} is loaded from \code{pmout} (from the \BRAM) at StartAdr. At the end of the program (boot loader), a branch instruction with destination 0 jumps to the beginning of the program that had just been loaded into \SRAM\ by the boot loader. This is, presumably, but not necessarily, the operating system. The following changes and additions are required:
+The initial program is loaded into a \BRAM\ (1\acro{K} \times\ 32). This block is memory-mapped into high-end addresses in the range of the data stack. On startup, the flag \code{PMsel} is set and \code{IR} is loaded from \code{pmout} (from the \BRAM) at \code{StartAdr}. At the end of the program (boot loader), a branch instruction with destination 0 jumps to the beginning of the program that had just been loaded into \SRAM\ by the boot loader. This is, presumably, but not necessarily, the operating system. The following changes and additions are required:
 \begintt
 localparam StartAdr = 18'b111111100000000000; // 0FE000H
-reg PMsel; // memory select for instruction fetch reg [31:0] IRBuf;
+reg PMsel; // memory select for instruction fetch
+reg [31:0] IRBuf;
+
 dbram32 PM ( // BRAM
-.clka (clk),
-.rdb (pmout), // output port .ab (pcmux[10:0])); // address
+  .clka (clk),
+  .rdb (pmout), // output port
+  .ab (pcmux[10:0])); // address
+
 assign IR = PMsel ? pmout : IRBuf;
+
 always @ (posedge clk) begin
-PMsel <= ~rst | (pcmux[17:11] == 7'b1111111); IRBuf <= stall ? IRBuf : codebus;
-...
+  PMsel <= ~rst | (pcmux[17:11] == 7'b1111111);
+  IRBuf <= stall ? IRBuf : codebus;
+  ...
 end ;
 \endtt
 
@@ -8221,7 +8234,7 @@ end ;
 
 The \RISC\ processor is embedded in an environment (module \code{RISCTop.v}) connecting it with elements that are \FPGA-chip external, but whose are provided on the Spartan development board (Figure 17.1). The environment consists of an address decoder, a data multiplexer, and interfaces to the memory and peripheral devices.
 
-\figure{pdfs/fig-17.1.png}{2.4in}{17.1}{The \RISC\ configuration}
+\figure{pdfs/fig-17.1.png}{4.4in}{17.1}{The \RISC\ configuration}
 
 The decoder for output and the multiplexer for input determine the various addresses of devices:
 
