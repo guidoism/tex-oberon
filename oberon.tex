@@ -14,6 +14,9 @@
 \centerline{\ninepoint{\bf Fig.\ #3}\enspace #4}\medskip
 }
 \def\pattern#1{{\bf Pattern #1:}}
+\def\Kwords{\acro{K} words}
+\def\KB{\acro{KB}}
+\def\MB{\acro{MB}}
 \def\RISC{\acro{RISC}}
 \def\CISC{\acro{CISC}}
 \def\MIPS{\acro{MIPS}}
@@ -7809,9 +7812,9 @@ The use of an \FPGA\ provides a substantial amount of freedom for design. Yet, t
 
 The development of this \RISC\ progressed through several stages. The first was the design of the architecture itself, (more or less) independent of subsequent implementation considerations. Then followed a first implementation called \RISC-0. For this a Harvard Architecture was chosen, implying that two distinct memories are used for program and for data. For both chip-internal block \RAM{}s were used. The Harvard architecture allows for a neat separation of the arithmetic from the control unit.
 
-But these blocks of \RAM\ are relatively small on the used Spartan-3 development board (1--4K words). This board, however, provides also an \FPGA-external static \RAM\ with a capacity of 1 MByte. In a second effort, the \BRAM\ for data was replaced by this \SRAM. Both instructions and data are placed into the \SRAM, resulting in a von Neumann architecture.
+But these blocks of \RAM\ are relatively small on the used Spartan-3 development board (1--4\Kwords). This board, however, provides also an \FPGA-external static \RAM\ with a capacity of 1 \MB. In a second effort, the \BRAM\ for data was replaced by this \SRAM. Both instructions and data are placed into the \SRAM, resulting in a von Neumann architecture.
 
-The \RISC\ hardware is characterized by three interfaces. The first is the programmer's interface, the architecture, that is, those aspects that are relevant to the programmer, in particular, the instruction set. It is described in Appendix A2. The second is the hardware interface between the processor core and its environment, described here. The third is that which connects the environment with physical devices such as memory, keyboard and display. This is described in Chapter 17.
+The \RISC\ hardware is characterized by three interfaces. The first is the programmer's interface, the architecture, that is, those aspects that are relevant to the programmer, in particular, the instruction set. It is described in Appendix~A2. The second is the hardware interface between the processor core and its environment, described here. The third is that which connects the environment with physical devices such as memory, keyboard and display. This is described in Chapter 17.
 \begintt
 module RISC5(
   input clk, rst, stallX,
@@ -7831,7 +7834,7 @@ First we concentrate on the implementation of the processor core, its realizatio
 
 The \ALU\ features a bank of 16 registers with 32 bit words. Arithmetic and logical operations, represented by instructions, always operate on these registers. Data can be transferred between memory and registers by separate load and store instructions. This is an important characteristic of \RISC\ architectures, developed between 1975 and 1985. It contrasts with the earlier \CISC\ architectures (Complex instruction set): Memory is largely decoupled from the processor. A second important characteristic is that most instructions take a single clock cycle (25 MHz) for their execution. The exceptions are access to memory, multiplication and division. More about this will be presented later. This single-cycle rule makes such processors predictable in performance. The number of cycles and the time required for executing any instruction sequence is precisely defined. Predictability is essential in all real-time applications.
 
-The data processing unit consisting of \ALU\ and registers is shown in Figure 16.2. Evidently, data cycle from registers through the \ALU, where an operation is performed, and the result is deposited back into a register. The \ALU\ embodies the circuits for arithmetic operations, logical operations, and shifts. The operations available are listed below. They are described in more detail in Appendix A2. The operand \code{n} is either a register or a part of the instruction itself.
+The data processing unit consisting of \ALU\ and registers is shown in Figure 16.2. Evidently, data cycle from registers through the \ALU, where an operation is performed, and the result is deposited back into a register. The \ALU\ embodies the circuits for arithmetic operations, logical operations, and shifts. The operations available are listed below. They are described in more detail in Appendix~A2. The operand \code{n} is either a register or a part of the instruction itself.
 
 \medskip
 \halign{#\hfil\quad&#\hfil\quad&#\hfil\quad&#\hfil\quad&#\hfil\cr
@@ -7939,7 +7942,7 @@ IF ODD(x) THEN p := p + y END ;
 y := 2*y; x := x DIV 2
 \endtt
 
-whereby multiplication by 2 is done by a left shift, and division by 2 by a right shift: As an example, consider the multiplication of two 4-bit integers $x = 5$ and $y = 3$, requiring 4 steps:
+\noindent whereby multiplication by 2 is done by a left shift, and division by 2 by a right shift: As an example, consider the multiplication of two 4-bit integers $x = 5$ and $y = 3$, requiring 4 steps:
 
 \medskip
 \halign{#\hfil\quad&#\hfil\quad&#\hfil\quad&#\hfil\quad&#\hfil\cr
@@ -7979,23 +7982,21 @@ x = A[31-k:0]
 k = 0 ... 31
 \endtt
 
-The multiplier is controlled by a rudimentary state machine \code{S}, actually a simple 5-bit counter running from 0 to 31. The multiplier is shown schematically in Figure 16.3.
+\noindent The multiplier is controlled by a rudimentary state machine \code{S}, actually a simple 5-bit counter running from 0 to 31. The multiplier is shown schematically in Figure 16.3.
 
-The multiplier interprets its operands as signed (\code{u = 0}) or unsigned (\code{u = 1}) integers. The difference between unsigned and signed representation is that in the former case the first term has a negative weight ($-x_{31} \times 2^{31}$). Therefore, implementation of signed multiplication requires very little change: Term 31 is subtracted instead of added (see complete program listing below).
+The multiplier interprets its operands as signed (\code{u} = 0) or unsigned (\code{u} = 1) integers. The difference between unsigned and signed representation is that in the former case the first term has a negative weight ($-x_{31} \times 2^{31}$). Therefore, implementation of signed multiplication requires very little change: Term 31 is subtracted instead of added (see complete program listing below).
 
-\figure{pdfs/fig-16.3.png}{3.4in}{16.3}{Schematic of multiplier}
+\figure{pdfs/fig-16.3.png}{4in}{16.3}{Schematic of multiplier}
 
 During execution of the 32 add-shift steps the processor must be stalled. The process proceeds and the counter \code{S} advances as long as the input \code{MUL} is active (high). \code{MUL} indicates that the current operation is a multiplication, and the signal is stable until the processor advances to the next instruction. This happens when step 31 is reached (Figure 16.4).
-
 \begintt
 stall = MUL & ~(S == 31);
 S <= MUL ? S + 1 : 0;
 \endtt
 
-\figure{pdfs/fig-16.4.png}{2.4in}{16.4}{Generating \emph{stall}}
+\figure{pdfs/fig-16.4.png}{3.5in}{16.4}{Generating \emph{stall}}
 
 The details of the simple multiplier are listed below:
-
 \begintt
 module Multiplier( input CLK, MUL, u, output stall,
 input [31:0] x, y, output [63:0] z);
@@ -8018,13 +8019,11 @@ end
 endmodule
 \endtt
 
-Implementing multiplication in hardware made the operation about 30 times faster than its solution by software. A significant factor! As multiplication is a relatively rare operation---at least in comparison with addition and subtraction---early \RISC\ designs (\MIPS, \SPARC, \ARM) refrained from its full implementation in hardware. Instead, an instruction called multiply step was provided, performing a single add-shift step in one clock cycle. A multiplication was then programmed by a sequence of 32 step instructions, typically provided as a subroutine. This measure of economy was abandoned, when hardware became faster and cheaper.
+\noindent Implementing multiplication in hardware made the operation about 30 times faster than its solution by software. A significant factor! As multiplication is a relatively rare operation---at least in comparison with addition and subtraction---early \RISC\ designs (\MIPS, \SPARC, \ARM) refrained from its full implementation in hardware. Instead, an instruction called multiply step was provided, performing a single add-shift step in one clock cycle. A multiplication was then programmed by a sequence of 32 step instructions, typically provided as a subroutine. This measure of economy was abandoned, when hardware became faster and cheaper.
 
-The \FPGA used on the Spartan-3 board features a welcome facility for speeding up multiplication, namely fast 18 \times\ 18 bit multiplier units. These are made available as basic cells of the \FPGA, and they multiply in a single clock cycle. Considering an operand $x = x_1 \times 2^{16} + x_0$, the product is obtained as the sum of only 4 terms:
-
+The \FPGA\ used on the Spartan-3 board features a welcome facility for speeding up multiplication, namely fast 18 \times\ 18 bit multiplier units. These are made available as basic cells of the \FPGA, and they multiply in a single clock cycle. Considering an operand $x = x_1 \times 2^{16} + x_0$, the product is obtained as the sum of only 4 terms:
 $$p = x \times y = x_1 \times y_1 \times 2^{32} + (x_0 \times y_1 + x_1 \times y_0) \times 2^{16} + x_0 \times y_0$$
-
-Thereby multiplication of two 32-bit integers can be performed in 2 cycles only, one for multiplications, one for addition. Four multipliers are needed. For details, the reader is referred to the program listing (module \code{Multiplier1}).
+\noindent Thereby multiplication of two 32-bit integers can be performed in 2 cycles only, one for multiplications, one for addition. Four multipliers are needed. For details, the reader is referred to the program listing (module \code{Multiplier1}).
 
 \beginsubsubsection 16.2.3. Division.
 
@@ -8034,17 +8033,15 @@ q = x DIV y
 r = x MOD y
 \endtt
 
-\code{q} is the quotient, \code{r} the remainder. These are defined by the invariants
-
+\noindent \code{q} is the quotient, \code{r} the remainder. These are defined by the invariants
 $$x = q \times y + r\ with\ 0 \le r < y$$
-
-Both \code{q} and \code{r} are held in registers. Initially we set \code{r} to \code{x}, the dividend, and then subtract multiples of \code{y} (the divisor) from it, each time checking that the result is not negative. This \emph{shift-subtract} step is
+\noindent Both \code{q} and \code{r} are held in registers. Initially we set \code{r} to \code{x}, the dividend, and then subtract multiples of \code{y} (the divisor) from it, each time checking that the result is not negative. This \emph{shift-subtract} step is
 \begintt
 r := 2*r; q := 2*q;
 IF r – y ≥ 0 THEN r := r – y END
 \endtt
 
-As an example, consider the division of the 8-bit integer x = 14 by the 4-bit integer y = 4, where multiplication and division by 2 are done by shifts:
+\noindent As an example, consider the division of the 8-bit integer x = 14 by the 4-bit integer y = 4, where multiplication and division by 2 are done by shifts:
 
 \medskip
 \halign{#\hfil\quad&#\hfil\quad&#\hfil\quad&#\hfil\quad&#\hfil\cr
@@ -8061,7 +8058,7 @@ shift        & 0000'0010 & 0100 & 0000'0011 & $r<y$ \cr
 sub y from r & 0000'0010 & 0100 & 0000'0011 & $q = 4, r = 2$ \cr
 }\medskip
 
-As with multiplication this arrangement may be simplified by putting r and q into a double-length shift register, and by shifting r to the left instead of y to the right. This results in
+\noindent As with multiplication this arrangement may be simplified by putting r and q into a double-length shift register, and by shifting r to the left instead of y to the right. This results in
 
 \medskip
 \halign{#\hfil\quad&#\hfil\quad&\hfil#\quad&#\hfil\quad&#\hfil\cr
@@ -8078,9 +8075,9 @@ shift        & 0010      & 0100  & $r < Y$\cr
 sub 0 from r & 0010      & 0100  & $q=4, r=2$\cr
 }\medskip
 
-This scheme is represented by the circuit shown in Figure 16.5.
+\noindent This scheme is represented by the circuit shown in Figure 16.5.
 
-\figure{pdfs/fig-16.5.png}{2.4in}{16.5}{Schematic of divider}
+\figure{pdfs/fig-16.5.png}{4in}{16.5}{Schematic of divider}
 
 Stall generation is the same as for the multiplier. A division takes 32 clock cycles. Further details are shown in the subsequent program listing.
 \begintt
@@ -8111,11 +8108,8 @@ endmodule
 \beginsubsection 16.3. FLOATING-POINT ARITHMETIC.
 
 The \RISC\ uses the \IEEE\ Standard for representing \code{REAL} (floating-point) numbers with 32 bits. The word is divided into 3 fields: \code{s} for the sign, \code{e} for the exponent, and \code{m} for the mantissa. The value is
-
 $$x = (-1)^s \times 2^{e-127} \times 1.m \qquad\hbox{with}\qquad 1.0 \le m < 2.0 \qquad\hbox{(normalized form)}$$
-
-Numbers are represented in sign-magnitude form. This implies that for sign inversion only the sign
-bit must be inverted, and exponent and mantissa remain unchanged.
+\noindent Numbers are represented in sign-magnitude form. This implies that for sign inversion only the sign bit must be inverted, and exponent and mantissa remain unchanged.
 
 Zero is a special case represented by 32 0-bits, and therefore has to be treated separately. Furthermore, $e = 255$ denotes ``not a number''. It is generated in the case of arithmetic overflow.
 
