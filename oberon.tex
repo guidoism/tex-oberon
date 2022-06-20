@@ -7816,9 +7816,9 @@ The \RISC\ hardware is characterized by three interfaces. The first is the progr
 module RISC5(
   input clk, rst, stallX,
   input [31:0] inbus, codebus,
-  output [19:0] adr,            // memory and device addresses
-  output rd, wr, ben,           // ead, write, byte enable control signals for memory
-  output [31:0] outbus);
+  output [19:0] adr,     // memory and device addresses
+  output rd, wr, ben,    // ead, write, byte enable
+  output [31:0] outbus); //   -- control signals for memory
 \endtt
 
 The main parts of the hardware interface are three busses, the data input and output busses, the code bus, and the address bus. Signals \code{rd} and \code{wr} indicate, whether a read or a write operation is to be performed. \code{ben} indicates a byte (rather than word) access. The entire processor operates synchronously on the clock \code{clk} (25 MHz on Spartan-3), \code{rst} is the reset signal (from a push button on the development board), and \code{stall} is the input to stall the processor.
@@ -7832,30 +7832,36 @@ First we concentrate on the implementation of the processor core, its realizatio
 The \ALU\ features a bank of 16 registers with 32 bit words. Arithmetic and logical operations, represented by instructions, always operate on these registers. Data can be transferred between memory and registers by separate load and store instructions. This is an important characteristic of \RISC\ architectures, developed between 1975 and 1985. It contrasts with the earlier \CISC\ architectures (Complex instruction set): Memory is largely decoupled from the processor. A second important characteristic is that most instructions take a single clock cycle (25 MHz) for their execution. The exceptions are access to memory, multiplication and division. More about this will be presented later. This single-cycle rule makes such processors predictable in performance. The number of cycles and the time required for executing any instruction sequence is precisely defined. Predictability is essential in all real-time applications.
 
 The data processing unit consisting of \ALU\ and registers is shown in Figure 16.2. Evidently, data cycle from registers through the \ALU, where an operation is performed, and the result is deposited back into a register. The \ALU\ embodies the circuits for arithmetic operations, logical operations, and shifts. The operations available are listed below. They are described in more detail in Appendix A2. The operand \code{n} is either a register or a part of the instruction itself.
-\begintt
- 0 MOV a,b    R.a := n  
- 1 LSL a,b,n  R.a := R.b \leftarrow\ n   (shift left by n bits)
- 2 ASR a,b,n  R.a := R.b \rightarrow\ n   (shift right by n bits with sign extension)
- 3 ROR a,b,n  R.a := R.b rot n   (rotate right by n bits)
- 4 AND a,b,n  R.a := R.b $\&$ n   logical operations
- 5 ANN a,b,n  R.a := R.b $\&$ ~n  
- 6 IOR a,b,n  R.a := R.b or n   inclusive or
- 7 XOR a,b,n  R.a := R.b xor n   exclusive or
- 8 ADD a,b,n  R.a := R.b + n   integer arithmetic
- 9 SUB a,b,n  R.a := R.b – n   
-10 MUL a,b,n  R.a := R.b \times\ n   
-11 DIV a,b,n  R.a := R.b div n   
-12 FAD a,b,c  R.a := R.b + R.c floating-point arithmetic   
-13 FSB a,b,c  R.a := R.b – R.c   
-14 FML a,b,c  R.a := R.b х R.c   
-15 FDV a,b,c  R.a:=R.b/R.c   
-\endtt
+
+\medskip
+\halign{#\hfil\quad&#\hfil\quad&#\hfil\quad&#\hfil\quad&#\hfil\cr
+Op & Assembly & Oberon & Effect & \cr
+\noalign{\smallskip\hrule}\cr
+ 0 & \code{MOV a,b}    & \code{R.a := n}                  & \cr
+ 1 & \code{LSL a,b,n}  & \code{R.a := R.b \leftarrow\ n}  & shift left by n bits \cr
+ 2 & \code{ASR a,b,n}  & \code{R.a := R.b \rightarrow\ n} & shift right by n bits with sign extension \cr
+ 3 & \code{ROR a,b,n}  & \code{R.a := R.b rot n}          & rotate right by n bits \cr
+ 4 & \code{AND a,b,n}  & \code{R.a := R.b $\&$ n}         & logical operations \cr
+ 5 & \code{ANN a,b,n}  & \code{R.a := R.b $\&$ \sim{}n}       & ... \cr
+ 6 & \code{IOR a,b,n}  & \code{R.a := R.b or n}           & inclusive or \cr
+ 7 & \code{XOR a,b,n}  & \code{R.a := R.b xor n}          & exclusive or \cr
+ 8 & \code{ADD a,b,n}  & \code{R.a := R.b + n}            & integer arithmetic \cr
+ 9 & \code{SUB a,b,n}  & \code{R.a := R.b – n}            & ... \cr
+10 & \code{MUL a,b,n}  & \code{R.a := R.b \times\ n}      & ... \cr
+11 & \code{DIV a,b,n}  & \code{R.a := R.b div n}          & ... \cr
+12 & \code{FAD a,b,c}  & \code{R.a := R.b + R.c}          & floating-point arithmetic    \cr
+13 & \code{FSB a,b,c}  & \code{R.a := R.b - R.c}          & ... \cr
+14 & \code{FML a,b,c}  & \code{R.a := R.b \times\ R.c}    & ... \cr
+15 & \code{FDV a,b,c}  & \code{R.a := R.b / R.c}          & ... \cr
+}\medskip
 
 The following excerpt describes the essence of the \ALU\ circuits. It is written in the \acro{HDL} Verilog and refers to the following wires and registers.
 \begintt
 wire [31:0] IR;
-wire p, q, u, v, w; // instruction fields IR[31], IR[30], IR[29], IR[28], IR[16]
-wire [3:0] op, ira, irb, irc; // instruction fields IR[19:16], IR[27:24], IR[23:20], IR[3:0]
+// instruction fields IR[31], IR[30], IR[29], IR[28], IR[16]
+wire p, q, u, v, w; 
+// instruction fields IR[19:16], IR[27:24], IR[23:20], IR[3:0]
+wire [3:0] op, ira, irb, irc; 
 wire [15:0] imm; // instruction field IR[15:0]
 wire [31:0] A, B, C0, C1, regmux;
 wire [31:0] s3, t3, quotient, fsum, fprod, fquot;
