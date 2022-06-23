@@ -64,10 +64,10 @@
 - [ ] Proofread until 11.3. PRINTING SERVICE.        xxx source.
 - [ ] Proofread until 11.4. MISCELLANEOUS SERVICES.  xxx
 - [ ] Proofread until 11.5. USER ADMINISTRATION.     xxx
-- [ ] Proofread until 12.1. INTRODUCTION.
-- [ ] Proofread until 12.2. CODE PATTERNS.
-- [ ] Proofread until 12.3. INTERNAL DATA STRUCTURES AND MODULE INTERFACES.
-- [ ] Proofread until 12.3.1. Data structures.
+- [X] Proofread until 12.1. INTRODUCTION.
+- [X] Proofread until 12.2. CODE PATTERNS.
+- [X] Proofread until 12.3. INTERNAL DATA STRUCTURES AND MODULE INTERFACES.
+- [X] Proofread until 12.3.1. Data structures.
 - [ ] Proofread until 12.3.2. Module interfaces.
 - [ ] Proofread until 12.4. THE PARSER.
 - [ ] Proofread until 12.5. THE SCANNER.
