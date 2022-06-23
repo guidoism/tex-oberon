@@ -32,6 +32,7 @@
 \def\MMU{\acro{MMU}}
 \def\ASCII{\acro{ASCII}}
 \def\IEEE{\acro{IEEE}}
+\def\table#1{\medskip\halign{#1}\medskip}
 
 % TODO: Change raw tags to use semantic \code and \emph macros
 
@@ -5044,13 +5045,13 @@ Before it is possible to understand how code is generated, one needs to know whi
 As a prerequisite to understanding the resulting instructions and in particular their parameters, we need to know where declared variables are stored, i.e. which are their addresses. This compiler uses the straight-forward scheme of sequential allocation of consecutively declared variables. An address is a pair consisting of a base address (in a register) and an offset. Global variables are allocated in the module's data section and the respective base address register is \code{SB} (\emph{Static Base}, see Chapter 6). Local variables are allocated in a procedure activation record on the stack; the respective base register is \code{SP} (\emph{Stack Pointer}). Offsets are positive integers.
 
 The amount of storage needed for a variable (called its size) is determined by the variable's type. The sizes of basic types are prescribed by the target computer's data representation. The following holds for the \RISC\ processor:
-\medskip
-\halign{#\hfil\quad&#\hfil\quad&#\hfil\cr
+\table{
+#\hfil\quad&#\hfil\quad&#\hfil\cr
 Type & Number of bytes\cr
 \noalign{\smallskip\hrule}\cr
 \code{BYTE}, \code{CHAR}, \code{BOOLEAN} & 1 \cr
 \code{INTEGER}, \code{REAL}, \code{SET}, \code{POINTER}, \code{PROCEDURE} & 4 \cr
-}\medskip
+}
 \noindent The size of an array is the size of the element type multiplied by the number of elements. The size of a record is the sum of the sizes of its fields.
 
 A complication arises due to so-called alignment. By alignment is meant the adjustment of an address to a multiple of the variable's size. Alignment is performed for variable addresses as well as for record field offsets. The motivation for alignment is the avoidance of double memory references for variables being ``distributed'' over two adjacent words. Proper alignment enhances processing speed quite significantly. Variable allocation using alignment is shown by the example in Fig. 12.2.
