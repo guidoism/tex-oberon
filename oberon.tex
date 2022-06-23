@@ -4918,7 +4918,7 @@ Our justification to present the drivers connecting the Oberon system with the \
 
 In order to reduce the number of interface types, standards have been established. The \RISC\ computer also uses such interface standards, and we will concentrate on them in the following presentations. The following devices are presented:
 
-1. The \emph{Keyboard} is considered as a serial device delivering one byte of input data per key stroke. It is connected by a serial line according to the \acro{PS}/2 and \ASCII (American Standard Code for Information Interchange) standards. The software is contained in module \code{Input} (Sect. 9.2), and the hardware is explained in Sect. 17.2.1.
+1. The \emph{Keyboard} is considered as a serial device delivering one byte of input data per key stroke. It is connected by a serial line according to the \acro{PS}/2 and \ASCII\ (American Standard Code for Information Interchange) standards. The software is contained in module \code{Input} (Sect. 9.2), and the hardware is explained in Sect. 17.2.1.
 
 2. The \emph{mouse} is a pointing device delivering coordinates in addition to key states. The software is also part of module \code{Input} (Sect. 9.2).
 
@@ -4932,7 +4932,7 @@ In all driver modules the implementation-dependent procedures \code{SYSTEM.PUT},
 
 \beginsubsection 9.2. KEYBOARD AND MOUSE.
 
-The driver procedures for the keyboard and the mouse are located in module \code{Input}. \code{Available()} signals that a character has been typed on the keyboard, if its value is greater than 0. The character is read by calling \code{Read(ch)}. Module \code{Input} is restricting the data to the \ASCII character set Latin-1, i.e. the values lie in the range $0X \ge ch < 80X$ (7-bit values). \code{Mouse(k, x, y)} yields the current state of the mouse keys and the mouse's coordinates.
+The driver procedures for the keyboard and the mouse are located in module \code{Input}. \code{Available()} signals that a character has been typed on the keyboard, if its value is greater than 0. The character is read by calling \code{Read(ch)}. Module \code{Input} is restricting the data to the \ASCII\ character set Latin-1, i.e. the values lie in the range $0X \ge ch < 80X$ (7-bit values). \code{Mouse(k, x, y)} yields the current state of the mouse keys and the mouse's coordinates.
 \begintt
 MODULE Input;
 PROCEDURE Available(): INTEGER;
@@ -5820,7 +5820,7 @@ The three types \code{Object}, \code{Item}, and \code{Struct} are defined in mod
 
 Before embarking on a presentation of the compiler's main module, the parser, an overview of its remaining modules is given in the form of their interfaces. The reader is invited to refer to them when studying the parser.
 
-The interface of the scanner module \code{ORS} is simple. It defines the numeric values of all symbols. But its chief constituent is procedure \code{Get}. Each call yields the next symbol from the source text, identified by an integer. Global variables represent attributes of the read symbol in certain cases. If a number was read, \code{ival} or \code{rval} hold its numeric value. If an identifier or a string was read, \code{str} holds the \ASCII values of the characters read.
+The interface of the scanner module \code{ORS} is simple. It defines the numeric values of all symbols. But its chief constituent is procedure \code{Get}. Each call yields the next symbol from the source text, identified by an integer. Global variables represent attributes of the read symbol in certain cases. If a number was read, \code{ival} or \code{rval} hold its numeric value. If an identifier or a string was read, \code{str} holds the \ASCII\ values of the characters read.
 
 Procedure \code{Mark} serves to generate a diagnostic output indicating a brief diagnostic and the scanner's current position in the source text. This procedure is located in the scanner, because only the scanner has access to its current position. \code{Mark} is called from all other modules.
 \begintt
