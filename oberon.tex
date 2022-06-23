@@ -5086,7 +5086,7 @@ BEGIN                                     module entry code
                                 B0D00000  STR  R0 SB 0
   k := 10;                      4000000A  MOV  R0 R0 10
                                 A0D00004  STR  R0 SB 4
-  x := 1.0;                     60003F80  MOV' R0 R0 3F800000H
+  x := 1.0;                     60003F80  MOV|char13 R0 R0 3F800000H
                                 A0D00008  STR  R0 SB 8
   s := {0, 4, 8}                40000111  MOV  R0 R0 111H
                                 A0D0000C  STR  R0 SB 12
@@ -5121,7 +5121,7 @@ BEGIN
                                 AND  R0 R0 15
                                 STR  r0 SB 8
   x := -y / (x - 1.0);          LDR  R0 SB 16
-                                MOV' R1 R0 3F80H
+                                MOV|char13 R1 R0 3F80H
                                 FSB  R0 R0 R1
                                 LDR  R1 SB 20
                                 FDV  R0 R1 R0
@@ -5377,7 +5377,7 @@ MODULE Pattern9;
                        STR  LNK SP 0      push ret adr
                        STR  R0 SP 4       push x
     IF x >= 1.0 THEN   LDR  R0 SP 4
-                       MOV' R1 R0 3F80H
+                       MOV|char13 R1 R0 3F80H
                        FSB  R0 R0 R1
                        BLT  4
       x := F(F(x))     LDR  R0 SP 4
@@ -5466,7 +5466,7 @@ BEGIN
   IF n IN {2,3,5,7,11,13} THEN    MOV  R0 R0 28ACH
                                   LDR  R1 SB 8
                                   ADD  R1 R1 1
-                                  ASR' R0 R0 R1
+                                  ASR|char13 R0 R0 R1
                                   BPL 2
   m := 1                          MOV  R0 R0 1
                                   STR  R0 SB 4      m
@@ -5737,12 +5737,12 @@ BEGIN
   n := ORD(ch);         LDB R0 SB 17      ch
                         STR R0 SB 4       n
   n := FLOOR(x);        LDR R0 SB 8       x
-                        MOV' R1 R0 4B00H
+                        MOV|char13 R1 R0 4B00H
                         FAD" R0 R0 R1     floor
                         STR R0 SB 4       n
   y := FLT(m);          LDR R0 SB 0       m
-                        MOV' R1 R0 4B00H
-                        FAD' R0 R0 R1     float
+                        MOV|char13 R1 R0 4B00H
+                        FAD|char13 R0 R0 R1     float
                         STR R0 SB 12      y
   n := LSL(m, 3);       LDR R0 SB 0       m
                         LSL R0 R0 3
