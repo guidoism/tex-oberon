@@ -5073,6 +5073,7 @@ Memory instructions compute the address as the sum of a register (base) and an o
 The first 7 sample patterns contain global variables only, and their base \code{SB} is assumed to hold the appropriate value. Parameters of branch instructions denote jump distances from the instruction's own location (\code{PC}-relative).
 
 \pattern{1} \emph{Assignment of constants}. We begin with a simple example of assigning constants to variables. The variables used in this example are global; their base register is \code{SB}. Each assignment results in a single instruction. The constant is embedded within the instruction as a literal operand.
+\eject % We are close to the end of the page so push the code onto the next page
 \begintt
 MODULE Pattern1;
   VAR ch: CHAR;                 0
