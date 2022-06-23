@@ -5998,20 +5998,22 @@ DEFINITION ORG;
   PROCEDURE Close*(VAR modid: ORS.Ident; key, nofent: LONGINT);
 END ORG.
 \endtt
-
+\eject
 \beginsubsection 12.4. THE PARSER.
 
 The main module \code{ORP} constitutes the parser. Its single command \code{Compile}---at the end of the program listing---identifies the source text according to the Oberon command conventions. It then calls procedure \code{Module} with the identified source text as parameter. The command forms are:
-
-\item{} \code{ORP.Compile} The most recent selection identifies the beginning of the source text.
-\item{} \code{@ ORP.Compile} The most recent selection identifies the name of the source file.
-\item{} \code{^ ORP.Compile f0 f1 ... ~} \code{f0, f1, ...} are the names of source files.
-
+\table{
+#\hfil\quad&#\hfil\quad\cr
+\code{ORP.Compile} & The most recent selection identifies the \cr
+                   & \quad beginning of the source text. \cr
+\code{\@ORP.Compile} & The most recent selection identifies the name \cr
+                     & \quad of the source file. \cr
+\code{\^{}ORP.Compile f0 f1 ... ~} & \code{f0, f1, ...} are the names of source files. \cr
+}
 \noindent File names and the characters \code{@} and \code{^} may be followed by an option specification \code{/s}. Option \code{s} enables the compiler to overwrite an existing symbol file, thereby invalidating clients.
 
 The parser is designed according to the proven method of top-down, recursive descent parsing with a look-ahead of a single symbol. The last symbol read is represented by the global variable \code{sym}. Syntactic entities are mirrored by procedures of the same name. Their goal is to recognize the specified construct in the source text. The start symbol and corresponding procedure is \code{Module}. The principal parser procedures are shown in Fig.~12.6., which also exhibits their calling hierarchy. Loops in the diagram indicate recursion in the syntactic definition.
-
-\figure{pdfs/fig-12.6.png}{4.7in}{12.6}{Parser procedure hierarchy}
+\figure{pdfs/fig-12.6.png}{4.2in}{12.6}{Parser procedure hierarchy}
 
 The rule of parsing strictly based on a single-symbol look-ahead and without reference to context is violated in three places. The prominent violation occurs in statements. If the first symbol of a statement is an identifier, the decision of whether an assignment or a procedure call is to be recognized is based on contextual information, namely the class of the identified object. The second violation occurs in qualident; if the identifier \code{x} preceding a period denotes a module, it is recognized together with the subsequent identifier as a qualified identifier. Otherwise \code{x} supposedly denotes a record variable. The third violation is made in procedure selector; if an identifier is followed by a left parenthesis, the decision of whether a procedure call or a type guard is to be recognized is again made on the basis of contextual information, namely the mode of the identified object.
 
