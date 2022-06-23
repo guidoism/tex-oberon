@@ -33,6 +33,7 @@
 \def\ASCII{\acro{ASCII}}
 \def\IEEE{\acro{IEEE}}
 \def\table#1{\medskip\halign{#1}\medskip}
+\def\list#1{\medskip#1\medskip}
 
 % TODO: Change raw tags to use semantic \code and \emph macros
 
@@ -5231,6 +5232,7 @@ The Boolean operators \code{\&} and \code{OR} are purposely not defined as total
 \noindent Consequently, Boolean operators must be translated into branches too. Evidently, branches stemming from if statements and branches stemming from Boolean operators should be merged, if possible. The resulting code therefore does not necessarily mirror the structure of the \code{if} statement directly, as can be seen from the code in \code{Pattern5}. We must conclude that code generation for Boolean expressions differs in some aspects from that for arithmetic expressions.
 
 The example of \code{Pattern5} is also used to exhibit the code resulting from the standard procedures \code{INC}, \code{DEC}, \code{INCL}, and \code{EXCL}. These procedures provide an opportunity to use shorter code in those cases where a single two-operand instruction suffices, i.e. when one of the arguments is identical with the destination.
+\eject % We are close to the end of the page so push the code onto the next page
 \begintt
 MODULE Pattern5;
   VAR n: INTEGER; s: SET;            0,4
@@ -5792,27 +5794,42 @@ We now return to the subject of Objects. Whereas objects of basic classes (\code
 Let us assume, for instance, that a term \code{x*y} is parsed. This implies that the operator and both factors have been parsed already. The factors \code{x} and \code{y} are represented by two variables of type \code{Item} of \code{Var} mode. The resulting term is again described by an \code{Item}, and since the product is transitory, i.e. has significance only within the expression of which the term is a constituent, it is to be held in a temporary location, in a register. In order to express that an item is located in a register, a new, non-basic mode \code{Reg} is introduced.
 
 Effectively, all non-basic modes reflect the target computer's architecture, in particular its addressing modes. The more addressing modes a computer offers, the more item modes are needed to represent them. The additional item modes required by the \RISC\ processor are. They are declared in module \code{ORG}:
-\medskip
-\item{\code{Reg}:}  direct register mode
-\item{\code{RegI}:} indirect register mode
-\item{\code{Cond}:} condition code mode
-\medskip
+\list{
+\item{} \code{Reg}: direct register mode
+\item{} \code{RegI}: indirect register mode
+\item{} \code{Cond}: condition code mode
+}
 The use of the types \code{Object}, \code{Item}, and \code{Struct} for the various modes and forms, and the meaning of their attributes are explained in the following tables:
-\medskip
-Object values and the meaning of \code{val}
-\halign{#\hfil\quad&#\hfil\quad&#\hfil\cr
-Name & \code{class} & Meaning of \code{val}\cr
+% TODO: The table in the text was pretty crappy so we should recreate from info in ORG.Mod
+\table{
+#\hfil\quad&#\hfil\quad&#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil\cr
+Objects & & Items \cr
+&  class   & val    & a     & b     & r \cr
 \noalign{\smallskip\hrule}\cr
-\code{Const} &  1 &  value \cr
-\code{Var}   &  2 &  address \cr
-\code{Par}   &  3 &  address \cr
-\code{Fld}   &  4 &  offset \cr
-\code{Typ}   &  5 &  type descriptor (\code{TD}) address \cr
-\code{SProc} &  6 &  inline code number \cr
-\code{SFunc} &  7 &  inline code number \cr
-\code{Mod}   &  8 &  key \cr
-}\medskip
-{\bf{\tt TODO:} Add the rest of the values}
+0  & Undef &        &       &       & \cr
+1  & Const & val    & val   &       & \cr
+2  & Var   & adr    & adr   & base  & \cr
+3  & Par   & adr    & adr   & off   & \cr
+4  & Fld   & off    & off   &       & \cr
+5  & Typ   & TDadr  & TDadr & modno & \cr
+6  & SProc & num    &       &       & \cr
+7  & SFunc & num    &       &       & \cr
+8  & Mod   &        &       &       & \cr
+10 & Reg   &        &       &       & regno \cr
+11 & RegI  &        & off   &       & regno \cr
+12 & Cond  &        & Tjmp  & Fjmp  & condition code \cr
+}
+\eject
+\table{
+#\hfil\quad&#\hfil\quad&#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil\cr
+Structures \cr
+&    form  & nofpar & len   & dsc   & base \cr
+\noalign{\smallskip\hrule}\cr
+7  & Pointer &        &       &       & base type \cr
+10 & ProcTyp & nofpar &       & param & result type \cr
+12 & Array   &        & nofel &       & element typ \cr
+13 & Record  & ext lev & desc adr & fields & extension type \cr
+}
 
 Items have an attribute called \code{lev} which is part of the address of the item. Positive values denote the level of nesting of the procedure in which the item is declared; \code{lev} = 0 implies a global object. Negative values indicate that the object is imported from the module with number -\code{lev}.
 
