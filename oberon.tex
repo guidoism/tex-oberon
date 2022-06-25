@@ -6020,18 +6020,18 @@ The rule of parsing strictly based on a single-symbol look-ahead and without ref
 A fairly large part of the program is devoted to the discovery of errors. Not only should they be properly diagnosed. A much more difficult requirement is that the parsing process should continue on the basis of a good guess about the structure that the text should most likely have. The parsing process must continue with some assumption and possibly after skipping a short piece of the source text. Hence, this aspect of the parser is mostly based on heuristics. Incorrect assumptions about the nature of a syntactic error lead to secondary error diagnostics. There is no way to avoid them. A reasonably good result is obtained by the fact that procedure \code{ORS.Mark} inhibits an error report, if it lies less than 10 characters ahead of the last one. Also, the language Oberon is designed with the property that most large constructs begin with a unique symbol, such as \code{IF}, \code{WHILE}, \code{CASE}, \code{RECORD}, etc. These symbols facilitate the recovery of the parsing process in the erroneous text. More problematic are open constructs which neither begin nor end with key symbols, such as types, factors, and expressions. Relying on heuristics, the source text is skipped up to the first occurrence of a symbol which may begin a construct that follows the one being parsed. The employed scheme may not be the best possible, but it yields quite acceptable results and keeps the amount of program devoted to the handling of erroneous texts within justifiable bounds.
 
 Besides the parsing of text, the Parser also performs the checking for type consistency of objects. This is based on type information held in the global table, gained during the processing of declarations, which is also handled by the routines which parse. Thereby an unjustifiably large number of very short procedures is avoided. However, the strict target-computer independence of the parser is violated slightly: Information about variable allocation strategy including alignment, and about the sizes of basic types is used in the parser module. Whereas the former violation is harmless, because the allocation strategy is hardly controversial, the latter case constitutes a genuine target-dependence embodied in a number of explicitly declared constants. Mostly these constants are contained in the respective type definitions, represented by records of type Type initialized by \code{ORB}. The following procedures allocate objects and generate elements of the symbol table:
-\medskip
-\item{Declarations} Object(Con), Object(Typ), Object(Var) 
-\item{ProcedureDeclaration} Object(xProc)
-\item{FormalType} Object(Var), Object(Par)
-\item{ORB.Import} Object(Mod)
-\item{RecordType} Object(Fld), Type(Record) 
-\item{ArrayType} Type(Array) 
-\item{ProcedureType} Type(ProcTyp) 
-\item{Type} Type(Pointer) 
-\item{FormalType} Type(Array)
-\medskip
-
+\table{
+#\hfil\quad&#\hfil\quad\cr
+Declarations & Object(Con), Object(Typ), Object(Var) \cr
+ProcedureDeclaration & Object(xProc)\cr
+FormalType & Object(Var), Object(Par)\cr
+ORB.Import & Object(Mod)\cr
+RecordType & Object(Fld), Type(Record) \cr
+ArrayType & Type(Array) \cr
+ProcedureType & Type(ProcTyp) \cr
+Type & Type(Pointer) \cr
+FormalType & Type(Array)\cr
+}
 \noindent An inherently nasty subject is the treatment of forward references in a single-pass compiler. In Oberon, there are two such cases:
 
 \item{1.} Forward declarations of procedures. They have been eliminated from the revision of the Oberon language in the year 2007 as they should be avoided if ever possible. If it is impossible, a remedy is to declare a variable of the given procedure type, and assign the procedure to be forwarded to this variable. The nastiness of procedure forward declarations originates in the necessity to specify parameters and result type in the forward declaration. These must be repeated in the actual procedure declaration, and one expects that a compiler verifies the equality (or equivalence) of the two declarations. This is a heavy burden for a case that very rarely occurs.
@@ -6048,6 +6048,7 @@ ELSIF x IS T2 THEN
   WITH x: T2 DO ... x ... END
 ELSIF ... END
 \endtt
+\eject
 is now written more simply and more efficiently as
 \begintt
 CASE x OF
@@ -6066,9 +6067,10 @@ A sequence of letters and digits may either denote an identifier or a key word. 
 
 The presence of a digit signals a number. Procedure \code{Number} first scans the subsequent digits (and letters) and stores them in a buffer. This is necessary, because hexadecimal numbers are denoted by the postfix letter \code{H} (rather than a prefix character). The postfix letter \code{X} specifies that the digits denote a character.
 
-There exists one case in the language Oberon, where a look-ahead of a single character does not suffice to identify the next symbol. When a sequence of digits is followed by a period, this period may either be the decimal point of a real number, or it may be the first element of a range symbol ( \code{..} ). Fortunately, the problem can be solved locally as follows: \code{If}, after reading digits and a period, a second period is present, the number symbol is returned, and the look-ahead variable ch is assigned the special value \code{7FX}. A subsequent call of \code{Get} then delivers the range symbol. Otherwise the period after the digit sequence belongs to the (real) number.
+There exists one case in the language Oberon, where a look-ahead of a single character does not suffice to identify the next symbol. When a sequence of digits is followed by a period, this period may either be the decimal point of a real number, or it may be the first element of a range symbol (\code{..}). Fortunately, the problem can be solved locally as follows: \code{If}, after reading digits and a period, a second period is present, the number symbol is returned, and the look-ahead variable ch is assigned the special value \code{7FX}. A subsequent call of \code{Get} then delivers the range symbol. Otherwise the period after the digit sequence belongs to the (real) number.
 
-\beginsubsection 12.6. SEARCHING THE SYMBOL TABLE, AND HANDLING SYMBOL FILES.
+\eject
+\beginsubsection 12.6. SEARCHING THE SYMBOL TABLE / HANDLING SYMBOL FILES.
 
 \beginsubsubsection 12.6.1. The structure of the symbol table.
 
@@ -6085,12 +6087,21 @@ TYPE Object = POINTER TO ObjDesc;
   END ;
   (*exported / read-only*)
   TypeDesc = RECORD
-    form, ref, mno: INTEGER; (*ref is only used for import/export*)
-    nofpar: INTEGER; (*for procedures; extension level for records*)
-    len: INTEGER; (*for arrays, len < 0 => open array; for records: adr of descriptor*)
+    (*ref is only used for import/export*)
+    form, ref, mno: INTEGER;
+    
+    (*for procedures; extension level for records*)
+    nofpar: INTEGER;
+
+    (*for arrays, len < 0 => open array; for records:
+      adr of descriptor*)
+    len: INTEGER; 
     dsc, typobj: Object;
     base: Type; (*for arrays, records, pointers*)
-    size: INTEGER; (*in bytes; always multiple of 4, except for Byte, Bool and Char*)
+
+    (*in bytes; always multiple of 4, except for Byte,
+      Bool and Char*)
+    size: INTEGER; 
   END ;
 \endtt
 
@@ -6133,52 +6144,68 @@ The major part of module \code{ORB} is devoted to input and output of symbol fil
 
 The structure of a symbol file is defined by the syntax specified below. The following terminal symbols are class and form specifiers or reference numbers for basic types with fixed values:
 \begintt
-Classes: Con=1,Var=2,Par=3,Fld=4;Typ=5
-Forms: Byte=1,Bool=2,Char=3,Int=4,LInt=5,Set=6, Pointer = 7, NoTyp = 9, ProcTyp = 10, Array = 12, Record = 13
-Syntax:
+Classes: Con=1, Var=2, Par=3, Fld=4, Typ=5
+Forms: Byte=1, Bool=2, Char=3, Int=4, LInt=5, Set=6,
+       Pointer=7, NoTyp=9, ProcTyp=10, Array=12, Record=13
+\endtt
+
+\noindent Syntax:
+\begintt
 SymFile = null key name versionkey {object}.
-object = (CON name type (value | exno) | TYP name type [{fix} 0] | VAR name type expno). type = ref (PTR type | ARR type len | REC type {field} 0 | PRO type {param} 0].
-dsc
-39
-field = FLD name type offset. param = (VAR | PAR) type.
+object = (CON name type (value |mid exno) |mid
+          TYP name type [{fix} 0] |mid
+          VAR name type expno).
+type = ref (PTR type |mid
+            ARR type len |mid
+            REC type {field} 0 |mid
+            PRO type {param} 0].
+field = FLD name type offset.
+param = (VAR |mid PAR) type.
 \endtt
 
 \noindent A procedure type description is contains a parameter list. Similarly, a record type description with form specifier \code{Record} contains the list of field descriptions. Note that a procedure is considered as a constant of a procedure type.
 
 Objects have types, and types are referenced by pointers. These cannot be written on a file. The straight-forward solution would be to use the type identifiers as they appear in the program to denote types. However, this would be rather crude and inefficient, and second, there are anonymous types, for which artificial identifiers would have to be generated.
 
-An elegant solution lies in consecutively numbering types. Whenever a type is encountered the first time, it is assigned a unique reference number. For this purpose, records (in the compiler) of type Type contain the field ref. Following the number, a description of the type is then written to the symbol file. When the type is encountered again during the traversal of the data structure, only the reference number is issued, with negative sign. The global variable \code{ORB.Ref} functions as the running reference number.
+An elegant solution lies in consecutively numbering types. Whenever a type is encountered the first time, it is assigned a unique reference number. For this purpose, records (in the compiler) of type \code{Type} contain the field \code{ref}. Following the number, a description of the type is then written to the symbol file. When the type is encountered again during the traversal of the data structure, only the reference number is issued, with negative sign. The global variable \code{ORB.Ref} functions as the running reference number.
 
-When reading a symbol file, a positive reference number is followed by the type's description. A pointer to the type read is assigned to the global table \code{typtab} with the reference number as index. When a negative reference number is read (it is not followed by a type description), then the type is identified by \code{typtab[-ref]} (see procedure \code{InType}). In the following example, types are identified by their reference number (e.g. \code{R \#14}), and later referenced by this number (\code{^14}).
+When reading a symbol file, a positive reference number is followed by the type's description. A pointer to the type read is assigned to the global table \code{typtab} with the reference number as index. When a negative reference number is read (it is not followed by a type description), then the type is identified by \code{typtab[-ref]} (see procedure \code{InType}). In the following example, types are identified by their reference number (e.g. \code{R \#14}), and later referenced by this number (\code{\^{}14}).
 \begintt
 MODULE A;
-CONST Ten* = 10; Dollar* = "$";
-TYPE R* = RECORD u*: INTEGER; v*: SET END ;
-S* = RECORD w*: ARRAY 4 OF R END ; P* = POINTER TO R;
-A* = ARRAY 8 OF INTEGER;
-B* = ARRAY 4, 5 OF REAL;
-C* = ARRAY 10 OF S;
-D* = ARRAY OF CHAR;
-VAR x*: INTEGER;
-PROCEDURE Q0*;
-BEGIN END Q0;
-PROCEDURE Q1*(x, y: INTEGER): INTEGER; BEGIN RETURN x+y END Q1;
+  CONST Ten* = 10; Dollar* = "$";
+  TYPE R* = RECORD u*: INTEGER; v*: SET END ;
+    S* = RECORD w*: ARRAY 4 OF R END ; P* = POINTER TO R;
+    A* = ARRAY 8 OF INTEGER;
+    B* = ARRAY 4, 5 OF REAL;
+    C* = ARRAY 10 OF S;
+    D* = ARRAY OF CHAR;
+  VAR x*: INTEGER;
+  PROCEDURE Q0*;
+  BEGIN END Q0;
+  PROCEDURE Q1*(x, y: INTEGER): INTEGER;
+  BEGIN RETURN x+y END Q1;
 END A.
+
 class = CON Ten [^4] 10
 class = CON Dollar [^3] 36
-class=TYPR[#14 form=REC[^9] exno=1 extlev=0 size=8{v[^6] 4u[^4] 0}]()
-class=TYPS[#15 form=REC[^9] exno=2 extlev=0 size=32{w[#0 form=ARR[^14] len=4 size=32] 0}]() class = TYP P [#16 form = PTR [^14]]()
-class=TYPA[#17 form=ARR[^4] len=8 size=32]()
-class=TYPB[#18 form=ARR[#0 form=ARR[^5] len=5 size=20] len=4 size=80]()
+class = TYPR[#14 form=REC[^9] exno=1 extlev=0 size=8{v[^6]
+        4u[^4] 0}]()
+class = TYPS[#15 form=REC[^9] exno=2 extlev=0 size=32{w[#0
+        form=ARR[^14] len=4 size=32] 0}]()
+class = TYP P [#16 form = PTR [^14]]()
+class = TYPA[#17 form=ARR[^4] len=8 size=32]()
+class = TYPB[#18 form=ARR[#0 form=ARR[^5] len=5 size=20] 
+        len=4 size=80]()
 class = TYP C [#19 form = ARR [^15] len = 10 size = 320]()
-class=TYPD[#20 form=ARR[^3] len=-1 size=8]()
+class = TYPD[#20 form=ARR[^3] len=-1 size=8]()
 class = VAR x [^4] 3
 class = CON Q0 [#0 form = PRO [^9]()] 4
-class = CON Q1 [#0 form = PRO [^4]( class = VAR [^4] class = VAR [^4])] 5
+class = CON Q1 [#0 form = PRO [^4]( class = VAR [^4]
+        class = VAR [^4])] 5
 \endtt
 After a symbol file has been generated, it is compared with the file from a previous compilation of the same module, if one exists. Only if the two files differ and if the compiler's s-option is enabled, is the old file replaced by the new version. The comparison is made by comparing byte after byte without consideration of the file's structure. This somewhat crude approach was chosen because of its simplicity and yielded good results in practice.
 
-A symbol file must not contain addresses (of variables or procedures). If they did, most changes in the program would result in a change of the symbol file. This must be avoided, because changes in the implementation (rather than the interface) of a module are supposed to remain invisible to the clients. Only changes in the interface are allowed to effect changes in the symbol file, requiring recompilation of all clients. Therefore, addresses are replaced by export numbers. The variable exno (global in ORP) serves as running number (see \code{ORP.Declarations} and \code{ORP.ProcedureDecl}). The translation from export number to address is performed by the loader. Every code file contains a list (table) of addresses (of variables and entry points for procedures). The export number serves as index in this table to obtain the requested address. Export numbers are generated by the parser.
+A symbol file must not contain addresses (of variables or procedures). If they did, most changes in the program would result in a change of the symbol file. This must be avoided, because changes in the implementation (rather than the interface) of a module are supposed to remain invisible to the clients. Only changes in the interface are allowed to effect changes in the symbol file, requiring recompilation of all clients. Therefore, addresses are replaced by export numbers. The variable \code{exno} (global in \code{ORP}) serves as running number (see \code{ORP.Declarations} and \code{ORP.ProcedureDecl}). The translation from export number to address is performed by the loader. Every code file contains a list (table) of addresses (of variables and entry points for procedures). The export number serves as index in this table to obtain the requested address. Export numbers are generated by the parser.
 
 Objects exported from some module M1 may refer in their declaration to some other module \code{M0} imported by \code{M1}. It would be unacceptable, if an import of \code{M1} would then also require the import of \code{M0}, i.e. imply the automatic reading of \code{M01}'s symbol file. It would trigger a chain reaction of imports that must be avoided. Fortunately, such a chain reaction can be avoided by making symbol files self-contained, i.e. by including in every symbol file the description of entities that stem from other modules. Such entities are always types.
 
@@ -6207,7 +6234,7 @@ But the story does not end here. Assume that in the example above module \code{M
 
 \beginsubsection 12.7. THE CODE GENERATOR.
 
-The routines for generating instructions are contained in a single module: \code{ORG}. They are fairly numerous, and therefore the interface of \code{ORG} is quite large. It is a procedural interface. This implies that there is no ``intermediate code'' or ``intermediate data structure'' between parser and code generator. This is one reason for the compactness of the code generator. The other is the regularity and simplicity of the processor architecture. In order to understand the following material, the reader is supposed to be familiar with this architecture (Appendix 2) and the generated code patterns for individual language constructs (Section 12.2).
+The routines for generating instructions are contained in a single module: \code{ORG}. They are fairly numerous, and therefore the interface of \code{ORG} is quite large. It is a procedural interface. This implies that there is no ``intermediate code'' or ``intermediate data structure'' between parser and code generator. This is one reason for the compactness of the code generator. The other is the regularity and simplicity of the processor architecture. In order to understand the following material, the reader is supposed to be familiar with this architecture (Appendix~2) and the generated code patterns for individual language constructs (Section 12.2).
 
 A distinguishing feature of this compiler is that parsing proceeds top-down according to the principle of recursive descent in the parsing tree. This implies that for every syntactic construct a specific procedure is called. It carries the same name as the construct. It also implies that properties of the parsed construct can be represented by parameters of the parsing procedures. Consider, for example, the construct of simple expression:
 \begintt
@@ -6219,11 +6246,12 @@ A distinguishing feature of this compiler is that parsing proceeds top-down acco
 PROCEDURE SimpleExpression(VAR x: Item);
   VAR y: Item;
 BEGIN term(x);
-  WHILE sym = plus DO ORS.Get(sym); term(y); ORG.AddOp(x, y) END
+  WHILE sym = plus DO ORS.Get(sym); term(y); ORG.AddOp(x, y)
+  END
 END SimpleExpression
 \endtt
 
-\noindent The generating procedure \code{AddOp} receives two parameters representing the operands, and returns the result through the first parameter. This scheme carries the invaluable advantage of using operands efficiently allocated on the stack rather than dynamically allocated on the heap and subject to automatic storage retrieval (garbage collection). Here the processed operands quietly disappear from the stack upon exit from the parser procedure.
+\noindent The generating procedure \code{AddOp} receives two parameters representing the oper\-ands, and returns the result through the first parameter. This scheme carries the invaluable advantage of using operands efficiently allocated on the stack rather than dynamically allocated on the heap and subject to automatic storage retrieval (garbage collection). Here the processed operands quietly disappear from the stack upon exit from the parser procedure.
 
 The parameters representing syntactic constructs are of type \code{Item} defined in \code{ORG}. This data type is rather similar to the type \code{Object} (in \code{ORB}). After all, it serves the same purpose; but it represents internal items rather than declared objects.
 \begintt
