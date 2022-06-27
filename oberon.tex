@@ -6570,13 +6570,18 @@ LDR R0, SB, offset    offset computed by the loader from
 
 This compiler provides an extensive system of safeguard by providing run-time checks (aborts) in several cases:
 
-TODO: table
-trap number
-1 2 3 4 5 6 7
-trap cause
-array index out of range type guard failure
-array or string copy overflow access via NIL pointer illegal procedure call
-integer division by zero assertionviolated
+\table{
+#\hfil\quad&#\hfil\quad&#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil\cr
+trap number & trap cause\cr
+\noalign{\smallskip\hrule}\cr
+1 & array index out of range \cr
+2 & type guard failure \cr
+3 & array or string copy overflow \cr
+4 & access via NIL pointer \cr
+5 & illegal procedure call \cr
+6 & integer division by zero \cr
+7 & assertion violated \cr
+}
 
 These checks are implemented very efficiently in order not to downgrade a program's performance. Involved is typically a single compare instruction, plus a conditional branch (\code{BLR MT}). It is assumed that entry 0 of the module table contain not a base address (module numbers start with 1), but a branch instruction to an appropriate trap routine. The trap number is encoded in bits 4:7 of the branch instruction.
 
@@ -6585,14 +6590,16 @@ The predefined procedure \code{Assert} generates a conditional trap with trap nu
 LDR R0, m
 LDR R1, n
 CMP R0, R0, R1
-BLR 1, 7CH      branch and link if unequal through R12, trap number 7
+BLR 1, 7CH      branch and link if unequal through R12,
+                trap number 7
 \endtt
 
 \noindent Procedure \code{New}, representing the operator \code{NEW}, has been implemented with the aid of the trap mechanism. (This is in order to omit in \code{ORG} any reference to module \code{Kernel}, which contains the allocation procedure \code{New}). The generated code for the statement \code{NEW(p}) is
 \begintt
 ADD R0, SP, p     address of p
 ADD R1, SB, tag   type tag
-BLR 7, 0CH        branch and link unconditionally through R12 (MT), trap number 0
+BLR 7, 0CH        branch and link unconditionally through
+                  R12 (MT), trap number 0
 \endtt
 
 \beginchapter CHAPTER 13: A GRAPHICS EDITOR.

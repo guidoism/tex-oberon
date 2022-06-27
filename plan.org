@@ -81,9 +81,9 @@
 - [X] Proofread until 12.7.4. Assignments.
 - [X] Proofread until 12.7.5. Conditional and repetitive statements.
 - [X] Proofread until 12.7.6. Boolean expressions.
-- [ ] Proofread until 12.7.7. Procedures.
-- [ ] Proofread until 12.7.8. Type extension.
-- [ ] Proofread until 12.7.9. Import and export, global variables.
+- [X] Proofread until 12.7.7. Procedures.
+- [X] Proofread until 12.7.8. Type extension.
+- [X] Proofread until 12.7.9. Import and export, global variables.
 - [ ] Proofread until 12.7.10. Traps.
 - [ ] Proofread until 13.1. HISTORY AND GOAL.
 - [ ] Proofread until 13.2. A BRIEF USER GUIDE.
