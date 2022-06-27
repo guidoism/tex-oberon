@@ -68,19 +68,19 @@
 - [X] Proofread until 12.2. CODE PATTERNS.
 - [X] Proofread until 12.3. INTERNAL DATA STRUCTURES AND MODULE INTERFACES.
 - [X] Proofread until 12.3.1. Data structures.
-- [ ] Proofread until 12.3.2. Module interfaces.
-- [ ] Proofread until 12.4. THE PARSER.
-- [ ] Proofread until 12.5. THE SCANNER.
-- [ ] Proofread until 12.6. SEARCHING THE SYMBOL TABLE, AND HANDLING SYMBOL FILES.
-- [ ] Proofread until 12.6.1. The structure of the symbol table.
-- [ ] Proofread until 12.6.2. Symbol files.
-- [ ] Proofread until 12.7. THE CODE GENERATOR.
-- [ ] Proofread until 12.7.1. Expressions.
-- [ ] Proofread until 12.7.2. Relations.
-- [ ] Proofread until 12.7.3. Set operations.
-- [ ] Proofread until 12.7.4. Assignments.
-- [ ] Proofread until 12.7.5. Conditional and repetitive statements.
-- [ ] Proofread until 12.7.6. Boolean expressions.
+- [X] Proofread until 12.3.2. Module interfaces.
+- [X] Proofread until 12.4. THE PARSER.
+- [X] Proofread until 12.5. THE SCANNER.
+- [X] Proofread until 12.6. SEARCHING THE SYMBOL TABLE, AND HANDLING SYMBOL FILES.
+- [X] Proofread until 12.6.1. The structure of the symbol table.
+- [X] Proofread until 12.6.2. Symbol files.
+- [X] Proofread until 12.7. THE CODE GENERATOR.
+- [X] Proofread until 12.7.1. Expressions.
+- [X] Proofread until 12.7.2. Relations.
+- [X] Proofread until 12.7.3. Set operations.
+- [X] Proofread until 12.7.4. Assignments.
+- [X] Proofread until 12.7.5. Conditional and repetitive statements.
+- [X] Proofread until 12.7.6. Boolean expressions.
 - [ ] Proofread until 12.7.7. Procedures.
 - [ ] Proofread until 12.7.8. Type extension.
 - [ ] Proofread until 12.7.9. Import and export, global variables.
