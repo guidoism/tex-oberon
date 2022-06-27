@@ -6606,7 +6606,7 @@ BLR 7, 0CH        branch and link unconditionally through
 
 \beginsubsection 13.1. HISTORY AND GOAL.
 
-The origin of graphics systems as they are in use at this time was intimately tied to the advent of the high-resolution bit-mapped display and of the mouse as pointing device. The author's first contact with such equipment dates back to 1976. The Alto computer at the Xerox Palo Alto Research Center is justly termed the first workstation featuring those characteristics. The designer of its first graphics package was Ch. Thacker who perceived the usefulness of the high-resolution screen for drawing and processing schematics of electronic circuits. This system was cleverly tailored to the needs encountered in this activity, and it was remarkable in its compactness and effectiveness due to the lack of unnecessary facilities. Indeed, its acronym was \acro{SIL}, for Simple ILlustrator.
+The origin of graphics systems as they are in use at this time was intimately tied to the advent of the high-resolution bit-mapped display and of the mouse as pointing device. The author's first contact with such equipment dates back to 1976. The Alto computer at the Xerox Palo Alto Research Center is justly termed the first workstation featuring those characteristics. The designer of its first graphics package was Ch.~Thacker who perceived the usefulness of the high-resolution screen for drawing and processing schematics of electronic circuits. This system was cleverly tailored to the needs encountered in this activity, and it was remarkable in its compactness and effectiveness due to the lack of unnecessary facilities. Indeed, its acronym was \acro{SIL}, for Simple ILlustrator.
 
 After careful study of the used techniques, the author designed a variant, programmed in Modula-2 (instead of \acro{BCPL}) for the \acro{PDP-11} Computer, thereby ordering and exhibiting the involved data structures more explicitly. In intervals of about two years, that system was revised and grew gradually into the present Draw system. The general goal remained a simple line drawing system: emphasis was placed on a clear structure and increase of flexibility through generalization of existing rather than indiscriminate addition of new features.
 
@@ -6650,29 +6650,34 @@ Shifting the plane. You may shift the entire drawing plane behind the viewer by 
 
 The following table shows a summary of the mouse actions:
 
-TODO: Table
-left draw line left (no motion) set caret
-left + middle left + right
-middle middle + left middle + right
-right
-right (no motion) right + middle right + left
-copy selected caption to caret set secondary caret
-move selection copy selection shift drawing plane
-select area
-select object
-copy caption to caret select without deselection
+\table{
+#\hfil\quad&#\hfil\quad&#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil\cr
+left              & draw line \cr
+left (no motion)  & set caret \cr
+left + middle     & copy selected caption to caret \cr
+left + right      & set secondary caret \cr
+middle            & move selection \cr
+middle + left     & copy selection \cr
+middle + right    & shift drawing plane \cr
+right             & select area \cr
+right (no motion) & select object \cr
+right + middle    & copy caption to caret  \cr
+right + left      & select without deselection \cr
+}
 
 \beginsubsubsection 13.2.2. Menu commands.
 
 The following commands are displayed in the menu (title bar) of every graphic viewer. They are activated by being pointed at and by clicking the middle button.
 
-TODO: Table for list
-Draw.Delete Draw.Store
-Draw.Restore Draw.Ticks
-The selected elements are deleted.
-The drawing is written as file with the name shown in the title bar. The original file is renamed by appending ".Bak".
-The entire frame is redrawn
-The frame displays a pattern of dots (ticks) to facilitate positioning.
+\table{
+#\hfil\quad&#\hfil\quad&#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil\cr
+Draw.Delete   & The selected elements are deleted. \cr
+Draw.Store    & The drawing is written as file with the name shown in the \cr
+              & title bar. The original file is renamed by appending ``.Bak''. \cr
+Draw.Restore  & The entire frame is redrawn \cr
+Draw.Ticks    & The frame displays a pattern of dots (ticks) to facilitate \cr
+              & positioning. \cr
+}
 
 The two viewers in Fig. 13.1. display different parts of the same graphic. The second view was obtained from the generic \code{System.Copy} command and a subsequent shift of the drawing plane.
 
