@@ -6462,7 +6462,7 @@ Before embarking on an explanation of procedure calls, entries and exits, we nee
 % Note: The original 2013 text had two figure 12.7s.
 \figure{pdfs/fig-12.7.2.png}{1.7in}{12.7(2)}{Stack frames}
 
-Scheme and layout determine the code sequences for call, entry and exit of procedures. Here is an example of a procedure P with 2 parameters:
+Scheme and layout determine the code sequences for call, entry and exit of procedures. Here is an example of a procedure \code{P} with 2 parameters:
 \begintt
 Call:    LDR R0, param0 
          LDR R1, param1
@@ -6531,18 +6531,17 @@ TYPE T  = RECORD...END;
 \figure{pdfs/fig-12.8.png}{4.7in}{12.8}{A type hierarchy}
 
 \noindent In the symbol table, the field base refers to the ancestor of a given record type. Thus base of the type representing \code{T11} points to \code{T1}, etc. Run-time checks, however, must be fast, and hence cannot proceed through chains of pointers. Instead, each \code{TD} contains an array with references to the ancestor \code{TD}s (including itself). For the example above, the \code{TD}s are as follows:
+\begintt
+TD(T)   = [T]
+TD(T0)  = [T, T0]
+TD(T1)  = [T, T1]
+TD(T00) = [T, T0, T00]
+TD(T01) = [T, T0, T01]
+TD(T10) = [T, T1, T10]
+TD(T11) = [T, T1, T11]
+\endtt
 
-\smallskip
-\item{} TD(T) = [T]
-\item{} TD(T0) = [T, T0]
-\item{} TD(T1) = [T, T1]
-\item{} TD(T00) = [T, T0, T00]
-\item{} TD(T01) = [T, T0, T01]
-\item{} TD(T10) = [T, T1, T10]
-\item{} TD(T11) = [T, T1, T11]
-\smallskip
-
-Evidently, the first element can be omitted, as it always refers to the common base of the type hierarchy. The last element always points to the \code{TD}’s owner. \code{TD}s are allocated in the data area, the area for variables.
+\noindent Evidently, the first element can be omitted, as it always refers to the common base of the type hierarchy. The last element always points to the \code{TD}’s owner. \code{TD}s are allocated in the data area, the area for variables.
 
 References to \code{TD}s are called type tags. They are required in two cases. The first is for records referenced by pointers. Such dynamically allocated records carry an additional, hidden field holding their type tag. (A second additional word is reserved for use by the garbage collector. The offset of the tag field is therefore -8). The second case is that of record-typed \code{VAR}-parameters. In this case the type tag is explicitly passed along with the address of the actual parameter. Such parameters therefore require two words/registers.
 
@@ -6560,8 +6559,9 @@ Matters are more complex in the case of data. \code{Object} records in the symbo
 
 This base address is fetched from a table global to the entire system. This module table contains one entry for every module loaded, namely the address of the module's data section. The address of the table is permanently in register \code{MT} (= \code{R12}). An access to an imported variable therefore always requires two instructions:
 \begintt
-LDR SB, MT, modno*4 base address of data section
-LDR R0, SB, offset offset computed by the loader from object's export number
+LDR SB, MT, modno*4   base address of data section
+LDR R0, SB, offset    offset computed by the loader from
+                      object's export number
 \endtt
 
 \noindent Considering the fact that references to external variables are (or should be) rare, this circumstance is of no great concern. (Note also that such accesses are read-only). More severe is the fact that we also treat global variables contained in the same module by the same technique. Their level number is 0. One might use a specific base register for the base of the current module. Its content would then have to be reloaded upon every procedure call and after every return. This is common technique, but we have here chosen to reload only when necessary, i.e. only when an access is at hand. This strategy rewards the programmer who sensibly uses global variables rarely.
