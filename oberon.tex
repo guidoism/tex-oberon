@@ -7192,35 +7192,77 @@ This successful decoupling of additions from the system's base suffices, almost.
 The following may serve as a template for any module defining a new object class \code{X}. Two examples are given in Section 13.9, namely \code{Rectangles} and \code{Curves}.
 \begintt
 MODULE Xs;
-IMPORT Files, Oberon, Graphics, GraphicFrames;
-TYPE X* = POINTER TO XDesc;
-XDesc = RECORD (Graphics.ObjectDesc) (*additional data fields*) END ;
-VAR method: Graphics.Method;
-PROCEDURE New*; VAR x: X;
-BEGIN NEW(x); x.do := method; Graphics.new := x END New;
-PROCEDURE* Copy(obj, to: Graphics.Object); BEGIN to(X)^ := obj(X)^
-END Copy;
-PROCEDURE* Draw(obj: Graphics.Object; VAR msg: Graphics.Msg); BEGIN ...
-END Draw;
-PROCEDURE* Selectable(obj: Graphics.Object; x, y: INTEGER): BOOLEAN; BEGIN ...
-END Selectable;
-PROCEDURE* Change(obj: Graphics.Object; VAR msg: Graphics.Msg); BEGIN
-IF msg IS Graphics.ColorMsg THEN obj.col := msg(Graphics.ColorMsg).col ELSIF msg IS ... THEN ...
-END
-END Handle;
-PROCEDURE* Read(obj: Graphics.Object; VAR W: Files.Rider; VAR C: Context); BEGIN (*read X-specific data*)
-END Write;
-PROCEDURE* Write(obj: Graphics.Object; cno: SHORTINT; VAR W: Files.Rider; VAR C: Context);
-BEGIN Graphics.WriteObj(W, cno, obj); (*write X-specific data*) END Write;
-PROCEDURE Make*; (*command*) VAR x: X; F: GraphicFrames.Frame;
-BEGIN F := GraphicFrames.Focus(); IF F # NIL THEN
-GraphicFrames.Deselect(F);
-NEW(x); x.x := F.mark.x - F.x; x.y := F.mark.y - F.y; x.w := ... ; x.h := ... ;
-x.col := Oberon.CurCol; x.do := method;
-GraphicFrames.Defocus(F); Graphics.Add(F.graph, x); GraphicFrames.DrawObj(F, x)
-END END Make;
-BEGIN NEW(method); method.module := "Xs"; method.allocator := "New";
-method.copy := Copy; method.draw := Draw; method.selectable := Selectable; method.handle := Handle; method.read := Read; method.write := Write; method.print := Print
+  IMPORT Files, Oberon, Graphics, GraphicFrames;
+  TYPE X* = POINTER TO XDesc;
+    XDesc = RECORD (Graphics.ObjectDesc)
+              (*additional data fields*) END ;
+  VAR method: Graphics.Method;
+  PROCEDURE New*; VAR x: X;
+  BEGIN NEW(x); x.do := method; Graphics.new := x
+  END New;
+  
+  PROCEDURE* Copy(obj, to: Graphics.Object);
+  BEGIN to(X)^ := obj(X)^
+  END Copy;
+
+  PROCEDURE* Draw(obj: Graphics.Object; VAR msg: Graphics.Msg);
+  BEGIN ...
+  END Draw;
+  
+  PROCEDURE* Selectable(obj: Graphics.Object;
+                        x, y: INTEGER): BOOLEAN;
+  BEGIN ...
+  END Selectable;
+  
+  PROCEDURE* Change(obj: Graphics.Object;
+                    VAR msg: Graphics.Msg);
+  BEGIN
+    IF msg IS Graphics.ColorMsg
+    THEN obj.col := msg(Graphics.ColorMsg).col
+    ELSIF msg IS ... THEN ...
+    END
+  END Handle; <-- TODO: Another bug or typo Dr. Wirth!
+  
+  PROCEDURE* Read(obj: Graphics.Object; VAR W: Files.Rider;
+    VAR C: Context);
+  BEGIN (*read X-specific data*)
+  END Write; <-- TODO: Another bug or typo Dr. Wirth!
+    
+  PROCEDURE* Write(obj: Graphics.Object; cno: SHORTINT;
+    VAR W: Files.Rider; VAR C: Context);
+  BEGIN Graphics.WriteObj(W, cno, obj); (*write X-specific data*)
+  END Write;
+  
+  PROCEDURE Make*; (*command*)
+  VAR x: X; F: GraphicFrames.Frame;
+  BEGIN
+    F := GraphicFrames.Focus();
+    IF F # NIL THEN
+      GraphicFrames.Deselect(F);
+      NEW(x);
+      x.x := F.mark.x - F.x;
+      x.y := F.mark.y - F.y;
+      x.w := ... ;
+      x.h := ... ;
+      x.col := Oberon.CurCol;
+      x.do := method;
+      GraphicFrames.Defocus(F);
+      Graphics.Add(F.graph, x);
+      GraphicFrames.DrawObj(F, x)
+    END
+  END Make;
+
+BEGIN
+  NEW(method);
+  method.module := "Xs";
+  method.allocator := "New";
+  method.copy := Copy;
+  method.draw := Draw;
+  method.selectable := Selectable;
+  method.handle := Handle;
+  method.read := Read;
+  method.write := Write;
+  method.print := Print
 END Xs.
 \endtt
 
@@ -7234,8 +7276,16 @@ Module \code{Draw} is a typical command module whose exported procedures are lis
 
 We emphasize at this point that graphic frames may be opened and manipulated also by other modules apart from \code{Draw}. In particular, document editors that integrate texts and graphics---and perhaps also other entities---would refer to \code{Graphics} and \code{GraphicFrames} directly, but not make use of \code{Draw} which, as a tool module, should not have client modules.
 \begintt
-DEFINITION Draw; PROCEDURE Open; PROCEDURE Delete; PROCEDURE SetWidth; PROCEDURE ChangeColor; PROCEDURE Store; PROCEDURE Macro;
-PROCEDURE OpenMacro; PROCEDURE MakeMacro; PROCEDURE LoadLibrary;
+DEFINITION Draw;
+  PROCEDURE Open;
+  PROCEDURE Delete;
+  PROCEDURE SetWidth;
+  PROCEDURE ChangeColor;
+  PROCEDURE Store;
+  PROCEDURE Macro;
+  PROCEDURE OpenMacro;
+  PROCEDURE MakeMacro;
+  PROCEDURE LoadLibrary;
 END Draw.
 \endtt
 
@@ -7251,22 +7301,22 @@ Module \code{GraphicFrames} contains all routines concerned with displaying, vis
 \item{6.} Modify messages from \code{MenuViewers}. They indicate that a frame has to be adjusted in size and position because a neighbouring viewer has been reshaped, or because its own viewer has been repositioned
 \item{7.} Display messages. They originate from procedure \code{InsertChar} and handle the displaying of single characters when a caption is composed (see below).
 
-The frame handler receiving a consume message interprets the request through procedure \code{InsertChar}, and receiving a track message through procedure \code{Edit}. If no mouse key is depressed, the cursor is simply drawn, and thereby the mouse is tracked. Instead of the regular arrow, a crosshair is used as cursor pattern. Thereby immediate visual feedback is provided to indicate that now mouse actions are interpreted by the graphics handler (instead of, e.g., a text handler). Such feedback is helpful when graphic frames appear not only in a menuviewer, but as subframes of a more highly structured document frame.
+\noindent The frame handler receiving a consume message interprets the request through procedure \code{InsertChar}, and receiving a track message through procedure \code{Edit}. If no mouse key is depressed, the cursor is simply drawn, and thereby the mouse is tracked. Instead of the regular arrow, a crosshair is used as cursor pattern. Thereby immediate visual feedback is provided to indicate that now mouse actions are interpreted by the graphics handler (instead of, e.g., a text handler). Such feedback is helpful when graphic frames appear not only in a menuviewer, but as subframes of a more highly structured document frame.
 
 Procedure \code{Edit} first tracks the mouse while recording further key activities (interclicks) until all keys are released. The subsequent action is determined by the perceived key clicks. The actions are (the second key denotes the interclick):
-TODO: table
 
-keys = left
-keys = left, middle keys = left, right keys = middle
-keys = middle, left keys = middle, right keys = right
-keys = right, middle
-
-set caret, if mouse was not moved, otherwise draw new line, copy text selection to caret position
-set secondary caret (mark)
-move selection
-copy selection
-shift origin of graph
-select (either object, or objects in area) copy selected text to caret position
+\table{
+#\hfil\quad&#\hfil\quad&#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil\cr
+keys = left             & set caret, if mouse was not moved, otherwise draw \cr
+                        & new line, \cr
+keys = left, middle     & copy text selection to caret position \cr
+keys = left, right      & set secondary caret (mark) \cr
+keys = middle           & move selection \cr
+keys = middle, left     & copy selection \cr
+keys = middle, right    & shift origin of graph \cr
+keys = right            & select (either object, or objects in area) \cr
+keys = right, middle    & copy selected text to caret position \cr
+}
 
 When copying or moving a set of selected objects, it must be distinguished between the cases where the source and the destination graphics are the same or are distinct. In the former case, source and destination positions may lie in the same or in different frames.
 
@@ -7288,7 +7338,7 @@ Additional data structures become necessary through the presence of macros and c
 
 A library descriptor is similarly structured: In addition to its name, the field \code{first} points to the list of elements (macros) of the library, which are themselves linked through the field next. Fig. 13.6. shows the data structure containing two libraries. It is anchored in the global variable \code{firstLib}.
 
-\figure{pdfs/fig-13.6.png}{4in}{13.6}{Data structure for two libraries, each with three macros}
+\figure{pdfs/fig-13.6.png}{3.3in}{13.6}{Data structure for two libraries, each with three macros}
 
 Libraries are permanently stored as files. It is evidently unacceptable that file access be required upon every reference to a macro, e.g. each time a macro is redrawn. Therefore a library is loaded into primary store, when one of its elements is referenced for the first time. Procedure \code{ThisMac} searches the data structure representing the specified library and locates the header of the requested macro.
 
@@ -7302,19 +7352,21 @@ When a graphics file is generated by procedure \code{Store}, local dictionaries 
 
 When the graphic file is read, these pairs trigger insertion of the font, library, or class in the respective dictionary, whereby the name is converted into a pointer to the entity, which is obtained by a loading process embodied by procedures \code{Fonts.This}, \code{GetLib}, and \code{GetClass}. Both the \code{Load} and \code{Store} procedures traverse the file only once. The files are self-contained in the sense that all external quantities are represented by their names. The format of a graphics file is defined in Extended BNF syntax as follows:
 \begintt
-file = stretch= item =
-data=
-tag stretch.
-{item}255.
-0 0 fontno fontname | 0 1 libno libname | 0 2 classno classname allocname |
-1 data | 2 data fontno string | 3 data libno macname | classno data extension. x y w h color.
+file    = tag stretch.
+stretch = {item}255.
+item    = 0 0 fontno fontname | 0 1 libno libname |
+          0 2 classno classname allocname |
+          1 data | 2 data fontno string |
+          3 data libno macname | classno data extension.
+data    =  x y w h color.
 \endtt
 
 All class numbers are at least 4; the values 1, 2, and 3 are assigned to lines, captions, and macros. \code{x}, \code{y}, \code{w}, \code{h} are two-byte integer attributes of the base type \code{Object}. The attribute color takes a single byte. The first byte of an item being 0 signifies that the item is an identification of a new font, library, or class. If the second byte is 0, a new font is announced, if 1 a new library, and if 2 a new class of elements.
 
 The same procedures are used for loading and storing a library file. In fact, \code{Load} and \code{Store} read and write a file stretch representing a sequence of elements which is terminated by a special value (255). In a library file each macro corresponds to a stretch, and the terminator is followed by values specifying the macro's overall width, height, and its name. The structure of library files is defined by the following syntax:
 \begintt
-libfile = libtag {macro}. macro = stretch w h name.
+libfile = libtag {macro}.
+macro = stretch w h name.
 \endtt
 
 The first byte of each element is a class number within the context of the file and identifies the class to which the element belongs. An object of the given class is allocated by calling the class' allocation procedure, which is obtained from the class dictionary in the given context. The class number is used as dictionary index. The presence of the required allocation procedure in the dictionary is guaranteed by the fact that a corresponding index/name pair had preceded the element in the file.
@@ -7340,12 +7392,13 @@ In spite of the simplicity of the notion of rectangles, their drawing method is 
 Procedure \code{Handle} provides an example of a receiver of a control message. It is activated as soon as the middle mouse button is pressed, in contrast to other actions, which are initiated after the release of all buttons. Therefore, this message allows for the implementation of actions under control of individual handlers interpreting further mouse movements. In this example, the action serves to change the size of the rectangle, namely by moving its lower left corner.
 \begintt
 DEFINITION Rectangles;
-TYPE Rectangle = POINTER TO RectDesc;
-RectDesc = RECORD (Graphics.ObjectDesc) lw: INTEGER
-END ;
-VAR method: Graphics.Method;
-PROCEDURE New;
-PROCEDURE Make; END Rectangles.
+  TYPE Rectangle = POINTER TO RectDesc;
+    RectDesc = RECORD (Graphics.ObjectDesc) lw: INTEGER
+    END ;
+  VAR method: Graphics.Method;
+  PROCEDURE New;
+  PROCEDURE Make;
+END Rectangles.
 \endtt
 
 \beginsubsubsection 13.9.2. Oblique lines and circles.
@@ -7354,22 +7407,30 @@ The second extension to be presented is module \code{Curves}. It introduces two 
 
 In order to avoid computations involving floating-point numbers and to increase efficiency, Bresenham algorithms are used. The algorithm for a line defined by $bx - ay = 0$ (for $b \le a$) is given by the following statements:
 \begintt
-x := 0; y := 0; h := (b – a) DIV 2; WHILE x <= a DO Dot(x, y);
-IF h <= 0 THEN INC(h, b) ELSE INC(h, b-a); INC(y) END ;
-INC(x) END
+x := 0; y := 0; h := (b – a) DIV 2;
+WHILE x <= a DO Dot(x, y);
+  IF h <= 0 THEN INC(h, b) ELSE INC(h, b-a); INC(y) END ;
+  INC(x)
+END
 \endtt
 
 The Bresenham algorithm for a circle given by the equation $x^2 + y^2 = r^2$ is:
 \begintt
-x := r; y := 0; h := 1-r; WHILE y <= x DO Dot(x, y);
-IF h < 0 THEN INC(h, 2*y + 3) ELSE INC(h, 2*(y-x)+5); DEC(x) END ;
-INC(y) END
+x := r; y := 0; h := 1-r;
+WHILE y <= x DO Dot(x, y);
+  IF h < 0 THEN INC(h, 2*y + 3) ELSE INC(h, 2*(y-x)+5); DEC(x) END ;
+  INC(y)
+END
+
 DEFINITION Curves;
-TYPE Curve = POINTER TO CurveDesc;
-CurveDesc = RECORD (Graphics.ObjectDesc) kind, lw: INTEGER
-END ;
+  TYPE Curve = POINTER TO CurveDesc;
+    CurveDesc = RECORD (Graphics.ObjectDesc)
+                  kind, lw: INTEGER
+                END ;
 (*kind: 0 = up-line, 1 = down-line, 2 = circle*)
-VAR method: Graphics.Method; PROCEDURE MakeLine; PROCEDURE MakeCircle*;
+VAR method: Graphics.Method;
+PROCEDURE MakeLine;
+PROCEDURE MakeCircle*;
 END Curves.
 \endtt
 
