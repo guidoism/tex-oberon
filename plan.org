@@ -84,29 +84,29 @@
 - [X] Proofread until 12.7.7. Procedures.
 - [X] Proofread until 12.7.8. Type extension.
 - [X] Proofread until 12.7.9. Import and export, global variables.
-- [ ] Proofread until 12.7.10. Traps.
-- [ ] Proofread until 13.1. HISTORY AND GOAL.
-- [ ] Proofread until 13.2. A BRIEF USER GUIDE.
-- [ ] Proofread until 13.2.1. Basic commands.
-- [ ] Proofread until 13.2.2. Menu commands.
-- [ ] Proofread until 13.2.3. Further commands.
-- [ ] Proofread until 13.2.4. Macros.
-- [ ] Proofread until 13.2.5. Rectangles.
-- [ ] Proofread until 13.2.6. Oblique lines and circles.
-- [ ] Proofread until 13.2.7. Spline curves.
-- [ ] Proofread until 13.2.8. Constructing new macros.
-- [ ] Proofread until 13.3. THE CORE AND ITS STRUCTURE.
-- [ ] Proofread until 13.4. DISPLAYING GRAPHICS.
-- [ ] Proofread until 13.5. THE USER INTERFACE.
-- [ ] Proofread until 13.6. MACROS.
-- [ ] Proofread until 13.7. OBJECT CLASSES.
-- [ ] Proofread until 13.8. THE IMPLEMENTATION.
-- [ ] Proofread until 13.8.1. Module Draw.
-- [ ] Proofread until 13.8.2. Module GraphicFrames.
-- [ ] Proofread until 13.8.3. Module Graphics.
-- [ ] Proofread until 13.9. RECTANGLES AND CURVES.
-- [ ] Proofread until 13.9.1. Rectangles.
-- [ ] Proofread until 13.9.2. Oblique lines and circles.
+- [X] Proofread until 12.7.10. Traps.
+- [X] Proofread until 13.1. HISTORY AND GOAL.
+- [X] Proofread until 13.2. A BRIEF USER GUIDE.
+- [X] Proofread until 13.2.1. Basic commands.
+- [X] Proofread until 13.2.2. Menu commands.
+- [X] Proofread until 13.2.3. Further commands.
+- [X] Proofread until 13.2.4. Macros.
+- [X] Proofread until 13.2.5. Rectangles.
+- [X] Proofread until 13.2.6. Oblique lines and circles.
+- [X] Proofread until 13.2.7. Spline curves.
+- [X] Proofread until 13.2.8. Constructing new macros.
+- [X] Proofread until 13.3. THE CORE AND ITS STRUCTURE.
+- [X] Proofread until 13.4. DISPLAYING GRAPHICS.
+- [X] Proofread until 13.5. THE USER INTERFACE.
+- [X] Proofread until 13.6. MACROS.
+- [X] Proofread until 13.7. OBJECT CLASSES.
+- [X] Proofread until 13.8. THE IMPLEMENTATION.
+- [X] Proofread until 13.8.1. Module Draw.
+- [X] Proofread until 13.8.2. Module GraphicFrames.
+- [X] Proofread until 13.8.3. Module Graphics.
+- [X] Proofread until 13.9. RECTANGLES AND CURVES.
+- [X] Proofread until 13.9.1. Rectangles.
+- [X] Proofread until 13.9.2. Oblique lines and circles.
 - [ ] Proofread until 14.1. THE STARTUP PROCESS.
 - [ ] Proofread until 14.2. BUILDING TOOLS.
 - [ ] Proofread until 14.3. MAINTENANCE TOOLS.
