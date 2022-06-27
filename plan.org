@@ -107,9 +107,9 @@
 - [X] Proofread until 13.9. RECTANGLES AND CURVES.
 - [X] Proofread until 13.9.1. Rectangles.
 - [X] Proofread until 13.9.2. Oblique lines and circles.
-- [ ] Proofread until 14.1. THE STARTUP PROCESS.
-- [ ] Proofread until 14.2. BUILDING TOOLS.
-- [ ] Proofread until 14.3. MAINTENANCE TOOLS.
+- [X] Proofread until 14.1. THE STARTUP PROCESS.
+- [X] Proofread until 14.2. BUILDING TOOLS.
+- [X] Proofread until 14.3. MAINTENANCE TOOLS.
 - [ ] Proofread until 15.1. BASIC MATHEMATICAL FUNCTIONS.
 - [ ] Proofread until 15.1.1. Conversion between integers and floating-point numbers
 - [ ] Proofread until 15.1.2. The square root function
