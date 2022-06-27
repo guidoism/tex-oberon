@@ -6745,28 +6745,31 @@ Ellipses: & 1. & The caret is placed where the center is to lie. \cr
 }
 
 \beginsubsubsection 13.2.7. Spline curves.
-TODO: lists
 Spline curves are created by the following steps:
-1. The caret is placed where the starting point is to lie.
-2. Secondary carets are placed at the spline's fixed points (at most 20).
-3. The command Splines.MakeOpen or Splines.MakeClosed is activated.
+\list{
+\item{1.} The caret is placed where the starting point is to lie.
+\item{2.} Secondary carets are placed at the spline's fixed points (at most 20).
+\item{3.} The command \code{Splines.MakeOpen} or \code{Splines.MakeClosed} is activated.
+}
 
 \beginsubsubsection 13.2.8. Constructing new macros.
-TODO: lists
-A new macro is constructed and inserted in the library lib under the name mac as follows:
 
-1. All elements which belong to the new macro are selected.
-2. The caret is placed at the lower left corner of the area to be spanned by the macro.
-3. A secondary caret is placed at the upper right corner of the area to be spanned.
-4. The command \code{MacroTool.MakeMacro} lib mac is activated.
+A new macro is constructed and inserted in the library \code{lib} under the name \code{mac} as follows:
+\list{
+\item{1.} All elements which belong to the new macro are selected.
+\item{2.} The caret is placed at the lower left corner of the area to be spanned by the macro.
+\item{3.} A secondary caret is placed at the upper right corner of the area to be spanned.
+\item{4.} The command \code{MacroTool.MakeMacro lib mac} is activated.
+}
 
 An existing macro can be decomposed (opened) into its parts as follows:
+\list{
+\item{1.} The macro is selected.
+\item{2.} The caret is placed at the position where the decomposition is to appear.
+\item{3.} The command \code{MacroTool.OpenMacro} is activated.
+}
 
-1. The macro is selected.
-2. The caret is placed at the position where the decomposition is to appear.
-3. The command \code{MacroTool.OpenMacro} is activated.
-
-The command \code{MacroTool.StoreLibrary} lib file stores the library lib on the specified file. Only the macros presently loaded are considered as belonging to the library. If one wishes to add some macros to an existing library file, all of its elements must first be loaded. This is best done by opening a graph containing all macros of the desired library file.
+The command \code{MacroTool.StoreLibrary lib file} stores the library \code{lib} on the specified file. Only the macros presently loaded are considered as belonging to the library. If one wishes to add some macros to an existing library file, all of its elements must first be loaded. This is best done by opening a graph containing all macros of the desired library file.
 
 \beginsubsection 13.3. THE CORE AND ITS STRUCTURE.
 
@@ -6796,18 +6799,23 @@ TYPE Object =   POINTER TO ObjectDesc;
 
 \noindent Selection of a single element is typically achieved by pointing at the object with mouse and cursor. Selection of a set of objects is achieved by specifying a rectangular area, implying selection of all objects lying within it. In both cases, the search for selected elements proceeds through the linked list and relies on the position and size stored in each object's descriptor. As a consequence, the rule was adopted that every object not only specify a position through its coordinates \code{x}, \code{y}, but also the rectangular area within which it lies (width \code{w}, height \code{h}). It is thus easy to determine whether a given point identifies an object, as well as whether an object lies fully within a rectangular area.
 
-In principle, each caption descriptor carries the sequence of characters (string) representing the caption. The simplest realization would be an array structured field, limiting the length of captions to some fixed, predetermined value. First, this is highly undesirable (although used in early versions of the system). And second, texts carry attributes (\code{color}, \code{font}). It is therefore best to use a global ``scratch text'', and to record a caption by the position and length of the string in this immutable text.
+In principle, each caption descriptor carries the sequence of characters (a string) representing the caption. The simplest realization would be an array structured field, limiting the length of captions to some fixed, predetermined value. First, this is highly undesirable (although used in early versions of the system). And second, texts carry attributes (\code{color}, \code{font}). It is therefore best to use a global ``scratch text'', and to record a caption by the position and length of the string in this immutable text.
 
 A procedure \code{drawGraphic} to draw all objects of a graphic now assumes the following form:
 \begintt
-PROCEDURE drawObj(obj: Object); BEGIN
-IF obj IS Line THEN drawLine(obj(Line))
-ELSIF obj IS Caption THEN drawCaption(obj(Caption)) ELSE (*other object types, if any*)
-END
+PROCEDURE drawObj(obj: Object);
+BEGIN
+  IF obj IS Line THEN drawLine(obj(Line))
+  ELSIF obj IS Caption THEN drawCaption(obj(Caption))
+  ELSE (*other object types, if any*)
+  END
 END drawObj;
-PROCEDRE drawGraphic(first: Object); VAR obj: Object;
-BEGIN obj := first;
-WHILE obj # NIL DO drawObj(obj); obj := obj.next END
+
+PROCEDRE drawGraphic(first: Object);
+  VAR obj: Object;
+BEGIN
+  obj := first;
+  WHILE obj # NIL DO drawObj(obj); obj := obj.next END
 END drawGraphic
 \endtt
 
@@ -6815,66 +6823,82 @@ END drawGraphic
 
 This solution has the unpleasant property that all object types are anchored in the base module. If any new types are to be added, the base module has to be modified (and all clients are to be---at least---recompiled). The object-oriented paradigm eliminates this difficulty by inverting the roles of the two modules. It rests on binding the operations pertaining to an object type to each object individually in the form of procedure-typed record fields as shown in the following sample declaration:
 \begintt
-ObjectDesc =
-RECORD
-x, y, w, h, col: INTEGER; selected: BOOLEAN;
-draw: PROCEDURE (obj: Object);
-write: PROCEDURE (obj: Object; VAR R: Files.Rider); next: Object
+ObjectDesc = RECORD
+  x, y, w, h, col: INTEGER; selected: BOOLEAN;
+  draw: PROCEDURE (obj: Object);
+  write: PROCEDURE (obj: Object; VAR R: Files.Rider);
+  next: Object
 END
 \endtt
 The procedure drawGraphic is now formulated as follows:
 \begintt
-PROCEDURE drawGraphic(first: Object); VAR obj : Object;
-BEGIN obj := first;
-WHILE obj 9 NIL DO obj.draw(obj); obj := obj.next END
+PROCEDURE drawGraphic(first: Object);
+  VAR obj : Object;
+BEGIN
+  obj := first;
+  WHILE obj 9 NIL DO obj.draw(obj); obj := obj.next END
 END drawGraphic;
 \endtt
 
-The individual procedures---in object-oriented terminology called \emph{methods}---are assigned to the record's fields upon its creation. They need no further discrimination of types, as this role is assumed by the assignment of the procedures upon their installation. We note here that the procedure fields are never changed; they assume the role of \emph{constants} rather than variables associated with each object.
+The individual procedures---in object-oriented terminology called \emph{methods}--- are assigned to the record's fields upon its creation. They need no further discrimination of types, as this role is assumed by the assignment of the procedures upon their installation. We note here that the procedure fields are never changed; they assume the role of \emph{constants} rather than variables associated with each object.
 
 This example exhibits in a nutshell the essence of object-oriented programming, \emph{extensibility} as its purpose and the \emph{procedure-typed} record field as the technique.
 
 The given solution, as it stands, has the drawback that each object (instance, variable) contains several procedures (of which three are listed), and therefore leads to a storage requirement that should be avoided. Furthermore, it defines once and for all the number of operations applicable to objects, and also their parameters and result types. A different approach with the same underlying principle removes these drawbacks. It employs a single installed procedure which itself discriminates among the operations according to different types of parameters. The parameters of the preceding solution are merged into a single record called a \emph{message}. The unified procedure is called a \emph{handler}, and messages are typically extensions of a single base type \code{Msg}.
 \begintt
-TYPE Msg = DrawMsg =
-WriteMsg = ObjectDesc =
-RECORD END;
-RECORD (Msg) END;
-RECORD (Msg) R: Files.Rider END ;
-RECORD
-x, y, w, h, col: INTEGER; selected: BOOLEAN;
-handle: PROCEDURE (obj: Object; VAR M: Msg);
-next: Object END ;
+TYPE Msg =      RECORD END;
+  DrawMsg =     RECORD (Msg) END;
+  WriteMsg =    RECORD (Msg) R: Files.Rider END ;
+  ObjectDesc =  RECORD
+                  x, y, w, h, col: INTEGER;
+                  selected: BOOLEAN;
+                  handle: PROCEDURE (obj: Object; VAR M: Msg);
+                  next: Object
+                END ;
+
 PROCEDURE Handler (obj: Object; VAR M: Msg);
-(*this procedure is assigned to the handle field of every line object*)
+  (*this procedure is assigned to the handle field of every
+    line object*)
 BEGIN
-IF M IS DrawMsg THEN drawLine(obj(Line))
-ELSIF M IS WriteMsg THEN writeLine(obj(Line), M(WriteMsg).R) ELSE ...
-END
+  IF M IS DrawMsg THEN drawLine(obj(Line))
+  ELSIF M IS WriteMsg THEN writeLine(obj(Line), M(WriteMsg).R)
+  ELSE ...
+  END
 END ;
-PROCEDURE drawGraphic(first: Objec; VAR M: Msg); VAR obj: Object;
-BEGIN obj := first;
-WHILE obj 9 NIL DO obj.handle(obj, M); obj := obj.next END
+
+PROCEDURE drawGraphic(first: Objec; VAR M: Msg);
+  VAR obj: Object;
+BEGIN
+  obj := first;
+  WHILE obj 9 NIL DO obj.handle(obj, M); obj := obj.next END
 END drawGraphics
 \endtt
 
 In the present system, a combination of the two schemes presented so far is used. It eliminates the need for individual method fields in each object record as well as the cascaded \code{IF} statement for discriminating among the message types. Yet it allows further addition of new methods for later extensions without the need to change the object's declaration. The technique used is to include a single field (called \code{do}) in each record (analogous to the handler). This field is a pointer to a method record containing the procedures declared for the base type. At least one of them uses a message parameter, i.e. a parameter of record structure that is extensible.
 \begintt
-TYPE Method = Msg =
-Context =
-Object = ObjectDesc =
-MethodDesc =
-POINTER TO MethodDesc; RECORD END;
-RECORD END;
-POINTER TO ObjectDesc; RECORD
-x, y, w, h, col: INTEGER; selected: BOOLEAN;
-do: Method; next: Object END;
-RECORD
-new: Modules.Command;
-copy: PROCEDURE (obj, to: Object);
-draw, handle: PROCEDURE (obj: Object; VAR M: Msg);
-selectable: PROCEDURE (obj: Object; x, y: INTEGER): BOOLEAN; read: PROCEDURE (obj: Object; VAR R: Files.Rider; VAR C: Context); write: PROCEDURE (obj: Object; cno: INTEGER;
-VAR R: Files.Rider; VAR C: Context); END
+TYPE Method =  POINTER TO MethodDesc;
+  Msg =        RECORD END;
+  Context =    RECORD END;
+  Object =     POINTER TO ObjectDesc;
+  ObjectDesc = RECORD
+                 x, y, w, h, col: INTEGER;
+                 selected: BOOLEAN;
+                 do: Method;
+                 next: Object
+               END;
+  MethodDesc = RECORD
+                 new: Modules.Command;
+                 copy: PROCEDURE (obj, to: Object);
+                 draw, handle: PROCEDURE (obj: Object;
+                                          VAR M: Msg);
+                 selectable: PROCEDURE (obj: Object;
+                                   x, y: INTEGER): BOOLEAN;
+                 read: PROCEDURE (obj: Object;
+                                  VAR R: Files.Rider;
+                                  VAR C: Context);
+                 write: PROCEDURE (obj: Object; cno: INTEGER;
+                 VAR R: Files.Rider; VAR C: Context);
+               END
 \endtt
 
 A single method instance is generated when a new object type is created, typically in the initialization sequence of the concerned module. When a new object is created, a pointer to this record is assigned to the do field of the new object descriptor. A call then has the form \code{obj.do.write(obj, R)}. This example exhibits the versatility of Oberon's type extension and procedure variable features very well, and it does so without hiding the data structures involved in a dispensible, built-in run-time mechanism.
@@ -6896,16 +6920,16 @@ Our system, however, deviates from this scheme somewhat for several reasons:
 \itemitem{3.} A command module scanning command lines and invoking the appropriate interpreters.
 
 The module hierarchy of the Graphics System is here shown together with its analogy, with the Text System:
-TODO: table
 
-Function
-3. Command Scanner 2. Viewer Handler
-1. Frame Handler
-0. Base
-Graphics
-Draw MenuViewers GraphicFrames Graphics
-Text
-Edit MenuViewers TextFrames Texts
+\table{
+#\hfil\quad&#\hfil\quad&#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil\cr
+Function & Graphics & Text \cr
+\noalign{\smallskip\hrule}\cr
+3. Command Scanner & Draw          & Edit \cr
+2. Viewer Handler  & MenuViewers   & MenuViewers \cr
+1. Frame Handler   & GraphicFrames & TextFrames  \cr
+0. Base            & Graphics      & Texts \cr
+}
 
 As a result, module \code{Graphics} does not only contain the base type \code{Object}, but also its extensions \code{Line} and \code{Caption} (and \code{Macro}). Their methods are also defined in \code{Graphics}, with the exception of drawing methods, which are defined in \code{GraphicFrames}, because they refer to frames.
 
@@ -6917,45 +6941,69 @@ The set of operations applying to selected objects only consist of the following
 
 The declaration of types and procedures that have emerged so far are summarized in the following excerpt of the module's interface definition.
 \begintt
-DEFINITION Graphics; (*excerpt without macros*) IMPORT Files, Fonts, Texts, Modules, Display;
-CONST NameLen = 32;
-TYPE Graph = POINTER TO GraphDesc; Object = POINTER TO ObjectDesc; Method = POINTER TO MethodDesc;
-ObjectDesc = RECORD
-x, y, w, h: INTEGER;
-col: BYTE;
-selected, marked: BOOLEAN; do: Method
-END ;
-Msg = RECORD END ;
-WidMsg = RECORD (Msg) w: INTEGER END ; ColorMsg = RECORD (Msg) col: INTEGER END ; FontMsg = RECORD (Msg) fnt: Fonts.Font END ; Name = ARRAY NameLen OF CHAR;
-GraphDesc = RECORD sel: Object; time: INTEGER
-END ;
-Context = RECORD END ;
-MethodDesc = RECORD
-module, allocator: Name;
-new: Modules.Command;
-copy: PROCEDURE (obj, to: Object);
-draw, change: PROCEDURE (obj: Object; VAR msg: Msg);
-selectable: PROCEDURE (obj: Object; x, y: INTEGER): BOOLEAN;
-read: PROCEDURE (obj: Object; VAR R: Files.Rider; VAR C: Context);
-write: PROCEDURE (obj: Object; cno: INTEGER; VAR R: Files.Rider; VAR C: Context);
-END ;
-Line = POINTER TO LineDesc;
-LineDesc = RECORD (ObjectDesc) END ;
-Caption = POINTER TO CaptionDesc;
-CaptionDesc = RECORD (ObjectDesc) pos, len: INTEGER END ;
-VAR width, res: INTEGER;
-T: Texts.Text;
-LineMethod, CapMethod, MacMethod: Method;
+DEFINITION Graphics; (*excerpt without macros*)
+  IMPORT Files, Fonts, Texts, Modules, Display;
+  CONST NameLen = 32;
+  TYPE Graph = POINTER TO GraphDesc;
+  Object = POINTER TO ObjectDesc;
+  Method = POINTER TO MethodDesc;
+  ObjectDesc = RECORD
+    x, y, w, h: INTEGER;
+    col: BYTE;
+    selected, marked: BOOLEAN;
+    do: Method
+  END ;
+  Msg = RECORD END ;
+  WidMsg = RECORD (Msg) w: INTEGER END ;
+  ColorMsg = RECORD (Msg) col: INTEGER END ;
+  FontMsg = RECORD (Msg) fnt: Fonts.Font END ;
+  Name = ARRAY NameLen OF CHAR;
+  GraphDesc = RECORD sel: Object;
+    time: INTEGER
+  END ;
+  Context = RECORD END ;
+  MethodDesc = RECORD
+    module, allocator: Name;
+    new: Modules.Command;
+    copy: PROCEDURE (obj, to: Object);
+    draw, change: PROCEDURE (obj: Object; VAR msg: Msg);
+    selectable: PROCEDURE (obj: Object;
+      x, y: INTEGER): BOOLEAN;
+    read: PROCEDURE (obj: Object;
+             VAR R: Files.Rider; VAR C: Context);
+    write: PROCEDURE (obj: Object; cno: INTEGER;
+             VAR R: Files.Rider; VAR C: Context);
+  END ;
+  Line = POINTER TO LineDesc;
+  LineDesc = RECORD (ObjectDesc) END ;
+  Caption = POINTER TO CaptionDesc;
+  CaptionDesc = RECORD (ObjectDesc) pos, len: INTEGER END ;
+    VAR width, res: INTEGER;
+    T: Texts.Text;
+    LineMethod, CapMethod, MacMethod: Method;
+    
 PROCEDURE New(obj: Object);
 PROCEDURE Add (G: Graph; obj: Object);
 PROCEDURE Draw (G: Graph; VAR M: Msg);
-PROCEDURE ThisObj (G: Graph; x, y: INTEGER): Object; PROCEDURE SelectObj (G: Graph; obj: Object);
-PROCEDURE SelectArea (G: Graph; x0, y0, x1, y1: INTEGER);
-PROCEDURE Deselect (G: Graph); PROCEDURE DrawSel (G: Graph; VAR M: Msg);
-PROCEDURE Change (G: Graph; VAR M: Msg); PROCEDURE Move (G: Graph; dx, dy: INTEGER); PROCEDURE Copy (Gs, Gd: Graph; dx, dy: INTEGER); PROCEDURE Delete (G: Graph);
-PROCEDURE FontNo (VAR W: Files.Rider; VAR C: Context; fnt: Fonts.Font): INTEGER; PROCEDURE WriteObj (VAR W: Files.Rider; cno: INTEGER; obj: Object); PROCEDURE Store (G: Graph; VAR W: Files.Rider);
+PROCEDURE ThisObj (G: Graph; x, y: INTEGER): Object;
+PROCEDURE SelectObj (G: Graph; obj: Object);
+PROCEDURE SelectArea (G: Graph;
+  x0, y0, x1, y1: INTEGER);
+PROCEDURE Deselect (G: Graph);
+PROCEDURE DrawSel (G: Graph; VAR M: Msg);
+PROCEDURE Change (G: Graph; VAR M: Msg);
+PROCEDURE Move (G: Graph; dx, dy: INTEGER);
+PROCEDURE Copy (Gs, Gd: Graph; dx, dy: INTEGER);
+PROCEDURE Delete (G: Graph);
+PROCEDURE FontNo (VAR W: Files.Rider;
+  VAR C: Context; fnt: Fonts.Font): INTEGER;
+PROCEDURE WriteObj (VAR W: Files.Rider;
+  cno: INTEGER; obj: Object);
+PROCEDURE Store (G: Graph; VAR W: Files.Rider);
 PROCEDURE WriteFile (G: Graph; name: ARRAY OF CHAR);
-PROCEDURE Font (VAR R: Files.Rider; VAR C: Context): Fonts.Font; PROCEDURE Load (G: Graph; VAR R: Files.Rider);
+PROCEDURE Font (VAR R: Files.Rider;
+  VAR C: Context): Fonts.Font;
+PROCEDURE Load (G: Graph; VAR R: Files.Rider);
 PROCEDURE Open (G: Graph; name: ARRAY OF CHAR);
 END Graphics.
 \endtt
@@ -6964,31 +7012,26 @@ END Graphics.
 
 The base module Graphics defines the representation of a set of objects in terms of a data structure. The particulars are hidden and allow the change of structural representation by an exchange of this module without affecting its clients. The problems of displaying a graphic on a screen or a printed page are not handled by this module; they are delegated to the client module \code{GraphicFrames}, which defines a frame type for graphics which is an extension of \code{Display.Frame}, just like \code{TextFrames.Frame} is an extension of \code{Display.Frame}. In contrast to text frames, however, a graphic instead of a text is associate with it.
 \begintt
-FrameDesc = RECORD (Display.FrameDesc) graph: Graphics.Graph;
-Xg, Yg, X1, Y1, x, y, col: INTEGER; marked, ticked: BOOLEAN;
-mark: LocDesc
+FrameDesc = RECORD (Display.FrameDesc)
+  graph: Graphics.Graph;
+  Xg, Yg, X1, Y1, x, y, col: INTEGER;
+  marked, ticked: BOOLEAN;
+  mark: LocDesc
 END
 \endtt
 
 Every frame specifies its coordinates \code{X}, \code{Y} within the display area, its size by the attributes \code{W} (width) and \code{H} (height), and its background color \code{col}. Just as a frame represents a (rectangular) section of the entire screen, it also shows an excerpt of the drawing plane of the graphic. The coordinate origin need coincide with neither the frame origin nor the display origin. The frame's position relative to the graphic plane's origin is recorded in the frame descriptor by the coordinates \code{Xg}, \code{Yg}.
 
 The additional, redundant attributes \code{x}, \code{y}, \code{X1}, \code{Y1} are given by the following invariants, and they are recorded in order to avoid their frequent recomputation.
-
-X1 = X+W, Y1 = Y+H
-x =X+Xg, y =Y1+Yg
-
+$$X1 = X+W, Y1 = Y+H, x = X+Xg, y = Y1+Yg$$
 \code{X} and \code{Y} (and hence also \code{X1} and \code{Y1}) are changed when a viewer is modified, i.e. when the frame is moved or resized. \code{Xg} and \code{Yg} are changed when the graph's origin is moved within a frame. The meaning of the various values is illustrated in Figure 13.4.
 
 \figure{pdfs/fig-13.4.png}{4.7in}{13.4}{Frame and graph coordinates}
 
 As a consequence, the display coordinates u, v of an object z of a graph displayed in a frame f are computed as
-
-u = z.x + f.x, v = z.y + f.y
-
+$$u = z.x + f.x, v = z.y + f.y$$
 In order to determine whether an object z lies within a frame f, the following expression must hold:
-
-(f.X <= u) $\&$ (u + z.w <= f.X1) $\&$ (f.Y <= v) $\&$ (v + z.h <= f.Y1)
-
+$$(f.X \le u) \land (u + z.w \le f.X1) \land (f.Y \le v) \land (v + z.h \le f.Y1)$$
 The record field marked indicates whether or not the frame contains a caret. Its display position is recorded in the field called mark. A frame may contain several (secondary) carets; they form a list of location descriptors.
 
 When an object is displayed (drawn), its state must be taken into consideration in order to provide visible user feedback. The manner in which selection is indicated, however, may vary among different object types. This can easily be realized, because every object (type) is associated with an individual drawing procedure. The following visualizations of selection have been chosen:
@@ -6997,22 +7040,27 @@ Selected lines are shown in a grey tone (raster pattern). Selected captions are 
 
 Change of state is a relatively frequent operation, and if possible a complete repainting of the involved objects should be avoided for reasons of efficiency. Therefore, procedures for drawing an object are given a mode parameter, in addition to the obvious object and frame parameters. The parameters are combined into the message record of type \code{DrawMsg}.
 \begintt
-DrawMsg = RECORD (Graphics.Msg) f: Frame;
-mode, x, y, col: INTEGER END
+DrawMsg = RECORD (Graphics.Msg)
+  f: Frame;
+  mode, x, y, col: INTEGER
+END
 \endtt
 
 The meaning of the mode parameter's four possible values are the following:
 
-mode = 0: mode = 1: mode = 2: mode = 3:
-draw object according to its state,
-draw reflecting a transition from normal to selected state,
-draw reflecting a transition from selected to normal state, erase.
+\table{
+#\hfil\quad&#\hfil\quad&#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil\cr
+mode = 0: & draw object according to its state, \cr
+mode = 1: & draw reflecting a transition from normal to selected state, \cr
+mode = 2: & draw reflecting a transition from selected to normal state, \cr
+mode = 3: & erase. \cr
+}
 
 In the case of captions, for instance, the transitions are indicated by simply inverting the rectangular area covered by the caption. No rewriting of the captions' character patterns is required.
 
-A mode parameter is also necessary for reflecting object deletion. First, the selected objects are drawn with mode indicating erasure. Only afterwards are they removed from the graphic's linked list.
+A mode parameter is also necessary for reflecting object deletion. First, the selected objects are drawn with \code{mode} indicating erasure. Only afterwards are they removed from the graphic's linked list.
 
-Furthermore, the message parameter of the drawing procedure contains two offsets x and y. They are added to the object's coordinates, and their significance will become apparent in connection with macros. The same holds for the color parameter.
+Furthermore, the message parameter of the drawing procedure contains two offsets \code{x} and \code{y}. They are added to the object's coordinates, and their significance will become apparent in connection with macros. The same holds for the color parameter.
 
 The drawing procedures are fairly straight-forward and use the four basic raster operations of module \code{Display}. The only complication arises from the need to clip the drawing at the frame boundaries. In the case of captions, a character is drawn only if it fits into the frame in its entirety. The raster operations do not test (again) whether the indicated position is valid.
 
@@ -7023,27 +7071,42 @@ The broadcast is performed by the general procedure \code{Viewers.Broadcast(M)}.
 The definition of module \code{GraphicFrames} is summarized by the following interface:
 \begintt
 DEFINITION GraphicFrames;
-IMPORT Display, Graphics;
-TYPE Frame = POINTER TO FrameDesc; Location = POINTER TO LocDesc;
-LocDesc = RECORD x, y: INTEGER; next: Location
-END ;
-FrameDesc = RECORD (Display.FrameDesc) graph: Graphics.Graph;
-Xg, Yg, X1, Y1, x, y, col: INTEGER; marked, ticked: BOOLEAN;
-mark: LocDesc END ;
-(*mode = 0: draw according to selected, 1: normal -> selected, 2: selected -> normal, 3: erase*)
-DrawMsg = RECORD (Graphics.Msg) f: Frame;
-x, y, col, mode: INTEGER
-END ;
-PROCEDURE Restore (F: Frame);
-PROCEDURE Focus (): Frame;
-PROCEDURE Selected (): Frame;
-PROCEDURE This(x, y: INTEGER): Frame;
-PROCEDURE Draw (F: Frame);
-PROCEDURE Erase (F: Frame);
-PROCEDURE DrawObj (F: Frame; obj: Graphics.Object); PROCEDURE EraseObj (F: Frame; obj: Graphics.Object); PROCEDURE Change (F: Frame; VAR msg: Graphics.Msg); PROCEDURE Defocus (F: Frame);
-PROCEDURE Deselect (F: Frame);
-PROCEDURE Macro (VAR Lname, Mname: ARRAY OF CHAR);
-PROCEDURE Open (G: Frame; graph: Graphics.Graph); END GraphicFrames.
+  IMPORT Display, Graphics;
+  TYPE Frame = POINTER TO FrameDesc;
+    Location = POINTER TO LocDesc;
+    LocDesc = RECORD
+      x, y: INTEGER;
+      next: Location
+    END ;
+  FrameDesc = RECORD (Display.FrameDesc)
+    graph: Graphics.Graph;
+    Xg, Yg, X1, Y1, x, y, col: INTEGER;
+    marked, ticked: BOOLEAN;
+    mark: LocDesc
+  END ;
+  
+  (*mode = 0: draw according to selected,
+    1: normal -> selected, 2: selected -> normal, 3: erase*)
+
+  DrawMsg = RECORD (Graphics.Msg)
+    f: Frame;
+    x, y, col, mode: INTEGER
+  END ;
+  
+  PROCEDURE Restore (F: Frame);
+  PROCEDURE Focus (): Frame;
+  PROCEDURE Selected (): Frame;
+  PROCEDURE This(x, y: INTEGER): Frame;
+  PROCEDURE Draw (F: Frame);
+  PROCEDURE Erase (F: Frame);
+  PROCEDURE DrawObj (F: Frame; obj: Graphics.Object);
+  PROCEDURE EraseObj (F: Frame; obj: Graphics.Object);
+  PROCEDURE Change (F: Frame; VAR msg: Graphics.Msg);
+  PROCEDURE Defocus (F: Frame);
+  PROCEDURE Deselect (F: Frame);
+  PROCEDURE Macro (VAR Lname, Mname: ARRAY OF CHAR);
+  PROCEDURE Open (G: Frame; graph: Graphics.Graph);
+END GraphicFrames.
 \endtt
 
 \code{Focus} and \code{Selected} identify the graphic frame containing the caret, or containing the latest selection. \code{Draw}, \code{Erase}, and \code{Handle} apply to the selection of the specified frame's graphic. And \code{Open} generates a frame displaying the specified graphic.
