@@ -110,11 +110,11 @@
 - [X] Proofread until 14.1. THE STARTUP PROCESS.
 - [X] Proofread until 14.2. BUILDING TOOLS.
 - [X] Proofread until 14.3. MAINTENANCE TOOLS.
-- [ ] Proofread until 15.1. BASIC MATHEMATICAL FUNCTIONS.
-- [ ] Proofread until 15.1.1. Conversion between integers and floating-point numbers
-- [ ] Proofread until 15.1.2. The square root function
-- [ ] Proofread until 15.1.3. The exponential function
-- [ ] Proofread until 15.1.4. The logarithm
+- [X] Proofread until 15.1. BASIC MATHEMATICAL FUNCTIONS.
+- [X] Proofread until 15.1.1. Conversion between integers and floating-point numbers
+- [X] Proofread until 15.1.2. The square root function
+- [X] Proofread until 15.1.3. The exponential function
+- [X] Proofread until 15.1.4. The logarithm
 - [ ] Proofread until 15.1.5. The sine function
 - [ ] Proofread until 15.2. A DATA LINK.
 - [ ] Proofread until 15.3. A GENERATOR OF GRAPHIC MACROS.

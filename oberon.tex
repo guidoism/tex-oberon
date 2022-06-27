@@ -7753,51 +7753,85 @@ STR R0 x
 
 \beginsubsubsection 15.1.2. The square root function.
 
-We rely on the definition x = 2e×m Using the intrinsic UNPK procedure, the components m and e are obtained from x. Then the square root is computed according to the formulas
-sqrt(x) = 2(e DIV 2) × sqrt(m) if e is even, sqrt(x) = 2(e DIV 2 - 1) × sqrt(2) × sqrt(m) if e is odd.
+We rely on the definition $x = 2^e \times m$. Using the intrinsic \code{UNPK} procedure, the components $m$ and $e$ are obtained from $x$. Then the square root is computed according to the formulas
+
+$$sqrt(x) = 2(e \div 2) \times sqrt(m) \qquad\hbox{if e is even,}$$
+$$sqrt(x) = 2(e \div 2 - 1) \times sqrt(2) \times sqrt(m) \qquad\hbox{if e is odd.}$$
+
 The advantage is that the argument of the square root now lies in the narrow interval [1.0, 2.0], and therefore is easier and faster to approximate by a continued fraction.
-PROCEDURE sqrt(x: REAL): REAL; CONST c1 = 0.70710680; (* 1/sqrt(2) *)
-c2 = 0.590162067;
-c3 = 1.4142135; (*sqrt(2)*) VAR s: REAL; e: INTEGER;
-BEGIN ASSERT(x >= 0.0); IF x > 0.0 THEN
-UNPK(x, e);
-s := c2*(x+c1);
-s := s + (x/s);
-s := 0.25*s + x/s;
-s := 0.5 * (s + x/s);
-IF ODD(e) THEN s := c3*s END ; PACK(s, e DIV 2)
-ELSE s := 0.0 END ; RETURN s
+\begintt
+PROCEDURE sqrt(x: REAL): REAL;
+  CONST c1 = 0.70710680; (* 1/sqrt(2) *)
+    c2 = 0.590162067;
+    c3 = 1.4142135; (*sqrt(2)*) VAR s: REAL; e: INTEGER;
+BEGIN ASSERT(x >= 0.0);
+  IF x > 0.0 THEN
+  UNPK(x, e);
+  s := c2*(x+c1);
+  s := s + (x/s);
+  s := 0.25*s + x/s;
+  s := 0.5 * (s + x/s);
+  IF ODD(e) THEN s := c3*s END ;
+  PACK(s, e DIV 2)
+  ELSE s := 0.0 END ; RETURN s
 END sqrt;
+\endtt
 
 \beginsubsubsection 15.1.3. The exponential function.
 
-Since our floating-point format is based on an exponent of 2, we first use the formula exp(x) = ex = 2y with y = x × log2(e) = x / ln(2) log2(e) = 1.4426951
-and first compute y. We decompose y into its integral part n = FLOOR(y) and its fractional part y0 = y - n. Since 2n × 2y0 = 2n+y0, the result is the sum of the exponent n and the mantissa 2y0. Again, the advantage of the decomposition is that the argument y0 of the polynomial approximation lies in the narrow interval [1.0, 2.0].
-PROCEDURE exp(x: REAL): REAL; CONST c1 = 1.4426951; (*1/ln(2) *)
-p0 = 1.513864173E3; p1 = 2.020170000E1; p2 = 2.309432127E-2; q0 = 4.368088670E3; q1 = 2.331782320E2;
-VAR n: INTEGER; p, y, yy: REAL; BEGIN y := c1*x; (*1/ln(2)*)
-n := FLOOR(y + 0.5); y := y - FLT(n); yy := y*y;
-p := ((p2*yy + p1)*yy + p0)*y;
-p := p/((yy + q1)*yy + q0 - p) + 0.5; PACK(p, n+1); RETURN p
+Since our floating-point format is based on an exponent of 2, we first use the formula
+$$exp(x) = e^x = 2^y \qquad\hbox{with $y = x \times log_2(e) = x / ln(2)$}$$
+$$log_2(e) = 1.4426951$$
+
+and first compute $y$. We decompose $y$ into its integral part $n$ = \code{FLOOR(y)} and its fractional part $y0 = y - n$. Since $2^n \times 2^{y0} = 2^{n+y0}$, the result is the sum of the exponent $n$ and the mantissa $2^{y0}$. Again, the advantage of the decomposition is that the argument $y0$ of the polynomial approximation lies in the narrow interval [1.0, 2.0].
+\begintt
+PROCEDURE exp(x: REAL): REAL;
+  CONST c1 = 1.4426951; (*1/ln(2) *)
+        p0 = 1.513864173E3;
+        p1 = 2.020170000E1;
+        p2 = 2.309432127E-2;
+        q0 = 4.368088670E3;
+        q1 = 2.331782320E2;
+  VAR n: INTEGER; p, y, yy: REAL;
+BEGIN
+  y := c1*x; (*1/ln(2)*)
+  n := FLOOR(y + 0.5);
+  y := y - FLT(n);
+  yy := y*y;
+  p := ((p2*yy + p1)*yy + p0)*y;
+  p := p/((yy + q1)*yy + q0 - p) + 0.5;
+  PACK(p, n+1);
+  RETURN p
 END exp;
+\endtt
 
 \beginsubsubsection 15.1.4. The logarithm.
 
 Again we take advantage of the presence of an exponent in the floating-point representation and use the equations
-ln (a×b) = ln a + ln b
-ln (2e×m) = log2(2e×m) × ln(2) = e × ln(2) + ln m
+
+$$\ln{(a \times b)} = \ln{a} + \ln{b}$$
+$$\ln{(2^e \times m)} = \log_2{(2^e \times m)} \times \ln{(2)} = e \times \ln{(2)} + \ln{m}$$
+
+\begintt
 PROCEDURE ln(x: REAL): REAL;
-CONST c1 = 0.70710680; (* 1/sqrt(2) *)
-c2 = 0.69314720; (* ln(2) *) p0 = -9.01746917E1;
-p1 = 9.34639006E1;
-p2 = -1.83278704E1;
-q0 = -4.50873458E1; q1 = 6.176106560E1; q2 = -2.07334879E1;
-VAR e: INTEGER; y: REAL;
-BEGIN ASSERT(x > 0.0); UNPK(x, e);
-IF x < c1 THEN x := x*2.0; e := e-1 END ;
-x := (x - 1.0)/(x + 1.0);
-y := c2 * FLT(e) + x * ((p2*x + p1)*x + p0) / (((x + q2)*x + q1)*x + q0); RETURN y
+  CONST c1 = 0.70710680; (* 1/sqrt(2) *)
+        c2 = 0.69314720; (* ln(2) *)
+        p0 = -9.01746917E1;
+        p1 = 9.34639006E1;
+        p2 = -1.83278704E1;
+        q0 = -4.50873458E1;
+        q1 = 6.176106560E1;
+        q2 = -2.07334879E1;
+  VAR e: INTEGER; y: REAL;
+BEGIN
+  ASSERT(x > 0.0);
+  UNPK(x, e);
+  IF x < c1 THEN x := x*2.0; e := e-1 END ;
+  x := (x - 1.0)/(x + 1.0);
+  y := c2 * FLT(e) + x * ((p2*x + p1)*x + p0) / (((x + q2)*x + q1)*x + q0);
+  RETURN y
 END ln;
+\endtt
 
 \beginsubsubsection 15.1.5. The sine function.
 
