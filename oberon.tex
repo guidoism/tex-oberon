@@ -6671,12 +6671,12 @@ The following commands are displayed in the menu (title bar) of every graphic vi
 
 \table{
 #\hfil\quad&#\hfil\quad&#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil\cr
-Draw.Delete   & The selected elements are deleted. \cr
-Draw.Store    & The drawing is written as file with the name shown in the \cr
-              & title bar. The original file is renamed by appending ``.Bak''. \cr
-Draw.Restore  & The entire frame is redrawn \cr
-Draw.Ticks    & The frame displays a pattern of dots (ticks) to facilitate \cr
-              & positioning. \cr
+\code{Draw.Delete}   & The selected elements are deleted. \cr
+\code{Draw.Store}    & The drawing is written as file with the name shown in the \cr
+                     & title bar. The original file is renamed by appending ``.Bak''. \cr
+\code{Draw.Restore}  & The entire frame is redrawn \cr
+\code{Draw.Ticks}    & The frame displays a pattern of dots (ticks) to facilitate \cr
+                     & positioning. \cr
 }
 
 The two viewers in Fig. 13.1. display different parts of the same graphic. The second view was obtained from the generic \code{System.Copy} command and a subsequent shift of the drawing plane.
@@ -6685,18 +6685,23 @@ The two viewers in Fig. 13.1. display different parts of the same graphic. The s
 
 \beginsubsubsection 13.2.3. Further commands.
 
-The following commands are listed in the text Draw.Tool, but may appear in any text.
+The following commands are listed in the text \code{Draw.Tool}, but may appear in any text.
 
-TODO: list
-Draw.Store name The drawing in the marked viewer is stored as a file with the specified name.
+\table{
+#\hfil\quad&#\hfil\quad&#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil\cr
+\code{Draw.Store} \emph{name} & The drawing in the marked viewer is stored as a file \cr
+                              & with the specified name. \cr
+}
 
 The subsequent commands change attributes of drawing elements, such as line width, text font, and color, and they apply to the most recent selection.
 
-TODO: list
-Draw.SetWidth w default = 1, 0 < w < 7.
-Draw.ChangeFont fontname
-Draw.ChangeColor c
-Draw.ChangeWidth w (0 < w < 7)
+\table{
+#\hfil\quad&#\hfil\quad&#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil\cr
+\code{Draw.SetWidth} \emph{w}           & default = 1, $0 < w < 7$. \cr
+\code{Draw.ChangeFont} \emph{fontname}  & \cr
+\code{Draw.ChangeColor} \emph{c}        & \cr
+\code{Draw.ChangeWidth} \emph{w}        & $(0 < w < 7)$ \cr
+}
 
 The \code{ChangeColor} command either take a color number in the range 1..15 or a string as parameter. It serves to copy the color from the selected character.
 
