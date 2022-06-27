@@ -7679,40 +7679,77 @@ In this chapter, a few modules are presented that do not belong to Oberon's syst
 \beginsubsection 15.1. BASIC MATHEMATICAL FUNCTIONS.
 
 Module \code{Math} contains the basic standard functions that had been postulated already in 1960 by Algol 60. They are
-
-sqrt(x) the square root
-exp(x) the exponential function
-ln(x) the natural logarithm
-sin(x) the sine function
-cos(x) the cosine function
-
+\table{
+#\hfil\quad&#\hfil\quad&#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil\cr
+\code{sqrt(x)} & the square root \cr
+\code{exp(x)}  & the exponential function \cr
+\code{ln(x)}   & the natural logarithm \cr
+\code{sin(x)}  & the sine function \cr
+\code{cos(x)}  & the cosine function \cr
+}
 They are presented here only briefly without discussing their approximation methods. However, we point out how advantage can be taken from knowledge about the internal representation of floating-point numbers.
 
 \beginsubsubsection 15.1.1. Conversion between integers and floating-point numbers.
 
-The Oberon System adopts the standard format postulated by IEEE. Here we restrict it to the 32- bit variant. A floating-point number x consists of 3 parts
-s the sign
-e the exponent m the mantissa
-1 bit
-8 bits 23 bits
-Its value is defined as x = (-1)s × 2 e+127 × (1.m). A number is in normalized form, if its mantissa satisfies 1.0 ≤ m < 2.0. It is assumed that numbers are always normalized, and therefore the leading 1-bit is omitted. The exception is the singular value 0, which cannot be normalized. It must therefore be treated as a special case.
-It follows that integers and floating-point numbers are represented quite differently, and that conversion operations are necessary to transfer a number from one format to the other. This is the reason why the Oberon language keeps the two types INTEGER and REAL separate. Conversion must be explicitly specified by using the two predefined functions
-n := FLOOR(x) REAL→ INTEGER x := FLT(n) INTEGER → REAL
-Note: FLOOR(x) rounds toward -inf. For example FLOOR(1.5) = 1, FLOOR(-1.5) = -2.
-The RISC processor does not feature specific instructions implementing these functions. Instead, the compiler generates inline code using the FAD instruction with special options suppressing normalization. This option is specified by the u and v modifier bits of the instruction.
-The FLOOR function is realized by adding 0 with an exponent of 127 + 24 and suppressing the insertion of a leading 1-bit (u = 1). This causes the mantissa of the argument to be shifted right until its exponent is equal to 151. The RISC instructions are:
-MOV' R1 R0 4B00H R1 := 4B000000H FAD' R0 R0 R1
-The FLT function is implemented also by adding 0 with an exponent of 151 and forced insertion of a leading 1-bit (v = 1).
-MOV' R1 R0 4B00H FAD" R0 R0 R1
+The Oberon System adopts the standard format postulated by \IEEE. Here we restrict it to the 32-bit variant. A floating-point number x consists of 3 parts
+
+\table{
+#\hfil\quad&#\hfil\quad&#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil\cr
+$s$ & the sign     & 1 bit  \cr
+$e$ & the exponent & 8 bits  \cr
+$m$ & the mantissa & 23 bits \cr
+}
+
+Its value is defined as $x = (-1)^s \times 2^{e+127} \times (1.m)$. A number is in normalized form, if its mantissa satisfies $1.0 \le m < 2.0$. It is assumed that numbers are always normalized, and therefore the leading 1-bit is omitted. The exception is the singular value 0, which cannot be normalized. It must therefore be treated as a special case.
+
+It follows that integers and floating-point numbers are represented quite differently, and that conversion operations are necessary to transfer a number from one format to the other. This is the reason why the Oberon language keeps the two types \code{INTEGER} and \code{REAL} separate. Conversion must be explicitly specified by using the two predefined functions
+\eject
+\table{
+#\hfil\quad&#\hfil\quad&#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil\cr
+\code{n := FLOOR(x)} & \code{REAL} \rightarrow\ \code{INTEGER} \cr
+\code{x := FLT(n)}   & \code{INTEGER} \rightarrow\ \code{REAL} \cr
+}
+
+\noindent Note: \code{FLOOR(x)} rounds toward \code{-inf}. For example
+$$\code{FLOOR(1.5)} = 1, \code{FLOOR(-1.5)} = -2.$$
+The \RISC\ processor does not feature specific instructions implementing these functions. Instead, the compiler generates inline code using the \code{FAD} instruction with special options suppressing normalization. This option is specified by the $u$ and $v$ modifier bits of the instruction.
+
+The \code{FLOOR} function is realized by adding 0 with an exponent of $127 + 24$ and suppressing the insertion of a leading 1-bit ($u = 1$). This causes the mantissa of the argument to be shifted right until its exponent is equal to 151. The \RISC\ instructions are:
+\table{
+#\hfil\quad&#\hfil\quad&#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil\cr
+\code{MOV\char13\ R1 R0 4B00H}  &  \code{R1 := 4B000000H} \cr
+\code{FAD\char13\ R0 R0 R1}     &                         \cr
+}
+The \code{FLT} function is implemented also by adding 0 with an exponent of 151 and forced insertion of a leading 1-bit ($v = 1$).
+\table{
+#\hfil\quad&#\hfil\quad&#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil\cr
+\code{MOV\char13\ R1 R0 4B00H} \cr
+\code{FAD" R0 R0 R1}    \cr
+}
 There are two predefined procedures for packing and unpacking a floating-point number:
-PACK(x,e) x:=x×2e (forx>0)
-UNPK(x, e) assign to x and e, such that x×2e = x0, where x0 is the original value of x,
-x becomes normalized, that is 1.0 ≤ x < 2.0
-Assuming R0 = x and R1 = e, the instruction sequence for PACK(x, e) is LSL R1 R1 23
-ADD R0 R0 R1 STR R0 x
-Again assuming x = R0, the instruction sequence for UNPK(x, e) is ASR R1R0 23
-SUB R1 R1 127 STR R1e
-LSL R1 R1 23 SUB R0R0R1 STR R0x
+\table{
+#\hfil\quad&#\hfil\quad&#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil\cr
+\code{PACK(x, e)} & $x \gets x \times 2^e$ (for $x>0$) \cr
+\code{unpk(x, e)} & assign to $x$ and $e$, such that $x \times 2^e = x_0$, where $x_0$ is the \cr
+                  & original value of $x$, $x$ becomes normalized, that is $1.0 \le x < 2.0$ \cr
+}
+
+\noindent Assuming \code{R0} = $x$ and \code{R1} = $e$, the instruction sequence for \code{PACK(x, e)} is
+\begintt
+LSL R1 R1 23
+ADD R0 R0 R1
+STR R0 x
+\endtt
+
+\noindent Again assuming $x$ = \code{R0}, the instruction sequence for \code{UNPK(x, e)} is
+\begintt
+ASR R1 R0 23
+SUB R1 R1 127
+STR R1 ie
+LSL R1 R1 23
+SUB R0 R0 R1
+STR R0 x
+\endtt
 
 \beginsubsubsection 15.1.2. The square root function.
 
