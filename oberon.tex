@@ -6373,47 +6373,85 @@ These statements are implemented using branch instructions (jumps) as shown in S
 A difficulty, however, arises in the case of forward jumps, a difficulty inherent in all single-pass compilers: When the branch is issued, its destination is still unknown. It follows that the branch displacement must be later inserted when it becomes known, when the destination is reached. This is called a fixup. Here the method of fixup lists is used. The place of the instruction with still unknown destination is held in a variable \code{L} local to the respective parsing procedure. If several branches have the same destination, \code{L} is the heading of a list of the instructions to be fixed up, with its links placed in the instructions themselves in the place of the eventual jump displacement. This shown for the if statement by an excerpt of \code{ORP.StatSequence} with local variable \code{L0}:
 \begintt
 ELSIF sym = ORS.if THEN
-ORS.Get(sym); expression(x); ORG.CFJump(x); StatSequence; L0 := 0;
-WHILE sym = ORS.elsif DO
-ORS.Get(sym); ORG.FJump(L0); ORG.Fixup(x); expression(x);
-ORG.CFJump(x); Check(ORS.then, "no THEN"); StatSequence END ;
-IF sym = ORS.else THEN ORS.Get(sym); ORG.FJump(L0); ORG.Fixup(x); StatSequence ELSE ORG.Fixup(x)
-END ;
-ORG.FixLink(L0);
+  ORS.Get(sym);
+  expression(x);
+  ORG.CFJump(x);
+  StatSequence;
+  L0 := 0;
+  WHILE sym = ORS.elsif DO
+    ORS.Get(sym);
+    ORG.FJump(L0);
+    ORG.Fixup(x);
+    expression(x);
+    ORG.CFJump(x);
+    Check(ORS.then, "no THEN");
+    StatSequence
+  END ;
+  IF sym = ORS.else THEN
+    ORS.Get(sym);
+    ORG.FJump(L0);
+    ORG.Fixup(x);
+    StatSequence
+  ELSE
+    ORG.Fixup(x)
+  END ;
+  ORG.FixLink(L0);
 \endtt
 \noindent where in module \code{ORG}:
 \begintt
-PROCEDURE CFJump(VAR x: Item); (*conditional forward jump*) BEGIN
-IF x.mode # Cond THEN loadCond(x) END ;
-Put3(BC, negated(x.r), x.a); FixLink(x.b); x.a := pc-1 END CFJump;
-PROCEDURE FJump(VAR L: LONGINT); (*unconditional forward jump*) BEGIN Put3(BC, 7, L); L := pc-1
+PROCEDURE CFJump(VAR x: Item); (*conditional forward jump*)
+BEGIN
+  IF x.mode # Cond THEN loadCond(x) END ;
+  Put3(BC, negated(x.r), x.a); FixLink(x.b); x.a := pc-1
+END CFJump;
+
+PROCEDURE FJump(VAR L: LONGINT); (*unconditional forward jump*)
+BEGIN
+  Put3(BC, 7, L); L := pc-1
 END FJump;
+
 PROCEDURE fix(at, with: LONGINT);
-BEGIN code[at] := code[at] DIV C24 * C24 + (with MOD C24) END fix;
-PROCEDURE FixLink(L: LONGINT); VAR L1: LONGINT;
+BEGIN
+  code[at] := code[at] DIV C24 * C24 + (with MOD C24)
+END fix;
+
+PROCEDURE FixLink(L: LONGINT);
+  VAR L1: LONGINT;
 BEGIN invalSB;
-WHILE L # 0 DO L1 := code[L] MOD 40000H; fix(L, pc-L-1); L := L1 END
+  WHILE L # 0 DO
+    L1 := code[L] MOD 40000H;
+    fix(L, pc-L-1);
+    L := L1
+  END
 END FixLink;
-PROCEDURE Fixup(VAR x: Item); BEGIN FixLink(x.a)
+
+PROCEDURE Fixup(VAR x: Item);
+BEGIN
+  FixLink(x.a)
 END Fixup;
 \endtt
 \noindent In \code{while}-, \code{repeat}-, and \code{for} statements essentially the same technique is used with the support of the identical procedures in \code{ORG}.
 
 \beginsubsubsection 12.7.6. Boolean expressions.
 
-In the case of arithmetic expressions, our compilation scheme results in a conversion from infix to postfix notation (\code{x+y} \rightarrow\ \code{xy+}). This is not applicable for Boolean expressions, because the operators \code{$\&$} and \code{OR} are defined as follows:
+In the case of arithmetic expressions, our compilation scheme results in a conversion from infix to postfix notation (\code{x+y} \rightarrow\ \code{xy+}). This is not applicable for Boolean expressions, because the operators \code{\&} and \code{OR} are defined as follows:
 \smallskip
-\item{} $\code{x\ \&\ y}$ \rightarrow\ \code{if x then y else FALSE}
+\item{} \code{x\ \&\ y} \rightarrow\ \code{if x then y else FALSE}
 \item{} \code{x OR y} \rightarrow\ \code{if x then TRUE else y}
 \smallskip
 \noindent This entails that depending on the value of \code{x}, \code{y} must not be evaluated. As a consequence, jumps may have to be taken across the code for \code{y}. Therefore, the same technique of conditional evaluation must be used as for conditional statements. In the case of an expression $\code{x\ \&\ y}$ (\code{x OR y}), procedure \code{ORG.And1} resp. \code{ORG.Or1} must be called just after parsing \code{x} (see \code{ORP.term} \code{resp}. \code{ORP.SimpleExpression}). Only after parsing also \code{y} can the generators \code{ORG.And2} resp. \code{ORG(Or2)} be called, providing the necessary fixups of forward jumps.
 \begintt
-PROCEDURE And1(VAR x: Item); (* x := x $\&$ *) BEGIN
-IF x.mode \# Cond THEN loadCond(x) END ;
-Put3(BC, negated(x.r), x.a); x.a := pc-1; FixLink(x.b); x.b := 0 END And1;
-PROCEDURE And2(VAR x, y: Item); BEGIN
-IF y.mode \# Cond THEN loadCond(y) END ;
-x.a := merged(y.a, x.a); x.b := y.b; x.r := y.r END And2;
+PROCEDURE And1(VAR x: Item); (* x := x & *)
+BEGIN
+  IF x.mode # Cond THEN loadCond(x) END ;
+  Put3(BC, negated(x.r), x.a); x.a := pc-1; FixLink(x.b); x.b := 0
+END And1;
+
+PROCEDURE And2(VAR x, y: Item);
+BEGIN
+  IF y.mode # Cond THEN loadCond(y) END ;
+  x.a := merged(y.a, x.a); x.b := y.b; x.r := y.r
+END And2;
 \endtt
 
 \noindent A negative consequence of this scheme having condition flags in the processor is that when an item with mode \code{Cond} has to be transferred into mode \code{Reg}, as in a Boolean assignment, an unpleasantly complex instruction sequence must be generated. Fortunately, this case occurs quite rarely.
