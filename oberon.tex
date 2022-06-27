@@ -6724,14 +6724,25 @@ Rectangles can be created as individual elements. They are frequently used for f
 \item{3.} The command \code{Rectangles.Make} is activated.
 
 \beginsubsubsection 13.2.6. Oblique lines and circles.
-TODO: lists
+
 Further graphic elements are (oblique) lines, circles, and ellipses. The sensitive area of circles and ellipses is at their lowest point. They are created by the following steps:
-Lines: Circles: Ellipses:
-1. The caret is placed where the starting point is to lie. 2. A secondary caret is placed at the position of the end. 3. The command Curves.MakeLine is activated.
-1. The caret is placed where the circle's center is to lie.
-2. A secondary caret is placed, its distance from the center specifying the radius. 3.The command Curves.MakeCircle is activated.
-1. The caret is placed where the center is to lie.
-2. A second caret is placed. Its horizontal distance from the first caret specifies one axis. 3. A third caret is placed. Its vertical distance from the first caret specifies the other axis. 4. The command Curves.MakeEllipse is activated.
+
+\table{
+#\hfil\quad&#\hfil&#\hfil&\quad#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil\cr
+Lines:    & 1. & The caret is placed where the starting point is to lie. \cr
+          & 2. & A secondary caret is placed at the position of the end. \cr
+          & 3. & The command \code{Curves.MakeLine} is activated. \cr
+Circles:  & 1. & The caret is placed where the circle's center is to lie. \cr
+          & 2. & A secondary caret is placed, its distance from the center \cr
+          &    & specifying the radius. \cr
+          & 3. & The command \code{Curves.MakeCircle} is activated. \cr
+Ellipses: & 1. & The caret is placed where the center is to lie. \cr
+          & 2. & A second caret is placed. Its horizontal distance from the first \cr
+          &    & caret specifies one axis. \cr
+          & 3. & A third caret is placed. Its vertical distance from the first \cr
+          &    & caret specifies the other axis. \cr
+          & 4. & The command \code{Curves.MakeEllipse} is activated. \cr
+}
 
 \beginsubsubsection 13.2.7. Spline curves.
 TODO: lists
