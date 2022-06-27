@@ -7465,16 +7465,17 @@ In Stage 3, Oberon calls the loader to load the tool module \code{System}, and w
 This describes the normal case of startup. But, how did the boot loader ever get into the platform-flash, and how did the inner core ever get into the boot area of the disk, and how did the files of the outer core get into the file store? In fact, how did the file store get initialized? This is described in the following section on building tools.
 
 Precisely to solve this problem, the boot loader has been provided with a second source of the boot data. Instead of from the disk, it may be fetched over a data link, in this case the \rs232 data line. This choice is set by switch 0.
-
-0 load from the "boot track" of the disk (sectors 2 - 63)
-1 load from the RS-232 line (or a network, if available)
-
+\list{
+\item{0} load from the "boot track" of the disk (sectors 2 - 63)
+\item{1} load from the RS-232 line (or a network, if available)
+}
 In case 1, the data stream originates at a host computer, on which presumably the boot file had been generated or even the entire system had been built.
 
 In order to keep the boot loader as simple as possible---remember that it is placed in a small flash memory on every workstation and therefore cannot be changed without a special effort---the format of the byte stream representing the inner core must be simple. We have chosen the following structure, which had never to be changed during the entire development effort of the Oberon System because of both its simplicity and generality:
-
+\begintt
 BootFile = {block}.
 block = size address {byte}. (size and address are words)
+\endtt
 
 The address of the last block, distinguished by size = 0, is interpreted as the address of the starting point of Stage 2.
 
@@ -7484,32 +7485,53 @@ Still, how did the hardware configuration data and the boot loader get into the 
 
 After all necessary Verilog modules have been synthesized, the result is the configuration file \code{RISCTop.bit}. The necessary source files are
 
-RISCTop.v, RISC.v, Multiplier.v, Divider.v, FPAdder.v. FP.Multiplier.v, FP.Divider.v, dbram32.v RS232R.v, RS232T.v, SPI.v, XGS.v, PS2.v, RISC.ucf
+\list{
+\item{} \code{RISCTop.v}, \code{RISC.v}, \code{Multiplier.v}, \code{Divider.v}, \code{FPAdder.v. FP.Multiplier.v}, \code{FP.Divider.v}, \code{dbram32.v RS232R.v}, \code{RS232T.v}, \code{SPI.v}, \code{XGS.v}, \code{PS2.v}, \code{RISC.ucf}
+}
 
 Thereafter, the boot loader is compiled and, together with the result of the configuration of the \RISC\ hardware, loaded into the configuration memory of the \acro{FPGA}. This Stage 0 is partly done with proprietory software (dependant on the specific \acro{FPGA}) and is described in a separate installation guide.
 
-\figure{pdfs/fig-14.2.png}{4.7in}{14.2}{Booting from host computer}
+\figure{pdfs/fig-14.2.png}{4.2in}{14.2}{Booting from host computer}
 
 A simple boot loader reading from the \rs232 line and using the stream format described above is shown here:
 \begintt
 MODULE* BootLoad;
-IMPORT SYSTEM;
-CONST MT = 12; SP = 14; MemLim = 0E7F00H;
-swi = -60; led = -60; data = -56; ctrl = -52; (*device addresses*)
-PROCEDURE RecInt(VAR x: INTEGER); VAR z, y, i: INTEGER;
-BEGINz:=0; i:=4; REPEAT i := i-1;
-REPEAT UNTIL SYSTEM.BIT(ctrl, 0);
-SYSTEM.GET(data, y); z := ROR(z+y, 8) UNTIL i = 0;
-x := z
-END RecInt;
-PROCEDURE Load;
-VAR len, adr, dat: INTEGER;
-BEGIN RecInt(len); WHILE len > 0 DO
-RecInt(adr);
-REPEAT RecInt(dat); SYSTEM.PUT(adr, dat); adr := adr + 4; len := len - 4 UNTIL len = 0; RecInt(len)
-END ;
-SYSTEM.GET(4, adr); SYSTEM.LDREG(13, adr); SYSTEM.LDREG(12, 20H) END Load;
-BEGIN SYSTEM.LDREG(SP, MemLim); SYSTEM.LDREG(MT, 20H); SYSTEM.PUT(led, 128); END BootLoad.
+  IMPORT SYSTEM;
+  CONST MT = 12; SP = 14; MemLim = 0E7F00H;
+    (*device addresses*)
+    swi = -60; led = -60; data = -56; ctrl = -52; 
+    
+  PROCEDURE RecInt(VAR x: INTEGER);
+    VAR z, y, i: INTEGER;
+  BEGIN
+    z:=0; i:=4; REPEAT i := i-1;
+    REPEAT UNTIL SYSTEM.BIT(ctrl, 0);
+      SYSTEM.GET(data, y); z := ROR(z+y, 8)
+    UNTIL i = 0;
+    x := z
+  END RecInt;
+  
+  PROCEDURE Load;
+    VAR len, adr, dat: INTEGER;
+  BEGIN RecInt(len);
+    WHILE len > 0 DO
+      RecInt(adr);
+      REPEAT RecInt(dat);
+        SYSTEM.PUT(adr, dat);
+        adr := adr + 4;
+        len := len - 4
+      UNTIL len = 0;
+      RecInt(len)
+    END ;
+    SYSTEM.GET(4, adr);
+    SYSTEM.LDREG(13, adr);
+    SYSTEM.LDREG(12, 20H)
+  END Load;
+BEGIN
+  SYSTEM.LDREG(SP, MemLim);
+  SYSTEM.LDREG(MT, 20H);
+  SYSTEM.PUT(led, 128);
+END BootLoad.
 \endtt
 
 \noindent Another detail that must not be ignored is the handling of traps. They are implemented as a single \code{BRL} instruction, jumping conditionally to the address stored in register \code{MT}, that is, to entry 0 of the module table (which is not a module address). This address is deposited by the initialization of module \code{System}, which contains the trap handler. However, traps may also occur during the startup process. So, a temporary trap handler must also be installed at the very start, that is, when initializing \code{Kernel}.
@@ -7519,11 +7541,11 @@ Finally, it is worth mentioning that small Oberon programs can also be loaded an
 \beginsubsection 14.2. BUILDING TOOLS.
 
 Let us summarize the prerequisites for startup:
-
+\list{
 \item{0.} The \acro{FPGA} configuration and bootloader must reside in the \acro{ROM} (platform flash) 1. The boot file must reside on the boot area of the disk.
 \item{2.} The modules of the outer core must reside in the file system.
 \item{3.} The default font and \code{System.Tool} must be present in the file system.
-
+}
 These conditions are usually met. But they are not satisfied, if either a new, bare machine is present, or if the disk store is defective. In these cases, the prerequisites must be established with the aid of suitable tools. The tools needed for the case of the bare machine or the incomplete file store are called building tools, those required in the case of defects are called maintenance tools.
 
 Building tools allow to establish the preconditions for the boot process on a bare machine. Establishing condition 0 requires a tool for downloading the hardware configuration of the \acro{FPGA} resulting from circuit synthesis, and it requires a compiler for generating the boot loader. Condition 0 is established in Stage 0.
@@ -7533,44 +7555,92 @@ Establishing condition 1 requires a tool for composing the boot file, and one to
 Establishing condition 2 implies the building of a file directory and the loading of files. The pair \code{Oberon0} and \code{ORC} contains commands for initializing a file system, for loading files over the line connection, and for moving the inner core to the disk's boot area. In addition, \code{Oberon0} contains further commands for file system, memory and disk inspection. Note that loading (and starting) \code{Oberon0} automatically starts the entire Oberon system.
 
 There remains the important question of how \code{Oberon0} is loaded onto a bare machine. It is done by the boot loader with switch 1 being up. The boot file contains the inner core with the top module being \code{Oberon0} rather than \code{Modules}. The procedure is the following:
-
+\list{
 \item{1.} Select the alternative boot source by setting \code{switch0} = \code{1}.
 \item{2.} Reset and send the boot file from the host The boot file is transferred and \code{Oberon0} is started.
 \item{3.} Read all files from the host, (which supposedly holds all files needed for the outer core).
 \item{4.} Invoke the command which loads \code{Oberon}. This loads the outer core, sets up the display, and starts the central loop.
-
+}
 A more modern solution would be to select the network as alternative boot file source. We rejected this option in order to keep net access routines outside the \acro{ROM}, in order to keep the startup of a computer independent of the presence of a network and foreign sources, and also in consideration of the fact that there exist machines which operate in a stand-alone mode. As it turns out, the need for the alternative boot file source arises very rarely.
 
-The boot linker \acro{ORL}, presumably running on a host computer, where the \acro{FPGA}-tools are available, is almost identical to the module loader, with the exception that object code is not deposited in newly allocated blocks, but is output in the form a file. The name of the top module of the inner core is supplied as parameter.
-
-ORL.Link Modules generates the regular boot file
-ORL.Link Oberon0 generates the build-up boot file
+The boot linker \code{ORL}, presumably running on a host computer, where the \acro{FPGA}-tools are available, is almost identical to the module loader, with the exception that object code is not deposited in newly allocated blocks, but is output in the form a file. The name of the top module of the inner core is supplied as parameter.
+\table{
+#\hfil\quad&#\hfil\quad&#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil\cr
+\code{ORL.Link Modules} & generates the regular boot file \cr
+\code{ORL.Link Oberon0} & generates the build-up boot file \cr
+}
 
 \code{Oberon0} imports two modules taking care of communication with \code{ORL} on the host computer. They are the basic module \code{RS232}, and module \code{PCLink1} for file transfer. The latter constitutes a task, accepting commands over the line from \code{ORL}. Their interfaces are shown below:
 \begintt
 DEFINITION RS232;
-PROCEDURE Send(x: BYTE);
-PROCEDURE Rec(VAR x: BYTE);
-PROCEDURE SendInt(x: INTEGER); PROCEDURE SendHex(x: INTEGER); PROCEDURE SendReal(x: REAL); PROCEDURE SendStr(x: ARRAY OF CHAR); PROCEDURE RecInt(VAR x: INTEGER); PROCEDURE RecReal(VAR x: REAL); PROCEDURE RecStr(VAR x: ARRAY OF CHAR); PROCEDURE Line;
-PROCEDURE End;
+  PROCEDURE Send(x: BYTE);
+  PROCEDURE Rec(VAR x: BYTE);
+  PROCEDURE SendInt(x: INTEGER);
+  PROCEDURE SendHex(x: INTEGER);
+  PROCEDURE SendReal(x: REAL);
+  PROCEDURE SendStr(x: ARRAY OF CHAR);
+  PROCEDURE RecInt(VAR x: INTEGER);
+  PROCEDURE RecReal(VAR x: REAL);
+  PROCEDURE RecStr(VAR x: ARRAY OF CHAR);
+  PROCEDURE Line;
+  PROCEDURE End;
 END RS232.
-DEFINITION PCLink1; PROCEDURE Run*; PROCEDURE Stop*;
+
+DEFINITION PCLink1;
+  PROCEDURE Run*;
+  PROCEDURE Stop*;
 END PCLink1.
 \endtt
 
 \noindent The command interpreter is a simple loop, accepting commands specified by an integer followed by parameters which are either integers or names. User-friendliness was not attributed any importance at this point, and it would indeed be merely luxury. We refrain from elaborating on further details and concentrate on providing a list of commands provided by \code{Oberon0}. This should give the reader an impression of the capabilities and limitations of this tool module for system initiation and for error searching. (name stands for a string, and a, secno, m, n stand for integers).
 
-TODO: table
+\table{
+#\hfil\quad&#\hfil\quad&#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil\cr
+& parameters & action \cr
+\noalign{\smallskip\hrule}\cr
+0   & s                         & send and mirror s \cr
+1   & a,n                       & show (in hex) $M[a], M[a+4], ... , M[a + n*4]$ \cr
+2   & w                         & fill display with words w \cr
+3   & secno                     & show disk sector \cr
+4   & filename                  & read file \cr
+6   & -                         & start PC-link \cr
+7   & -                         & show allocation, nof sectors, switches, and timer  \cr
+10  & -                         & list modules \cr
+11  & modname                   & list commands \cr
+12  & prefix                    & list files (enumerate directory) \cr
+13  & filename                  & delete file \cr
+20  & modname                   & load module  \cr
+21  & modname                   & unload module  \cr
+22  & name                      & call command \cr
+50  & adr, list of values       & write memory \cr
+51  & adr, n                    & clear memory (n words)  \cr
+52  & secno, list of values     & write sector \cr
+53  & secno, n                  & clear sector (n words) \cr
+100 & -                         & load boot track  \cr
+101 & -                         & clear file directory \cr
+}
 
-\code{Oberon0} imports modules \code{Kernel}, \code{FileDir}, \code{Files}, \code{Modules}, \code{RS232}, \code{PCLink1}. This is the inner core plus facilities for communication.
+\noindent \code{Oberon0} imports modules \code{Kernel}, \code{FileDir}, \code{Files}, \code{Modules}, \code{RS232}, \code{PCLink1}. This is the inner core plus facilities for communication.
 
 \beginsubsection 14.3. MAINTENANCE TOOLS.
 
 An important prerequisite for Stage 2 (and the following stages) in the boot process has not been mentioned above. Recall that the initialization of module \code{FileDir} constructs the disk sector reservation table in the \code{Kernel} from information contained on the disk. Obviously, its prerequisite is an intact, consistent file directory. A single unreadable, corrupted file directory or file header sector lets this process fail, and booting becomes impossible. To cope with this (fortunately rare) situation, a maintenance tool has been designed: module \code{DiskCheck}.
 
-\code{DiskCheck} is organized similarly to Oberon0 as a simple command interpreter, but it imports only \code{Kernel} and \code{RS232}. Hence, booting involves only Stages 1 and 2 without any access to the disk. Operating \code{DiskCheck} requires care and knowledge of the structure of the file system (Chapter 7). The available commands are the following:
+\code{DiskCheck} is organized similarly to \code{Oberon0} as a simple command interpreter, but it imports only \code{Kernel} and \code{RS232}. Hence, booting involves only Stages 1 and 2 without any access to the disk. Operating \code{DiskCheck} requires care and knowledge of the structure of the file system (Chapter 7). The available commands are the following:
 
-TODO: table
+\table{
+#\hfil\quad&#\hfil\quad&#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil\cr
+& parameters & action \cr
+\noalign{\smallskip\hrule}\cr
+0 & s     & send and mirror integer (test) \cr
+1 & a,n   & show (in hex) $M[a], M[a+4], ... , M[a + n*4]$ \cr
+2 & secno & show disk sector \cr
+3 & secno & show head sector \cr
+4 & secno & show directory sector \cr
+5 & -     & traverse directory \cr
+6 & secno & clear header sector \cr
+7 & -     & clear directory (root page) \cr
+}
 
 The essential command is the file directory traversal (5). It lists all faulty directory sectors, showing their numbers. It also lists faulty header sectors. No changes are made to the file system.
 
@@ -7584,7 +7654,17 @@ The only way to recover files that are no longer accessible from the directory i
 
 The tool performing such a scan is called \code{Scavenger}. It is, like \code{DiskCheck}, a simple command interpreter with the following available commands:
 
-TODO: table
+\table{
+#\hfil\quad&#\hfil\quad&#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil&\quad#\quad\hfil\cr
+& parameters & action \cr
+\noalign{\smallskip\hrule}\cr
+0 & s & Send and mirror integer (test) \cr
+1 & n & Scan the first n sectors and collect headers \cr
+2 & - & Display names of collected files \cr
+3 & - & Build new directory \cr
+4 & - & Transfer new directory to the disk \cr
+5 & - & Clear display \cr
+}
 
 During the scan, a new directory is gradually built up in primary store. Sectors marked as headers are recorded by their name and creation date. The scavenger is the reason for recording the file name in the header, although it remains unused there by the Oberon System. Recovery of the date is essential, because several files with the same name may be found. If one is found with a newer creation date, the older entry is overwritten.
 
