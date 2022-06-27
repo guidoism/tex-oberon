@@ -7142,14 +7142,14 @@ The recursive nature of macros manifests itself in recursive calls of display pr
 
 An application of the macro facility is the design of schematics of electronic circuits. Circuit components correspond to macros. Most components are represented by a rectangular frame and by labelled connectors (pins). Some of the most elementary components, such as gates, diodes, transistors, resistors, and capacitors are represented by standardized symbols. Such symbols, which may be regarded as forming an alphabet of electronic circuit diagrams, are appropriately provided in the form of a special font, i.e. a collection of raster patterns. Three such macros are shown in Figure 13.5, together with the components from which they are assembled. The definitions of the data types involved are:
 \begintt
-Macro = MacroDesc =
-MacHead = MacHeadDesc =
-Library = LibraryDesc =
-POINTER TO MacroDesc;
-RECORD (ObjectDesc) mac: MacHead END ;
-POINTER TO MacHeadDesc; RECORD name: Name;
-w, h: INTEGER; lib: Library END ;
-POINTER TO LibraryDesc; RECORD name: Name END
+Macro =       POINTER TO MacroDesc;
+MacroDesc =   RECORD (ObjectDesc) mac: MacHead END ;
+MacHead =     POINTER TO MacHeadDesc;
+MacHeadDesc = RECORD name: Name;
+                w, h: INTEGER; lib: Library
+              END ;
+Library =     POINTER TO LibraryDesc;
+LibraryDesc = RECORD name: Name END
 \endtt
 
 Procedure \code{DrawMac(mh, M)} displays the macro with head mh according to the draw message parameter M which specifies a frame, a position within the frame, a display mode, and an overriding color.
@@ -7162,7 +7162,10 @@ The design of new macros is a relatively rare activity. Macros are used rather l
 
 \code{MakeMac} integrates all elements lying within a specified rectangular area into a new macro. \code{OpenMac} reverses this process by disintegrating the macro into its parts. \code{InsertMac} inserts a specified macro into a library. \code{NewLib} creates a new, empty library, and \code{StoreLib} generates a library file containing all macros currently loaded into the specified library. The details of these operations may be examined in the program listings provided later in this Chapter. Summarizing, the following procedures are exported from module Graphics related to handling macros:
 \begintt
-PROCEDURE GetLib(name: ARRAY OF CHAR; replace: BOOLEAN; VAR Lib: Library); PROCEDURE ThisMac(L: Library; Mname: ARRAY OF CHAR): MacHead; PROCEDURE DrawMac(mh: MacHead; VAR M: Msg);
+PROCEDURE GetLib(name: ARRAY OF CHAR; replace: BOOLEAN;
+                 VAR Lib: Library);
+PROCEDURE ThisMac(L: Library; Mname: ARRAY OF CHAR): MacHead;
+PROCEDURE DrawMac(mh: MacHead; VAR M: Msg);
 \endtt
 and the following are added for creating new macros and libraries:
 \begintt
@@ -7170,7 +7173,9 @@ PROCEDURE NewLib(Lname: ARRAY OF CHAR): Library;
 PROCEDURE StoreLib(L: Library; Fname: ARRAY OF CHAR);
 PROCEDURE RemoveLibraries;
 PROCEDURE OpenMac(mh: MacHead; G: Graph; x, y: INTEGER);
-PROCEDURE MakeMac(G: Graph; x, y, w, h: INTEGER; Mname: ARRAY OF CHAR): MacHead; PROCEDURE InsertMac(mh: MacHead; L: Library; VAR new: BOOLEAN);
+PROCEDURE MakeMac(G: Graph; x, y, w, h: INTEGER;
+                  Mname: ARRAY OF CHAR): MacHead;
+PROCEDURE InsertMac(mh: MacHead; L: Library; VAR new: BOOLEAN);
 \endtt
 
 \beginsubsection 13.7. OBJECT CLASSES.
