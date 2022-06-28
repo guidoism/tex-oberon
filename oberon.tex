@@ -7888,52 +7888,98 @@ This module represents a server running as an Oberon task which must be activate
 
 Every block is acknowledged by the receiver sending an \code{ACK} byte, for which the sender waits before sending the next block. There is no synchronization within blocks. Because writing bytes onto a file may involve operations of unpredictable duration, the received bytes are not written to the file immediately. They are buffered and only output after the entire block had been received.
 \begintt
+MODULE PCLink; (*NW 8.2.2013 for Oberon on RISC*)
+  IMPORT SYSTEM, Files, Texts, Oberon;
+  CONST data = -56; stat = -52;
+    BlkLen = 255;
+    REQ = 20H; REC = 21H; SND = 22H; ACK = 10H; NAK = 11H;
+  VAR T: Oberon.Task; W: Texts.Writer;
 
-MODULE PCLink; (*NW 8.2.2013 for Oberon on RISC*) IMPORT SYSTEM, Files, Texts, Oberon;
-CONST data = -56; stat = -52;
-BlkLen = 255;
-REQ = 20H; REC = 21H; SND = 22H; ACK = 10H; NAK = 11H;
-VAR T: Oberon.Task; W: Texts.Writer; PROCEDURE Rec(VAR x: BYTE); BEGIN
-REPEAT UNTIL SYSTEM.BIT(stat, 0);
-SYSTEM.GET(data, x) END Rec;
-PROCEDURE RecName(VAR s: ARRAY OF CHAR); VAR i: INTEGER; x: BYTE;
-BEGIN i := 0; Rec(x);
-WHILE x > 0 DO s[i] := CHR(x); INC(i); Rec(x) END ; s[i] := 0X
-END RecName;
-PROCEDURE Send(x: BYTE); BEGIN
-REPEAT UNTIL SYSTEM.BIT(stat, 1);
-SYSTEM.PUT(data, x) END Send;
-PROCEDURE Task;
-VAR len, n, i: INTEGER;
-x, ack, len1, code: BYTE; name: ARRAY 32 OF CHAR; F: Files.File; R: Files.Rider; buf: ARRAY 256 OF BYTE;
-BEGIN
-IF SYSTEM.BIT(stat, 0) THEN (*byte available*)
-Rec(code);
-IF code = SND THEN (*send file*)
-RecName(name); F := Files.Old(name); IF F # NIL THEN
-Send(ACK); len := Files.Length(F); Files.Set(R, F, 0); REPEAT
-IF len >= BlkLen THEN len1 := BlkLen ELSE len1 := len END ; Send(len1); n := len1; len := len - len1;
-WHILE n > 0 DO Files.ReadByte(R, x); Send(x); DEC(n) END ; IFack#ACKTHEN len:=0END
-UNTIL len1 < BlkLen ELSE Send(11H)
-END
-ELSIF code = REC THEN (*receive file*) RecName(name); F := Files.New(name); IF F # NIL THEN
-Files.Set(R, F, 0); Send(ACK); REPEAT Rec(x); len := x; i := 0;
-WHILE i < len DO Rec(x); buf[i] := x; INC(i) END ;
-i := 0;
-WHILE i < len DO Files.WriteByte(R, buf[i]); INC(i) END ; Send(ACK)
-UNTIL len < 255;
-Files.Register(F); Send(ACK) ELSE Send(NAK)
-END
-ELSIF code = REQ THEN Send(ACK) (*for testing*)
-END END
+  PROCEDURE Rec(VAR x: BYTE);
+  BEGIN
+    REPEAT UNTIL SYSTEM.BIT(stat, 0);
+    SYSTEM.GET(data, x)
+  END Rec;
+  
+  PROCEDURE RecName(VAR s: ARRAY OF CHAR);
+    VAR i: INTEGER; x: BYTE;
+  BEGIN i := 0; Rec(x);
+    WHILE x > 0 DO s[i] := CHR(x); INC(i); Rec(x) END ;
+    s[i] := 0X
+  END RecName;
+  
+  PROCEDURE Send(x: BYTE);
+  BEGIN
+    REPEAT UNTIL SYSTEM.BIT(stat, 1);
+    SYSTEM.PUT(data, x)
+  END Send;
+
+  PROCEDURE Task;
+    VAR len, n, i: INTEGER;
+      x, ack, len1, code: BYTE;
+      name: ARRAY 32 OF CHAR;
+      F: Files.File;
+      R: Files.Rider;
+      buf: ARRAY 256 OF BYTE;
+  BEGIN
+    IF SYSTEM.BIT(stat, 0) THEN (*byte available*)
+    Rec(code);
+    IF code = SND THEN (*send file*)
+    RecName(name);
+    F := Files.Old(name);
+    IF F # NIL THEN
+      Send(ACK); len := Files.Length(F); Files.Set(R, F, 0);
+      REPEAT
+        IF len >= BlkLen THEN len1 := BlkLen
+        ELSE len1 := len
+        END ;
+        Send(len1);
+        n := len1;
+        len := len - len1;
+        WHILE n > 0 DO Files.ReadByte(R, x); Send(x); DEC(n) END ;
+        IF ack # ACK THEN len := 0 END
+      UNTIL len1 < BlkLen
+      ELSE Send(11H)
+      END
+    ELSIF code = REC
+    THEN (*receive file*) RecName(name); F := Files.New(name);
+    IF F # NIL THEN
+      Files.Set(R, F, 0);
+      Send(ACK);
+      REPEAT
+        Rec(x);
+        len := x; i := 0;
+        WHILE i < len DO Rec(x); buf[i] := x; INC(i) END ;
+        i := 0;
+        WHILE i < len DO Files.WriteByte(R, buf[i]); INC(i) END ;
+        Send(ACK)
+      UNTIL len < 255;
+      Files.Register(F); Send(ACK) ELSE Send(NAK)
+    END
+    ELSIF code = REQ THEN Send(ACK) (*for testing*)
+    END
+  END
 END Task;
+
 PROCEDURE Run*;
-BEGIN Oberon.Install(T); Texts.WriteString(W, "PCLink started");
-Texts.WriteLn(W); Texts.Append(Oberon.Log, W.buf) END Run;
+BEGIN
+  Oberon.Install(T);
+  Texts.WriteString(W, "PCLink started");
+  Texts.WriteLn(W); Texts.Append(Oberon.Log, W.buf)
+END Run;
+
 PROCEDURE Stop*;
-BEGIN Oberon.Remove(T); Texts.WriteString(W, "PCLink stopped"); Texts.WriteLn(W); Texts.Append(Oberon.Log, W.buf)
+BEGIN
+  Oberon.Remove(T);
+  Texts.WriteString(W, "PCLink stopped");
+  Texts.WriteLn(W);
+  Texts.Append(Oberon.Log, W.buf)
 END Stop;
-BEGIN Texts.OpenWriter(W); T := Oberon.NewTask(Task, 0) END PCLink.
+
+BEGIN
+  Texts.OpenWriter(W);
+  T := Oberon.NewTask(Task, 0)
+END PCLink.
 \endtt
 
 \beginsubsection 15.3. A GENERATOR OF GRAPHIC MACROS.
