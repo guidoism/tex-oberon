@@ -7838,19 +7838,45 @@ END ln;
 \figure{pdfs/fig-15.1.png}{2.4in}{15.1}{Sine function $y = sin(x)$}
 
 First, the argument x is transposed into the interval $[0, \pi/4]$ by computing
-
+\begintt
 n := FLOOR(y+0.5); y := (y - n)
-and then distinguish between two approximating polynomials depending on whether x < π/4.
-PROCEDURE sin(x: REAL): REAL; CONST c1 = 6.3661977E-1; (*2/pi*)
-p0 = 7.8539816E-1; p1 = -8.0745512E-2; p2 = 2.4903946E-3; p3 = -3.6576204E-5; p4 = 3.1336162E-7; p5 = -1.7571493E-9; p6 = 6.8771004E-12; q0 = 9.9999999E-1; q1 = -3.0842514E-1; q2 = 1.5854344E-2; q3 = -3.2599189E-4; q4 = 3.5908591E-6; q5 = -2.4609457E-8; q6 = 1.1363813E-10;
-VAR n: INTEGER; y, yy, f: REAL; BEGIN y := c1*x;
-IF y >= 0.0 THEN n := FLOOR(y + 0.5) ELSE n := FLOOR(y - 0.5) END ;
-y := (y - FLT(n)) * 2.0; yy := y*y;
-IF ODD(n) THEN f := (((((q6*yy + q5)*yy + q4)*yy + q3)*yy + q2)*yy + q1)*yy + q0 ELSE f := ((((((p6*yy + p5)*yy + p4)*yy + p3)*yy + p2)*yy + p1)*yy + p0)*y
-END ;
-IF ODD(n DIV 2) THEN f := -f END ;
-RETURN f
+\endtt
+
+and then distinguish between two approximating polynomials depending on whether $x < \pi/4$.
+\begintt
+PROCEDURE sin(x: REAL): REAL;
+  CONST c1 = 6.3661977E-1; (*2/pi*)
+    p0 = 7.8539816E-1;
+    p1 = -8.0745512E-2;
+    p2 = 2.4903946E-3;
+    p3 = -3.6576204E-5;
+    p4 = 3.1336162E-7;
+    p5 = -1.7571493E-9;
+    p6 = 6.8771004E-12;
+    q0 = 9.9999999E-1;
+    q1 = -3.0842514E-1;
+    q2 = 1.5854344E-2;
+    q3 = -3.2599189E-4;
+    q4 = 3.5908591E-6;
+    q5 = -2.4609457E-8;
+    q6 = 1.1363813E-10;
+  VAR n: INTEGER; y, yy, f: REAL;
+BEGIN
+  y := c1*x;
+  IF y >= 0.0 THEN n := FLOOR(y + 0.5)
+  ELSE n := FLOOR(y - 0.5)
+  END ;
+  y := (y - FLT(n)) * 2.0;
+  yy := y*y;
+  IF ODD(n) THEN f := (((((q6*yy + q5)*yy + q4)*yy + q3)*yy +
+                      q2)*yy + q1)*yy + q0
+  ELSE f := ((((((p6*yy + p5)*yy + p4)*yy + p3)*yy + p2)*yy +
+            p1)*yy + p0)*y
+  END ;
+  IF ODD(n DIV 2) THEN f := -f END ;
+  RETURN f
 END sin;
+\endtt
 
 \beginsubsection 15.2. A DATA LINK.
 

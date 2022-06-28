@@ -115,7 +115,7 @@
 - [X] Proofread until 15.1.2. The square root function
 - [X] Proofread until 15.1.3. The exponential function
 - [X] Proofread until 15.1.4. The logarithm
-- [ ] Proofread until 15.1.5. The sine function
+- [X] Proofread until 15.1.5. The sine function
 - [ ] Proofread until 15.2. A DATA LINK.
 - [ ] Proofread until 15.3. A GENERATOR OF GRAPHIC MACROS.
 - [X] Proofread until 16.1. INTRODUCTION.
