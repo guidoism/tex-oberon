@@ -34,9 +34,9 @@ class CWEBTexFormatter(Formatter):
                     value = '\\7\n'
                 elif value == '\n':
                     value = '\\6\n'
-                #value = value.replace(' ', '\\ ')
+                else:
+                    value = value.replace('  ', '\\quad ') # Maybe \enskip instead?
                 outfile.write(value.encode())
-                #print(repr(value).encode(), file=sys.stderr)
             elif ttype == Token.Operator and value == '&':
                 outfile.write('\\land\ '.encode())
             elif ttype == Token.Operator and value == '#':
@@ -45,6 +45,16 @@ class CWEBTexFormatter(Formatter):
                 outfile.write('\\K\ '.encode())
             elif ttype == Token.Comment.Multiline:
                 outfile.write(value.replace('&', ' and ').encode())
+            elif ttype == Token.Operator:
+                if value == '>=':
+                    value = ' \\ge\ '
+                elif value == '<=':
+                    value = ' \\le\ '
+                elif value == '<':
+                    value = ' $<$\ '
+                elif value == '>':
+                    value = ' $>$\ '
+                outfile.write(value.encode())
             else:
                 p(f'{value} ({ttype})')
                 outfile.write(value.encode())

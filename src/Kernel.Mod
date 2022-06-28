@@ -9,8 +9,8 @@ MODULE Kernel;  (*NW/PR  11.4.86 / 27.12.95 / 4.2.2014*)
   TYPE Sector* = ARRAY SectorLength OF BYTE;
 
   VAR allocated*, NofSectors*: INTEGER;
-    heapOrg*, heapLim*: INTEGER; 
-    stackOrg* ,  stackSize*, MemLim*: INTEGER;
+    heapOrg*, heapLim*: INTEGER;
+    stackOrg*, stackSize*, MemLim*: INTEGER;
     clock: INTEGER;
     list0, list1, list2, list3: INTEGER;  (*lists of free blocks of size n*256, 128, 64, 32 bytes*)
     data: INTEGER; (*SPI data in*)
@@ -41,7 +41,10 @@ MODULE Kernel;  (*NW/PR  11.4.86 / 27.12.95 / 4.2.2014*)
     VAR q: LONGINT;
   BEGIN
     IF list1 # 0 THEN p := list1; SYSTEM.GET(list1+8, list1)
-    ELSE GetBlock(q, 256); SYSTEM.PUT(q+128, 128); SYSTEM.PUT(q+132, -1); SYSTEM.PUT(q+136, list1);
+    ELSE GetBlock(q, 256);
+      SYSTEM.PUT(q+128, 128);
+      SYSTEM.PUT(q+132, -1);
+      SYSTEM.PUT(q+136, list1);
       list1 := q + 128; p := q
     END
   END GetBlock128;
@@ -50,7 +53,10 @@ MODULE Kernel;  (*NW/PR  11.4.86 / 27.12.95 / 4.2.2014*)
     VAR q: LONGINT;
   BEGIN
     IF list2 # 0 THEN p := list2; SYSTEM.GET(list2+8, list2)
-    ELSE GetBlock128(q); SYSTEM.PUT(q+64, 64); SYSTEM.PUT(q+68, -1); SYSTEM.PUT(q+72, list2);
+    ELSE GetBlock128(q);
+      SYSTEM.PUT(q+64, 64);
+      SYSTEM.PUT(q+68, -1);
+      SYSTEM.PUT(q+72, list2);
       list2 := q + 64; p := q
     END
   END GetBlock64;
@@ -59,7 +65,10 @@ MODULE Kernel;  (*NW/PR  11.4.86 / 27.12.95 / 4.2.2014*)
     VAR q: LONGINT;
   BEGIN
     IF list3 # 0 THEN p := list3; SYSTEM.GET(list3+8, list3)
-    ELSE GetBlock64(q); SYSTEM.PUT(q+32, 32); SYSTEM.PUT(q+36, -1); SYSTEM.PUT(q+40, list3);
+    ELSE GetBlock64(q);
+      SYSTEM.PUT(q+32, 32);
+      SYSTEM.PUT(q+36, -1);
+      SYSTEM.PUT(q+40, list3);
       list3 := q + 32; p := q
     END
   END GetBlock32;
