@@ -29,9 +29,11 @@ PDF and code taken from http://www.projectoberon.com
 
 ## Progress
 
-- [🌕🌕🌕🌕🌕🌕🌕🌕🌕🌕🌕🌕🌕🌕🌕🌕🌕🌕🌕🌕🌕🌕] (100%) -  Copy text / basic typesetting
-- [🌕🌕🌕🌕🌕🌕🌕🌕🌕🌕🌕🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑] (50%) - First proofreading pass
-- [🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑🌑] (00%) - Second proofreading pass
+
+
+- [x] Copy text / basic typesetting
+- [x] First proofreading pass
+- [ ] Second proofreading pass
 
 ## Building
 

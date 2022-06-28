@@ -116,8 +116,8 @@
 - [X] Proofread until 15.1.3. The exponential function
 - [X] Proofread until 15.1.4. The logarithm
 - [X] Proofread until 15.1.5. The sine function
-- [ ] Proofread until 15.2. A DATA LINK.
-- [ ] Proofread until 15.3. A GENERATOR OF GRAPHIC MACROS.
+- [X] Proofread until 15.2. A DATA LINK.
+- [X] Proofread until 15.3. A GENERATOR OF GRAPHIC MACROS.
 - [X] Proofread until 16.1. INTRODUCTION.
 - [X] Proofread until 16.2. THE ARITHMETIC AND LOGIC UNIT (ALU).
 - [X] Proofread until 16.2.1 Shifters.
