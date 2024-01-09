@@ -1,0 +1,7 @@
+package MyLuaLatexBindings;
+use LaTeXML::Package;
+DefConstructor('\begintt{}', '<verbatim>', mode=>'text');
+DefConstructor('\endtt', '</verbatim>', mode=>'text');
+
+# Ignore directlua macro (Replace with appropriate handling as needed)
+DefMacro('\directlua#1', '');
